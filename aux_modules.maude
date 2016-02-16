@@ -1,0 +1,24 @@
+fmod UNIT-RESULT is
+ pr QID-LIST .
+ sort UnitResult .
+ *** Correct test, failed tests, Tests info
+ op [_,_,_] : Nat Nat QidList -> UnitResult [ctor] .
+endfm
+
+
+fmod PRINT is
+ pr UNIT-RESULT .
+ pr META-LEVEL .
+ pr CONVERSION .
+
+ var  QIL : QidList .
+ vars N N' : Nat .
+
+ op mu-banner : -> QidList .
+ eq mu-banner = '\n '\t 'MUnit: 'a 'unit 'testing 'framework 'for 'Maude.
+           '\n '\t ' '\t '`( 'February '15th '`, '\s '2015 '`) '\n .
+
+ op printUR : UnitResult -> QidList .
+ eq printUR([N, N', QIL]) = '\n qid(string(N + N', 10)) 'test 'cases 'were 'executed. '\n
+                            '\n qid(string(N', 10)) 'failures. '\n QIL .
+endfm

@@ -1,0 +1,175 @@
+load aux_modules.maude
+load full-maude.maude
+
+fmod MUNIT-SIGNATURE is
+  inc FULL-MAUDE-SIGN .
+
+  sorts @MUnitModule@ @MUnitPredicate@ @MUnitPredSet@ .
+  subsort @MUnitPredicate@ < @MUnitPredSet@ .
+
+  subsort @MUnitModule@ < @Input@ .
+
+  op __ : @MUnitPredSet@ @MUnitPredSet@ -> @MUnitPredSet@ [ctor assoc comm] .
+
+  op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+
+  op munit_is_endu : @ModExp@ @MUnitPredSet@ -> @MUnitModule@ [ctor] .
+endfm
+
+
+fmod META-MUNIT-SIGN is
+ inc META-FULL-MAUDE-SIGN .
+ inc UNIT .
+
+ op MUNIT-GRAMMAR : -> FModule [memo] .
+ eq MUNIT-GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), GRAMMAR) .
+
+endfm
+
+fmod MUNIT-COMMAND-PROCESSING is
+ pr COMMAND-PROCESSING .
+ pr PRINT .
+
+
+ var  ME : ModuleExpression .
+ vars QIL QIL' : QidList .
+ vars T T' T1 T2 : Term .
+ vars DB DB' : Database .
+ vars N N' N1 N1' : Nat .
+ var  VDS : OpDeclSet .
+ var  M : Module .
+ var  B : Bool .
+
+ op procMUnit : Term Term Database -> UnitResult .
+ ceq procMUnit(T, T', DB) = procMUnitAux(ME, T', DB')
+  if < DB' ; ME > := evalModExp(parseModExp(T), DB) .
+ eq procMUnit(T, T', DB) = [0, 0, '\n '\r '\! 'Error: '\o
+                                  'Wrong 'module 'expression. '\n] [owise] .
+
+ op procMUnitAux : ModuleExpression Term Database -> UnitResult .
+ ceq procMUnitAux(ME, T, DB) = procProps(M, T, VDS, B, DB)
+  if compiledModule(ME, DB) /\
+     M := getFlatModule(ME, DB) /\
+     VDS := getVars(ME, DB) /\
+     B := included('META-MODULE, getImports(getTopModule(ME, DB)), DB) .
+ ceq procMUnitAux(ME, T, DB) = procProps(M, T, VDS, B, DB')
+  if not compiledModule(ME, DB) /\
+     DB' := database(evalModExp(ME, DB)) /\
+     M := getFlatModule(ME, DB') /\
+     VDS := getVars(ME, DB') /\
+     B := included('META-MODULE, getImports(getTopModule(ME, DB')), DB') .
+ eq procMUnitAux(ME, T, DB) = [0, 0, '\n '\r '\! 'Error: '\o 'The
+                                  'module 'cannot 'be 'compiled. '\n] [owise] .
+
+ op procProps : Module Term OpDeclSet Bool Database -> UnitResult .
+ ceq procProps(M, '__[T, T'], VDS, B, DB) = [N + N', N1 + N1', QIL QIL']
+  if [N, N1, QIL] := procProps(M, T, VDS, B, DB) /\
+     [N', N1', QIL'] := procProps(M, T', VDS, B, DB) .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T1 := reduce(M, solveBubbles(T', M, B, VDS, DB)) .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     T1 =/= T2 .
+ eq procProps(M, 'Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
+
+ op reduce : Module Term -> Term .
+ eq reduce(M, T) = getTerm(metaReduce(M, T)) .
+endfm
+
+mod MUNIT-DATABASE-HANDLING is
+ pr MUNIT-COMMAND-PROCESSING .
+ inc DATABASE-HANDLING .
+
+ sort MUDatabaseClass .
+ subsort MUDatabaseClass < DatabaseClass .
+
+ op MUDatabase : -> MUDatabaseClass [ctor] .
+
+ var  MUDC : MUDatabaseClass .
+ var  AtS : AttributeSet .
+ var  UR : UnitResult .
+ var  DB : Database .
+ vars T T' : Term .
+ var  O : Oid .
+
+ crl [munit] :
+     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
+  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
+  if UR := procMUnit(T, T', DB) .
+
+endm
+
+mod MUNIT is
+ inc MUNIT-DATABASE-HANDLING .
+ inc META-MUNIT-SIGN .
+ inc LOOP-MODE .
+
+ var  QI : Qid .
+ vars QIL QIL' QIL'' : QidList .
+ var  Atts : AttributeSet .
+ var  N : Nat .
+ var  DB : Database .
+ vars RP RP' : ResultPair .
+ var  O : Oid .
+ var  X@Database : DatabaseClass .
+
+ op o : -> Oid [ctor] .
+
+ --- State for LOOP mode:
+ subsort Object < State .
+ op init-munit : -> System .
+
+ op init-state : -> AttributeSet .
+ eq init-state = db : initialDatabase, default : 'CONVERSION .
+
+ rl [init] :
+    init-munit
+ => [nil, < o : MUDatabase | input : nilTermList, output : nil, init-state >, mu-banner] .
+
+ crl [in] :
+     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
+  => [nil,
+      < O : X@Database | input : getTerm(metaParse(MUNIT-GRAMMAR, QIL, '@Input@)), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     metaParse(MUNIT-GRAMMAR, QIL, '@Input@) : ResultPair .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output : ('\r 'Warning: '\o
+                printSyntaxError(metaParse(MUNIT-GRAMMAR, QIL, '@Input@), QIL)
+                '\n
+                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     noParse(N) := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
+      QIL']
+   if QIL =/= nil /\
+      ambiguity(RP, RP') := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
+
+ rl [out] :
+    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
+ => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
+endm
+
+set print conceal on .
+print conceal mod_is_sorts_._____endm .
+print conceal fmod_is_sorts_.____endfm .
+print conceal db .
+
+loop init-munit .
+
+(munit NAT is
+  assertEqual(3, 4)
+  assertEqual(3, 1 + 2)
+  assertEqual(3, 2)
+  assertEqual(3, 3)
+endu)
