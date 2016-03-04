@@ -4,16 +4,17 @@ load full-maude.maude
 fmod MUNIT-SIGNATURE is
   inc FULL-MAUDE-SIGN .
 
-  sorts @MUnitModule@ @MUnitPredicate@ @MUnitPredSet@ .
-  subsort @MUnitPredicate@ < @MUnitPredSet@ .
+  sorts @MUnitModule@ @MUnitPredicate@ @MUnitPredList@ .
+  subsort @MUnitPredicate@ < @MUnitPredList@ .
 
   subsort @MUnitModule@ < @Input@ .
 
-  op __ : @MUnitPredSet@ @MUnitPredSet@ -> @MUnitPredSet@ [ctor assoc comm] .
+  op __ : @MUnitPredList@ @MUnitPredList@ -> @MUnitPredList@ [ctor assoc] .
 
   op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+  op assertTrue : @Bubble@ -> @MUnitPredicate@ [ctor] .
 
-  op munit_is_endu : @ModExp@ @MUnitPredSet@ -> @MUnitModule@ [ctor] .
+  op munit_is_endu : @ModExp@ @MUnitPredList@ -> @MUnitModule@ [ctor] .
 endfm
 
 
@@ -23,7 +24,6 @@ fmod META-MUNIT-SIGN is
 
  op MUNIT-GRAMMAR : -> FModule [memo] .
  eq MUNIT-GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), GRAMMAR) .
-
 endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
@@ -37,6 +37,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  vars DB DB' : Database .
  vars N N' N1 N1' : Nat .
  var  VDS : OpDeclSet .
+ var  T? : [Term] .
  var  M : Module .
  var  B : Bool .
 
@@ -72,7 +73,21 @@ fmod MUNIT-COMMAND-PROCESSING is
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      T1 =/= T2 .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
+  if T? := solveBubbles(T', M, B, VDS, DB) /\
+     not (T? :: Term) .
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T1 == 'true.Bool .
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [0, 1, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T1 == 'false.Bool .
+
  eq procProps(M, 'Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
+ eq procProps(M, 'Q[T], VDS, B, DB) = [0, 1, nil] [owise] .
 
  op reduce : Module Term -> Term .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
@@ -167,9 +182,3 @@ print conceal db .
 
 loop init-munit .
 
-(munit NAT is
-  assertEqual(3, 4)
-  assertEqual(3, 1 + 2)
-  assertEqual(3, 2)
-  assertEqual(3, 3)
-endu)
