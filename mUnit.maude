@@ -66,6 +66,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, '__[T, T'], VDS, B, DB) = [N + N', N1 + N1', QIL QIL']
   if [N, N1, QIL] := procProps(M, T, VDS, B, DB) /\
      [N', N1', QIL'] := procProps(M, T', VDS, B, DB) .
+
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [1, 0, nil]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 := reduce(M, solveBubbles(T', M, B, VDS, DB)) .
@@ -79,12 +80,16 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
   if T? := solveBubbles(T', M, B, VDS, DB) /\
      not (T? :: Term) .
+
  ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [1, 0, nil]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'true.Bool .
  ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [0, 1, nil]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'false.Bool .
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
+  if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     not (T? :: Term) .
 
  eq procProps(M, 'Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
  eq procProps(M, 'Q[T], VDS, B, DB) = [0, 1, nil] [owise] .

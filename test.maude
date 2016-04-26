@@ -10,7 +10,6 @@ fmod FOO is
  eq par(0) = true .
  eq par(1) = false .
  eq par(s(s(N))) = par(N) .
- op _**_ : Nat Nat -> NzNat .
 endfm
 
 load mUnit.maude
@@ -20,6 +19,7 @@ load mUnit.maude
   assertEqual(3, suma(1, 2))
   assertEqual(suma(2,1), 2 + 1)
   assertEqual(3, 3)
+
   assertTrue(par(7))
 endu)
 
