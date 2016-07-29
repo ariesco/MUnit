@@ -40,6 +40,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  var  T? : [Term] .
  var  M : Module .
  var  B : Bool .
+ var  Q : Qid .
 
  op procMUnit : Term Term Database -> UnitResult .
  ceq procMUnit(T, T', DB) = procMUnitAux(ME, T', DB')
@@ -91,8 +92,8 @@ fmod MUNIT-COMMAND-PROCESSING is
   if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      not (T? :: Term) .
 
- eq procProps(M, 'Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
- eq procProps(M, 'Q[T], VDS, B, DB) = [0, 1, nil] [owise] .
+ eq procProps(M, Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
+ eq procProps(M, Q[T], VDS, B, DB) = [0, 1, nil] [owise] .
 
  op reduce : Module Term -> Term .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
