@@ -1,0 +1,129 @@
+load GEO2D.maude
+load full-maude.maude
+
+fmod GEO-SIGNATURE is
+  inc FULL-MAUDE-SIGN .
+
+  sorts @GeoCommand@ .
+  subsort @GeoCommand@ < @Input@ .
+
+  op point_ : @Bubble@ -> @GeoCommand@ [ctor] .
+***  op point_as_ : @Bubble@ -> @GeoCommand@ [ctor] .
+  op circumference_in_with`radius_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+endfm
+
+fmod META-GEO-SIGN is
+ inc META-FULL-MAUDE-SIGN .
+ inc UNIT .
+
+ op GEO-GRAMMAR : -> FModule [memo] .
+ eq GEO-GRAMMAR = addImports((including 'GEO-SIGNATURE .), GRAMMAR) .
+endfm
+
+
+fmod GEO-COMMAND-PROCESSING is
+ pr COMMAND-PROCESSING .
+ pr GEO2D .
+
+ var T : Term .
+
+ op processPoint : Term -> Punto .
+ eq processPoint('bubble[T]) = processPointAux(T) .
+
+ op processPointAux : Term -> Punto .
+endfm
+
+mod GEO-DATABASE-HANDLING is
+ pr GEO-COMMAND-PROCESSING .
+ inc DATABASE-HANDLING .
+
+ sort GEODatabaseClass .
+ subsort GEODatabaseClass < DatabaseClass .
+
+***(
+ var  MUDC : GEODatabaseClass .
+ var  AtS : AttributeSet .
+ var  UR : UnitResult .
+ var  DB : Database .
+ vars T T' : Term .
+ var  O : Oid .
+ var  P : Punto .
+
+ crl [point] :
+     < O : MUDC | db : DB, input : ('point_[T]), output : nil, AtS >
+  => < O : MUDC | db : DB, input : nilTermList, output : 'Exito, AtS >
+  if P := procPoint(T) .
+)
+endm
+
+mod MUNIT is
+ inc GEO-DATABASE-HANDLING .
+ inc META-GEO-SIGN .
+ inc LOOP-MODE .
+
+ var  QI : Qid .
+ vars QIL QIL' QIL'' : QidList .
+ var  Atts : AttributeSet .
+ var  N : Nat .
+ var  DB : Database .
+ vars RP RP' : ResultPair .
+ var  O : Oid .
+ var  X@Database : DatabaseClass .
+
+ op o : -> Oid [ctor] .
+
+ op GEODatabase : -> GEODatabaseClass [ctor] .
+
+ --- State for LOOP mode:
+ subsort Object < State .
+ op init-geo : -> System .
+
+ op init-state : -> AttributeSet .
+ eq init-state = db : initialDatabase, default : 'CONVERSION .
+
+ op geo-banner : -> QidList .
+ eq geo-banner = '\n '\t 'GEO: 'blah 'a 'unit 'testing 'framework 'for 'Maude.
+           '\n '\t ' '\t '`( 'October '27th '`, '\s '2016 '`) '\n .
+
+ rl [init] :
+    init-geo
+ => [nil, < o : GEODatabase | input : nilTermList, output : nil, init-state >, geo-banner] .
+
+ crl [in] :
+     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
+  => [nil,
+      < O : X@Database | input : getTerm(metaParse(GEO-GRAMMAR, QIL, '@Input@)), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     metaParse(GEO-GRAMMAR, QIL, '@Input@) : ResultPair .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output : ('\r 'Warning: '\o
+                printSyntaxError(metaParse(GEO-GRAMMAR, QIL, '@Input@), QIL)
+                '\n
+                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     noParse(N) := metaParse(GEO-GRAMMAR, QIL, '@Input@)  .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
+      QIL']
+   if QIL =/= nil /\
+      ambiguity(RP, RP') := metaParse(GEO-GRAMMAR, QIL, '@Input@)  .
+
+ rl [out] :
+    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
+ => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
+endm
+
+set print conceal on .
+print conceal mod_is_sorts_._____endm .
+print conceal fmod_is_sorts_.____endfm .
+print conceal db .
+
+loop init-geo .
