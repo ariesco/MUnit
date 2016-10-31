@@ -11,8 +11,41 @@ fmod MUNIT-SIGNATURE is
 
   op __ : @MUnitPredList@ @MUnitPredList@ -> @MUnitPredList@ [ctor assoc] .
 
-  op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+  *********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to true       ***
+  *** Usage: assertTrue(f(t_1, ..., t_n))                                       ***
+  *********************************************************************************
   op assertTrue : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to true       ***
+  *** and print the given message                                               ***
+  *** Usage: assertTrueMsg(f(t_1, ..., t_n), "Error in f")                      ***
+  *********************************************************************************
+  op assertTrueMsg : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+  op assertReachable : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor] .
+  op assertReachableBnd : @Bubble@ @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test must have the given sort.  ***
+  *** It passes if the sort of the term is lesser or equal than the given sort. ***
+  *** Usage: assertSort(f(t_1, ..., t_n), Sort)                                 ***
+  *********************************************************************************
+  op assertSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Restarts the loop.                                                        ***
+  *** Usage: restart                                                            ***
+  *********************************************************************************
+  op restart : -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Applies a new command in the loop                                         ***
+  *** Usage: command(COMM), with COMM a command in the current system           ***
+  *********************************************************************************
+  op command : @Bubble@ -> @MUnitPredicate@ [ctor] .
 
   op munit_is_endu : @ModExp@ @MUnitPredList@ -> @MUnitModule@ [ctor] .
 endfm
@@ -30,17 +63,21 @@ fmod MUNIT-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
  pr PRINT .
 
-
+ vars T T' T'' T1 T2 T3 TSB TSB' : Term .
  var  ME : ModuleExpression .
  vars QIL QIL' : QidList .
- vars T T' T1 T2 : Term .
  vars DB DB' : Database .
  vars N N' N1 N1' : Nat .
  var  VDS : OpDeclSet .
+ var  SS : SortSet .
  var  T? : [Term] .
  var  M : Module .
+ var  S : Sort .
  var  B : Bool .
  var  Q : Qid .
+
+ op printOpts : -> PrintOptionSet .
+ eq printOpts = mixfix number rat format .
 
  op procMUnit : Term Term Database -> UnitResult .
  ceq procMUnit(T, T', DB) = procMUnitAux(ME, T', DB')
@@ -68,20 +105,6 @@ fmod MUNIT-COMMAND-PROCESSING is
   if [N, N1, QIL] := procProps(M, T, VDS, B, DB) /\
      [N', N1', QIL'] := procProps(M, T', VDS, B, DB) .
 
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [1, 0, nil]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
-     T1 := reduce(M, solveBubbles(T', M, B, VDS, DB)) .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, nil]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
-     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
-     T1 =/= T2 .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
-  if T? := solveBubbles(T, M, B, VDS, DB) /\
-     not (T? :: Term) .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
-  if T? := solveBubbles(T', M, B, VDS, DB) /\
-     not (T? :: Term) .
-
  ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [1, 0, nil]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'true.Bool .
@@ -92,6 +115,93 @@ fmod MUNIT-COMMAND-PROCESSING is
   if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      not (T? :: Term) .
 
+ ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T1 == 'true.Bool .
+ ceq procProps(M, 'assertTrueMsg[T, 'token[T']], VDS, B, DB) = [0, 1, QIL]
+  if TSB := solveBubbles(T, M, B, VDS, DB) /\
+     T1 := reduce(M, TSB) /\
+     T1 == 'false.Bool /\
+     QIL := '\n 'Error 'for 'assertTrue '`( metaPrettyPrint(M, TSB, printOpts) '`)
+            ' '---> ' downQid(T') '\n .
+ ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB) = [0, 1, QIL]
+  if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T1 := reduce(M, solveBubbles(T', M, B, VDS, DB)) .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     T1 =/= T2 .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T', M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [1, 0, nil]
+  if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     sameKind(M, Q, S) /\
+     sortLeq(M, S, Q) .
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, nil]
+  if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     sameKind(M, Q, S) /\
+     not sortLeq(M, S, Q) .
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, nil]
+  if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     not sameKind(M, Q, S) .
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure .
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure .
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T', M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB) = [1, 0, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure .
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, nil]
+  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) == failure .
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, QIL]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, QIL]
+  if not (rat(string(downQid(T'')), 10) :: Nat) /\
+     QIL := ('\n '\r 'Error: '\o 'Not 'a 'number) .
+
  eq procProps(M, Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
  eq procProps(M, Q[T], VDS, B, DB) = [0, 1, nil] [owise] .
 
@@ -99,33 +209,18 @@ fmod MUNIT-COMMAND-PROCESSING is
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
 endfm
 
-mod MUNIT-DATABASE-HANDLING is
- pr MUNIT-COMMAND-PROCESSING .
+th MUNIT-DATABASE is
+ pr DATABASE-HANDLING .
+
+ sort DBClass .
+ subsort DBClass < DatabaseClass .
+endth
+
+mod MUNIT-INIT{X :: MUNIT-DATABASE} is
  inc DATABASE-HANDLING .
-
- sort MUDatabaseClass .
- subsort MUDatabaseClass < DatabaseClass .
-
- op MUDatabase : -> MUDatabaseClass [ctor] .
-
- var  MUDC : MUDatabaseClass .
- var  AtS : AttributeSet .
- var  UR : UnitResult .
- var  DB : Database .
- vars T T' : Term .
- var  O : Oid .
-
- crl [munit] :
-     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
-  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
-  if UR := procMUnit(T, T', DB) .
-
-endm
-
-mod MUNIT is
- inc MUNIT-DATABASE-HANDLING .
  inc META-MUNIT-SIGN .
  inc LOOP-MODE .
+ pr PRINT .
 
  var  QI : Qid .
  vars QIL QIL' QIL'' : QidList .
@@ -134,9 +229,14 @@ mod MUNIT is
  var  DB : Database .
  vars RP RP' : ResultPair .
  var  O : Oid .
- var  X@Database : DatabaseClass .
+ var  X@Database : X$DBClass .
 
  op o : -> Oid [ctor] .
+
+ sort MUDatabaseClass .
+ subsort MUDatabaseClass < X$DBClass .
+
+ op MUDatabase : -> MUDatabaseClass [ctor] .
 
  --- State for LOOP mode:
  subsort Object < State .
@@ -181,10 +281,49 @@ mod MUNIT is
  => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
 endm
 
+view FMDB from MUNIT-DATABASE to DATABASE-HANDLING is
+ sort DBClass to DatabaseClass .
+endv
+
+mod MUNIT is
+ pr MUNIT-COMMAND-PROCESSING .
+ pr MUNIT-INIT{FMDB} .
+
+ var  MUDC : MUDatabaseClass .
+ var  AtS : AttributeSet .
+ var  UR : UnitResult .
+ var  DB : Database .
+ vars T T' : Term .
+ var  O : Oid .
+ var  S : System .
+
+ sorts Command CommandList .
+ subsort Command < CommandList .
+
+ op mtCL : -> CommandList [ctor] .
+ op __ : CommandList CommandList -> CommandList [ctor assoc id: mtCL] .
+
+ op restart : -> Command [ctor] .
+ op command : QidList -> Command [ctor] .
+
+ crl [munit] :
+     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
+  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
+  if UR := procMUnit(T, T', DB) /\
+     init-munit => S /\
+     S =/= init-munit .
+
+ *** Comparar atributos con upTerm
+
+endm
+
 set print conceal on .
 print conceal mod_is_sorts_._____endm .
 print conceal fmod_is_sorts_.____endfm .
 print conceal db .
+
+*** for debugging purposes
+set print attribute on .
 
 loop init-munit .
 
