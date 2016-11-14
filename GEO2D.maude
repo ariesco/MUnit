@@ -1,0 +1,273 @@
+fmod GEO2D is
+
+	pr FLOAT .
+	sorts Punto Recta Vector Segmento Circunferencia Lista Figura .
+	subsort Punto < Lista .	
+	subsort Punto < Figura .
+	subsort Recta < Figura .
+	subsort Circunferencia < Figura .
+
+	op p(__) : Float Float -> Punto [ctor] .
+	*** Define un punto como un par de numeros reales
+	op r(__) : Punto Punto -> Recta [ctor] .
+	*** Define una recta como un par de puntos, mas adelante la daremos ecuaciones
+	op v(__) : Float Float -> Vector [ctor] .
+	*** Define un vector como un par de puntos mas adelante se dara como par de reales
+	*** Extremo menos origen
+	op c : Punto Float -> Circunferencia [ctor] .
+	*** Define una circunferencia como un par punto, real, correspondiendo estos con el 
+	*** centro y el radio.
+	op mt : -> Lista [ctor] .
+	op __ : Lista Lista -> Lista [ctor assoc comm id: mt] . 
+
+	vars p1 p2 p3 p4 : Punto .
+	vars z11 z12 z21 z22 z31 z32 z41 z42 m n a b c Aux-A Aux-B Aux-C Aux-D Aux-E : Float .
+	vars r1 r2 : Recta .
+	vars v1 v2 : Vector .
+	vars c1 c2 : Circunferencia .
+	vars t : Bool .
+	vars l : Lista .
+
+	op ecu-recta-m : Recta -> Float .
+	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
+	*** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+	*** en las que son de la forma  x = n 
+	ceq ecu-recta-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) 
+	if not (z21 - z11) == 0.0 .
+	ceq ecu-recta-m(r(p(z11 z12) p(z21 z22))) = 1.0 
+	if (z21 - z11) == 0.0 . 
+
+	op ecu-recta-n : Recta -> Float .
+	*** Dados los dos puntos que definen la recta, devuelve el valor de n, 
+	*** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+	*** en las que son de la forma  x = n
+	eq ecu-recta-n(r(p(z11 z12) p(z21 z22)))= z12 - (z11 * ecu-recta-m(r(p(z11 z12) p(z21 z22)))) .
+
+	op vertical : Recta -> Bool .
+	*** Comprueba si una recta es de la forma x = n .
+	ceq vertical(r(p(z11 z12) p(z21 z22))) = true
+	if (z21 - z11) == 0.0 . 	
+	ceq vertical(r(p(z11 z12) p(z21 z22))) = false
+	if not ((z21 - z11) == 0.0) .
+
+	op horizontal : Recta -> Bool .
+	*** Comprueba si una recta es de la forma y = n .
+	ceq horizontal(r(p(z11 z12) p(z21 z22))) = true
+	if (z22 - z12) == 0.0 . 	
+	ceq horizontal(r(p(z11 z12) p(z21 z22))) = false
+	if not ((z22 - z12) == 0.0) .
+
+	op se-cortan : Recta Recta -> Bool .
+	*** comprueba si dos rectas se cortan a pratir de la pendiente de estas
+	*** devolviendo el valor false si son paralelas y true en caso contrario.
+	*** El caso en que sean coincidentes debera verse de forma manual comparandolas.
+	eq se-cortan(r1 , r2) = not (ecu-recta-m(r1) == ecu-recta-m(r2)) .
+
+	op son-iguales : Recta Recta -> Bool .
+	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
+	*** pues una recta puede construirse mediantes infinitos pares de puntos.
+	eq son-iguales(r1 , r2) = (ecu-recta-m(r1) == ecu-recta-m(r2)) and (ecu-recta-n(r1) == ecu-recta-n(r2))	.
+
+	op pto-corte : Recta Recta -> Punto .
+	*** Devuelve el punto de corte de dos rectas dadas.
+	ceq pto-corte(r1 , r2) = p(pto-corte-x(r1 , r2) pto-corte-y(r1 , r2))
+	if not horizontal(r1) .
+	ceq pto-corte(r1 , r2) = p(pto-corte-x(r2 , r1) pto-corte-y(r2 , r1))
+	if horizontal(r1) .	
+
+	op pto-corte-x : Recta Recta -> Float .
+	*** Devuelve la coordenada X del punto de corte de las dos rectas.
+	ceq pto-corte-x(r1 , r2) = (pto-corte-y(r1 , r2) - ecu-recta-n(r1)) / (ecu-recta-m(r1))
+	if not horizontal(r1) .
+	ceq pto-corte-x(r1 , r2) = (pto-corte-y(r1 , r2) - ecu-recta-n(r2)) / (ecu-recta-m(r2))
+	if horizontal(r1) .
+
+	op pto-corte-y : Recta Recta -> Float .
+	*** Devuelve la coordenada Y del punto de corte de las dos rectas.
+	ceq pto-corte-y(r1 , r2) = ((ecu-recta-m(r1) * ecu-recta-n(r2)) - (ecu-recta-m(r2) * ecu-recta-n(r1))) / (ecu-recta-m(r1) - (ecu-recta-m(r2) * ecu-recta-m(r1)))
+	if not horizontal(r1) and not horizontal(r2) and not (ecu-recta-m(r1) - (ecu-recta-m(r2) * ecu-recta-m(r1)) == 0.0) .
+	ceq pto-corte-y(r1 , r2) = pto-corte-y(r2 , r1)
+	if not horizontal(r1) and not horizontal(r2) and (ecu-recta-m(r1) - (ecu-recta-m(r2) * ecu-recta-m(r1)) == 0.0) .
+	ceq pto-corte-y(r1 , r2) = ecu-recta-n(r1)
+	if horizontal(r1) .
+	ceq pto-corte-y(r1 , r2) = ecu-recta-n(r2)
+	if horizontal(r2) .
+
+	op distancia : Punto Punto -> Float .
+	*** Calcula la distancia entre dos puntos mediante la metrica usual.
+	eq distancia(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) + ((z22 - z12) ^ 2.0)) .
+	
+	op esta-en-recta : Punto Recta -> Bool .
+	*** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
+	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
+	*** que la distancia entre estos el punto estara contenido en la recta.
+	eq esta-en-recta(p1,r(p2 p3)) = (distancia(p1 , p2) + distancia(p1 , p3)) == distancia(p2 , p3) . 
+
+	op convierte-en-recta : Float Float -> Recta .
+	*** Recibe los parametros m y n de las ecuaciones de una recta y devuelve una recta dada por dos puntos,
+	*** no funciona con rectas horizontales.
+	eq convierte-en-recta(m , n) = r(p(0.0 n) p(1.0 (m + n))) .
+
+	op vector-director-recta : Recta -> Vector .
+	*** Devuelve el vector director de una recta
+	eq vector-director-recta(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
+
+	op recta-mediante-vector : Vector Punto -> Recta .
+	*** Construye una recta mediante un vector y un punto dados.
+	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p((z11 + z21) (z12 + z22)) p(z21 z22)) 
+	if not z11 == 0.0 .
+	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p(z21 (z22 + 1.0)))
+	if z11 == 0.0 .
+
+	op vector-perpendicular : Vector -> Vector .
+	*** Devuelve el vector perpendicular a uno dado
+	eq vector-perpendicular(v(z11 z12)) = v(z12 (- z11)) .
+
+	op recta-perpendicular : Recta Punto -> Recta .
+	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
+	eq recta-perpendicular(r1 , p1) = recta-mediante-vector(vector-perpendicular(vector-director-recta(r1)) , p1) .
+
+	op esta-en-circunferencia : Punto Circunferencia -> Bool .
+	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
+	*** al centro con el radio
+	eq esta-en-circunferencia(p1 ,c(p2 , z11)) = distancia(p1 , p2) == z11 .
+		
+	op centro-circunferencia : Circunferencia -> Punto .
+	*** Devuelve el centro de la circunferencia
+	eq centro-circunferencia(c(p1 , z11)) = p1 .
+
+	op radio-circunferencia : Circunferencia -> Float .
+	*** Devuelve el radio de la circunferencia
+	eq radio-circunferencia(c(p1 , z11)) = z11 .
+
+	op se-cortan-c-c : Circunferencia Circunferencia -> Bool .
+	*** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
+	ceq se-cortan-c-c(c1, c2) = distancia(centro-circunferencia(c1) , centro-circunferencia(c2)) <= (radio-circunferencia(c1) + radio-circunferencia(c2))
+	if not (centro-circunferencia(c1) == centro-circunferencia(c2)) . 
+	ceq se-cortan-c-c(c1, c2) = radio-circunferencia(c1) == radio-circunferencia(c2)
+	if (centro-circunferencia(c1) == centro-circunferencia(c2)) .
+
+	op se-cortan-r-c : Recta Circunferencia -> Bool .
+	*** Puede fallar falta comprobar
+	*** Comprueba si una recta y una circunferencia se cortan mediante la comparacion de la
+	*** distancia de la recta al centro de la circunferencia.
+	eq se-cortan-r-c(r1 , c(p1 , z11)) = distancia(pto-corte(r1 , recta-perpendicular(r1 , p1)) , p1) <= z11 .
+
+	op ecu-segundo-grado-1 : Float Float Float -> Float .
+	*** Devuelve el valor de una ecuacion de segundo grado en el caso +
+	eq ecu-segundo-grado-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
+
+	op ecu-segundo-grado-2 : Float Float Float -> Float .
+	*** Devuelve el valor de una ecuacion de segundo grado en el caso -
+	eq ecu-segundo-grado-2(a , b , c) = (- b - sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) .
+
+	op lista-vacia : Lista -> Bool .
+	ceq lista-vacia(l) = true
+	if l == mt .
+	ceq lista-vacia(l) = false
+	if not (l == mt) . 
+
+	op pto-corte-circunferencias : Circunferencia Circunferencia -> Lista .
+	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
+	if not (z11 == z21) .
+	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
+	if not (z12 == z22) .
+	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
+	if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
+
+	op pto-corte-circunferencias-x-dis : Circunferencia Circunferencia -> Lista .
+	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
+	*** solo funciona si los centros no tienen la misma X, habria que hacer caso contrario
+	eq pto-corte-circunferencias-x-dis(c1 , c2) = mt pto-corte-circunferencias-1(c1 , c2) pto-corte-circunferencias-2(c1 , c2) .
+
+	op pto-corte-circunferencias-1 : Circunferencia Circunferencia -> Punto .
+	*** halla el primer punto de corte de las dos circunferencias.
+	ceq pto-corte-circunferencias-1(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (ecu-segundo-grado-1(Aux-C , Aux-D , Aux-E) * Aux-B))  ecu-segundo-grado-1(Aux-C , Aux-D , Aux-E))
+	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
+	/\ Aux-B := (z22 - z12) / (z21 - z11) 
+	/\ Aux-C := (Aux-B) ^ 2.0 + 1.0
+	/\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
+	/\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
+
+	op pto-corte-circunferencias-2 : Circunferencia Circunferencia -> Punto .
+	*** halla el segundo punto de corte de las dos circunferencias.
+	ceq pto-corte-circunferencias-2(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (ecu-segundo-grado-2(Aux-C , Aux-D , Aux-E) * Aux-B))  ecu-segundo-grado-2(Aux-C , Aux-D , Aux-E))
+	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
+	/\ Aux-B := (z22 - z12) / (z21 - z11) 
+	/\ Aux-C := (Aux-B) ^ 2.0 + 1.0
+	/\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
+	/\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
+
+	op pto-corte-circunferencias-y-dis : Circunferencia Circunferencia -> Lista .
+	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
+	ceq pto-corte-circunferencias-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt p1 p2
+	if p1 := pto-trans(pto-corte-circunferencias-1(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) 
+	/\ p2 := pto-trans(pto-corte-circunferencias-2(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) .
+
+	op pto-trans : Punto -> Punto .
+	*** Intercambia las coordenadas de un punto
+	eq pto-trans(p(z11 z12)) = p(z12 z11) .
+
+	op v-prod-escalar : Vector Vector -> Float .
+	***Calcula el producto escalar de dos vectores
+	eq v-prod-escalar(v(z11 z12) , v(z21 z22)) = z11 * z21 + z12 * z22 .
+
+	op v-perpendiculares : Vector Vector -> Bool .
+	***Comprueba si dos vectores son perpendiculares
+	eq v-perpendiculares(v1 , v2) = (v-prod-escalar(v1 , v2) == 0.0) .
+
+	op r-perpendiculares : Recta Recta -> Bool .
+	***Comprueba si dos rectas son perpendiculares
+	eq r-perpendiculares(r1 , r2) = v-perpendiculares(vector-director-recta(r1) , vector-director-recta(r2)) .
+
+	op v-modulo : Vector -> Float .
+	***Calcula el modulo de un vector
+	eq v-modulo(v1) = v-prod-escalar(v1 , v1) ^ (0.5) .
+
+	op pto-corte-r-c : Recta Circunferencia -> Lista .
+	*** Dados una circunferencia y un punto devuelve una lista con los dos puntos de corte
+	*** pudiendo ser estos iguales.
+	ceq pto-corte-r-c(r1 , c1) = mt
+	if not se-cortan-r-c(r1 , c1) .
+	ceq pto-corte-r-c(r1 , c1) = mt pto-corte-r-c-1(r1 , c1) pto-corte-r-c-2(r1 , c1)
+	if se-cortan-r-c(r1 , c1) /\ not vertical(r1) .
+	ceq pto-corte-r-c(r1 , c1) = pto-corte-r-c-vertical(r1 , c1) 
+	if se-cortan-r-c(r1 , c1) /\ vertical(r1) .
+
+	op pto-corte-r-c-1 : Recta Circunferencia -> Punto .
+	*** Halla el primer punto de corte de la recta y la circunferencia
+	ceq pto-corte-r-c-1(r1 , c(p(z11 z12) , z31)) = p(Aux-A Aux-B)
+	if Aux-A := ecu-segundo-grado-1((ecu-recta-m(r1) ^ 2.0) + 1.0 , (2.0 * ecu-recta-m(r1) * (ecu-recta-n(r1) - z12)) - (2.0 * z11) , (z11 ^ 2.0) + ((ecu-recta-n(r1) - z12) ^ 2.0) - (z31 ^ 2.0))
+	/\ Aux-B := (ecu-recta-m(r1) * Aux-A) + ecu-recta-n(r1) .
+
+	op pto-corte-r-c-2 : Recta Circunferencia -> Punto .
+	*** Halla el segundo punto de corte de la recta y la circunferencia
+	ceq pto-corte-r-c-2(r1 , c(p(z11 z12) , z31)) = p(Aux-A Aux-B)
+	if Aux-A := ecu-segundo-grado-2((ecu-recta-m(r1) ^ 2.0) + 1.0 , (2.0 * ecu-recta-m(r1) * (ecu-recta-n(r1) - z12)) - (2.0 * z11) , (z11 ^ 2.0) + ((ecu-recta-n(r1) - z12) ^ 2.0) - (z31 ^ 2.0))
+	/\ Aux-B := (ecu-recta-m(r1) * Aux-A) + ecu-recta-n(r1) .
+
+	op pto-corte-r-c-vertical : Recta Circunferencia -> Lista .
+	*** Halla y devuelve en forma de lista los dos puntos de corte de la circunferencia
+	*** con la recta. Pueden ser el mismo.	
+	ceq pto-corte-r-c-vertical(r(p(z11 z12) p(z21 z22)) , c(p(z31 z32) , z41)) = mt p(z11 Aux-C) p(z11 Aux-D)
+	if Aux-A := (- 2.0 * z31)
+	/\ Aux-B := ((z11 - z31) ^ 2.0) + (z32 ^ 2.0) - (z41 ^ 2.0)
+	/\ Aux-C := ecu-segundo-grado-1(1.0 , Aux-A , Aux-B)
+	/\ Aux-D := ecu-segundo-grado-2(1.0 , Aux-A , Aux-B) .
+
+endfm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
