@@ -31,8 +31,8 @@ fmod GEO-SIGNATURE is
   subsort @GeoCommand@ < @Input@ .
 
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
-  op circumference_in_with`radius_ : @Token@ @Bubble@ @Bubble@ -> @GeoCommand@ [ctor] .
-  op line_from_to_ : @Token@ @Bubble@ @Bubble@ -> @GeoCommand@ [ctor] . 
+  op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
+  op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
 
 endfm
 
@@ -48,11 +48,13 @@ endfm
 fmod GEO-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
  pr DICC-PUNTOS .
+ pr GEO2D .
 
  vars T T' T'' NP NC NR : Term .
  vars Q Q' Q'' : Qid .
  vars S S' : String .
  vars F F' : Float .
+ vars P1 P2 : Punto .
 
  op processPoint : Term Term -> Entry .
  eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
@@ -69,19 +71,14 @@ fmod GEO-COMMAND-PROCESSING is
      F := float(S) /\
      F' := float(S') .
 
- op processCircumference : Term Term Term -> Entry .
- eq processCircumference('token[NC] , 'bubble[T] , 'bubble[T']) = downQid(NC) -> processCircumferenceAux(T , T') .
-
- op processCircumferenceAux : Term Term -> Circunferencia .
- ceq processCircumferenceAux('__[T, T'] , T'') = c(qid2point(Q , Q') , F) 
-  if Q := downQid(T) 
-  /\ Q' := downQid(T')
-  /\ Q'' := downQid(T'')
-  /\ S := string(Q'')
+ op processCircumference : Term Punto Term -> Entry .
+ ceq processCircumference('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F) 
+  if Q := downQid(T)
+  /\ S := string(Q)
   /\ F := float(S) .
      
- op processLine : Term Term Term -> Entry .
- eq processLine('token[NR] , 'bubble[T] , 'bubble[T']) = downQid(NR) -> r(processPointAux(T) processPointAux(T')) .
+ op processLine : Term Punto Punto -> Entry .
+ eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
 
 endfm
 
@@ -96,7 +93,7 @@ mod GEO-DATABASE-HANDLING is
  var  MUDC : GEODatabaseClass .
  var  AtS : AttributeSet .
  var  DB : Database .
- vars T T' T'' : Term .
+ vars T1 T2 T3 : Term .
  var  F : Figura .
  var  O : Oid .
  var  D : Dic .
@@ -105,25 +102,25 @@ mod GEO-DATABASE-HANDLING is
  op dic :_ : Dic -> Attribute [ctor] .
 
  crl [point] :
-     < O : MUDC | input : ('point_as_[T , T']), dic : D,
+     < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Figura, AtS >
-  if Q -> F := processPoint(T , T') .
+                  output : 'Punto`almacenado , AtS >
+  if Q -> F := processPoint(T1 , T2) .
 
  crl [circumference] :
-     < O : MUDC | input : ('circumference_in_with`radius_[T , T' , T'']), dic : D,
+     < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Figura, AtS >
-  if Q -> F := processCircumference(T , T' , T'') .
+                  output : 'Circunferencia`almacenado , AtS >
+  if Q -> F := processCircumference(T1 , D[downQid(T2)] , T3) .
 
  crl [line] :
-     < O : MUDC | input : ('line_from_to_[T , T' , T'']), dic : D,
+     < O : MUDC | input : ('line_from_to_[T1 , 'token[T2] , 'token[T3]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Figura, AtS >
-  if Q -> F := processLine(T , T' , T'') . 
+                  output : 'Recta`almacenado , AtS >
+  if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) . 
 
 
 endm
