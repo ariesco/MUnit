@@ -1,14 +1,36 @@
 load GEO2D.maude
 load full-maude.maude
 
+fmod DICC-PUNTOS is
+  pr GEO2D .
+  pr QID .
+
+  sorts Dic Entry .
+  subsort Entry < Dic .
+
+  op _->_ : Qid Punto -> Entry [ctor] .
+  op mtD : -> Dic [ctor] .
+  op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
+
+  var  D : Dic .
+  var  Q : Qid .
+  vars P P' : Punto .
+
+  op _[_] : Dic Qid ~> Punto .
+  eq (D . Q -> P)[Q] = P .
+
+  op _[_/_] : Dic Qid Punto -> Dic .
+  eq (D . Q -> P)[Q / P'] = D . Q -> P' .
+  eq D[Q / P] = D . Q -> P [owise] .
+endfm
+
 fmod GEO-SIGNATURE is
   inc FULL-MAUDE-SIGN .
 
   sorts @GeoCommand@ .
   subsort @GeoCommand@ < @Input@ .
 
-  op point_ : @Bubble@ -> @GeoCommand@ [ctor] .
-***  op point_as_ : @Bubble@ -> @GeoCommand@ [ctor] .
+  op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
 endfm
 
@@ -23,37 +45,55 @@ endfm
 
 fmod GEO-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
- pr GEO2D .
+ pr DICC-PUNTOS .
 
- var T : Term .
+ vars T T' NP : Term .
+ vars Q Q' : Qid .
+ vars S S' : String .
+ vars F F' : Float .
 
- op processPoint : Term -> Punto .
- eq processPoint('bubble[T]) = processPointAux(T) .
+ op processPoint : Term Term -> Entry .
+ eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
 
  op processPointAux : Term -> Punto .
+ ceq processPointAux('__[T, T']) = qid2point(Q, Q')
+  if Q := downQid(T) /\
+     Q' := downQid(T') .
+
+ op qid2point : Qid Qid -> Punto .
+ ceq qid2point(Q, Q') = p(F F')
+  if S := string(Q) /\
+     S' := string(Q') /\
+     F := float(S) /\
+     F' := float(S') .
 endfm
 
 mod GEO-DATABASE-HANDLING is
  pr GEO-COMMAND-PROCESSING .
  inc DATABASE-HANDLING .
+ pr DICC-PUNTOS .
 
  sort GEODatabaseClass .
  subsort GEODatabaseClass < DatabaseClass .
 
-***(
  var  MUDC : GEODatabaseClass .
  var  AtS : AttributeSet .
- var  UR : UnitResult .
  var  DB : Database .
  vars T T' : Term .
- var  O : Oid .
  var  P : Punto .
+ var  O : Oid .
+ var  D : Dic .
+ var  Q : Qid .
+
+ op dic :_ : Dic -> Attribute [ctor] .
 
  crl [point] :
-     < O : MUDC | db : DB, input : ('point_[T]), output : nil, AtS >
-  => < O : MUDC | db : DB, input : nilTermList, output : 'Exito, AtS >
-  if P := procPoint(T) .
-)
+     < O : MUDC | input : ('point_as_[T, T']), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / P]),
+                  output : 'Exito, AtS >
+  if Q -> P := processPoint(T, T') .
+
 endm
 
 mod MUNIT is
@@ -79,7 +119,7 @@ mod MUNIT is
  op init-geo : -> System .
 
  op init-state : -> AttributeSet .
- eq init-state = db : initialDatabase, default : 'CONVERSION .
+ eq init-state = dic : mtD, db : initialDatabase, default : 'CONVERSION .
 
  op geo-banner : -> QidList .
  eq geo-banner = '\n '\t 'GEO: 'blah 'a 'unit 'testing 'framework 'for 'Maude.
@@ -87,7 +127,8 @@ mod MUNIT is
 
  rl [init] :
     init-geo
- => [nil, < o : GEODatabase | input : nilTermList, output : nil, init-state >, geo-banner] .
+ => [nil, < o : GEODatabase | input : nilTermList, output : nil,
+                              init-state >, geo-banner] .
 
  crl [in] :
      [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
