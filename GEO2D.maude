@@ -3,6 +3,7 @@ fmod GEO2D is
 	pr FLOAT .
 	sorts Punto Recta Vector Segmento Circunferencia Lista Figura .
 	subsort Punto < Lista .	
+	***subsort Figura < Lista .
 	subsort Punto < Figura .
 	subsort Recta < Figura .
 	subsort Circunferencia < Figura .
@@ -26,7 +27,20 @@ fmod GEO2D is
 	vars v1 v2 : Vector .
 	vars c1 c2 : Circunferencia .
 	vars t : Bool .
-	vars l : Lista .
+	vars l l1 : Lista .
+
+	op lista-vacia : Lista -> Bool .
+	eq lista-vacia(mt) = true . 
+	eq lista-vacia(mt l1 p1) = false .
+
+	op quitar-primer-elemento : Lista -> Lista .
+	ceq quitar-primer-elemento(mt l1 p1) = mt l1
+	if not lista-vacia(mt l1 p1) .
+	ceq quitar-primer-elemento(mt) = mt
+	if lista-vacia(mt) .
+
+	op dar-primer-elemento : Lista -> Punto .
+	eq dar-primer-elemento(mt l1 p1) = p1 .
 
 	op ecu-recta-m : Recta -> Float .
 	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
@@ -57,22 +71,22 @@ fmod GEO2D is
 	ceq horizontal(r(p(z11 z12) p(z21 z22))) = false
 	if not ((z22 - z12) == 0.0) .
 
-	op se-cortan : Recta Recta -> Bool .
+	op se-cortan-r-r : Recta Recta -> Bool .
 	*** comprueba si dos rectas se cortan a pratir de la pendiente de estas
 	*** devolviendo el valor false si son paralelas y true en caso contrario.
 	*** El caso en que sean coincidentes debera verse de forma manual comparandolas.
-	eq se-cortan(r1 , r2) = not (ecu-recta-m(r1) == ecu-recta-m(r2)) .
+	eq se-cortan-r-r(r1 , r2) = not (ecu-recta-m(r1) == ecu-recta-m(r2)) .
 
 	op son-iguales : Recta Recta -> Bool .
 	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
 	*** pues una recta puede construirse mediantes infinitos pares de puntos.
 	eq son-iguales(r1 , r2) = (ecu-recta-m(r1) == ecu-recta-m(r2)) and (ecu-recta-n(r1) == ecu-recta-n(r2))	.
 
-	op pto-corte : Recta Recta -> Punto .
+	op pto-corte-r-r : Recta Recta -> Punto .
 	*** Devuelve el punto de corte de dos rectas dadas.
-	ceq pto-corte(r1 , r2) = p(pto-corte-x(r1 , r2) pto-corte-y(r1 , r2))
+	ceq pto-corte-r-r(r1 , r2) = p(pto-corte-x(r1 , r2) pto-corte-y(r1 , r2))
 	if not horizontal(r1) .
-	ceq pto-corte(r1 , r2) = p(pto-corte-x(r2 , r1) pto-corte-y(r2 , r1))
+	ceq pto-corte-r-r(r1 , r2) = p(pto-corte-x(r2 , r1) pto-corte-y(r2 , r1))
 	if horizontal(r1) .	
 
 	op pto-corte-x : Recta Recta -> Float .
@@ -167,12 +181,12 @@ fmod GEO2D is
 	ceq lista-vacia(l) = false
 	if not (l == mt) . 
 
-	op pto-corte-circunferencias : Circunferencia Circunferencia -> Lista .
-	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
+	op pto-corte-c-c : Circunferencia Circunferencia -> Lista .
+	ceq pto-corte-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
 	if not (z11 == z21) .
-	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
+	ceq pto-corte-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
 	if not (z12 == z22) .
-	ceq pto-corte-circunferencias(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
+	ceq pto-corte-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
 	if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
 
 	op pto-corte-circunferencias-x-dis : Circunferencia Circunferencia -> Lista .
@@ -254,6 +268,33 @@ fmod GEO2D is
 	/\ Aux-B := ((z11 - z31) ^ 2.0) + (z32 ^ 2.0) - (z41 ^ 2.0)
 	/\ Aux-C := ecu-segundo-grado-1(1.0 , Aux-A , Aux-B)
 	/\ Aux-D := ecu-segundo-grado-2(1.0 , Aux-A , Aux-B) .
+
+	op pto-corte : Figura Figura -> Lista [comm] .
+	*** Comprueba si dos figuras se cortan, y devuelve una lista con los puntos de corte
+	ceq pto-corte(p1, p2) = mt p1
+	if p1 == p2 .
+	ceq pto-corte(p1, p2) = mt
+	if not p1 == p2 .
+	ceq pto-corte(p1 , r1) = mt p1
+	if esta-en-recta(p1 , r1) .
+	ceq pto-corte(p1 , r1) = mt
+	if not esta-en-recta(p1 , r1) .
+	ceq pto-corte(r1 , r2) = mt pto-corte-r-r(r1 , r2)
+	if se-cortan-r-r(r1 , r2) .
+	ceq pto-corte(r1 , r2) = mt 
+	if not se-cortan-r-r(r1 , r2) .
+	ceq pto-corte(p1 , c1) = mt p1
+	if esta-en-circunferencia(p1 , c1) .
+	ceq pto-corte(p1 , c1) = mt
+	if not esta-en-circunferencia(p1 , c1) .
+	ceq pto-corte(r1 , c1) = pto-corte-r-c(r1 , c1)
+	if se-cortan-r-c(r1 , c1) .
+	ceq pto-corte(r1 , c1) = mt
+	if not se-cortan-r-c(r1 , c1) .
+	ceq pto-corte(c1 , c2) = pto-corte-c-c(c1 , c2)
+	if se-cortan-c-c(c1 , c2) .
+	ceq pto-corte(c1 , c2) = mt
+	if not se-cortan-c-c(c1 , c2) .
 
 endfm
 

@@ -8,7 +8,7 @@ fmod DICC-PUNTOS is
   sorts Dic Entry .
   subsort Entry < Dic .
 
-  op _->_ : Qid Punto -> Entry [ctor] .
+  op _->_ : Qid Figura -> Entry [ctor] .
   op mtD : -> Dic [ctor] .
   op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
 
@@ -19,7 +19,7 @@ fmod DICC-PUNTOS is
   op _[_] : Dic Qid ~> Figura .
   eq (D . Q -> F)[Q] = F .
 
-  op _[_/_] : Dic Qid Punto -> Dic .
+  op _[_/_] : Dic Qid Figura -> Dic .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
   eq D[Q / F] = D . Q -> F [owise] .
 endfm
@@ -33,6 +33,7 @@ fmod GEO-SIGNATURE is
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
   op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
+***  op cut`point`of_and_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
 
 endfm
 
@@ -55,6 +56,7 @@ fmod GEO-COMMAND-PROCESSING is
  vars S S' : String .
  vars F F' : Float .
  vars P1 P2 : Punto .
+ vars f1 f2 : Figura .
 
  op processPoint : Term Term -> Entry .
  eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
@@ -79,6 +81,15 @@ fmod GEO-COMMAND-PROCESSING is
      
  op processLine : Term Punto Punto -> Entry .
  eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
+
+***(
+ op processCutPoint : Figura Figura -> Entry .
+ eq processCutPoint(f1 , f2) = processCutPointAux(pto-corte(f1 , f2)) .
+ 
+ op processCutPointAux : Lista -> Entry .
+ eq processCutPointAux(l1)
+
+)
 
 endfm
 
@@ -105,23 +116,31 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Punto`almacenado , AtS >
+                  output : ('Punto 'almacenado) , AtS >
   if Q -> F := processPoint(T1 , T2) .
 
  crl [circumference] :
      < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Circunferencia`almacenado , AtS >
+                  output : ('Circunferencia 'almacenada) , AtS >
   if Q -> F := processCircumference(T1 , D[downQid(T2)] , T3) .
 
  crl [line] :
      < O : MUDC | input : ('line_from_to_[T1 , 'token[T2] , 'token[T3]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : 'Recta`almacenado , AtS >
+                  output : ('Recta 'almacenada) , AtS >
   if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) . 
 
+***(
+ crl [cut] :
+     < O : MUDC | input : ('[T1 , cut`point`of_and_['token[T1] , 'token[T2]]), dic : D, 
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : 'Punto'almacenado , AtS >
+  if Q -> F := processCutPoint(D[downQid(T1)] , D[downQid(T2)]) . 
+)
 
 endm
 
