@@ -39,8 +39,12 @@ fmod GEO2D is
 	ceq quitar-primer-elemento(mt) = mt
 	if lista-vacia(mt) .
 
-	op dar-primer-elemento : Lista -> Punto .
-	eq dar-primer-elemento(mt l1 p1) = p1 .
+	op primer-elemento : Lista -> Punto .
+	eq primer-elemento(mt l1 p1) = p1 .
+
+	op long-lista : Lista -> Float .
+	eq long-lista(mt) = 0.0 .
+	eq long-lista(mt l p1) = 1.0 + long-lista(mt l) .
 
 	op ecu-recta-m : Recta -> Float .
 	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
@@ -273,28 +277,31 @@ fmod GEO2D is
 	*** Comprueba si dos figuras se cortan, y devuelve una lista con los puntos de corte
 	ceq pto-corte(p1, p2) = mt p1
 	if p1 == p2 .
-	ceq pto-corte(p1, p2) = mt
-	if not p1 == p2 .
+	
 	ceq pto-corte(p1 , r1) = mt p1
 	if esta-en-recta(p1 , r1) .
-	ceq pto-corte(p1 , r1) = mt
-	if not esta-en-recta(p1 , r1) .
 	ceq pto-corte(r1 , r2) = mt pto-corte-r-r(r1 , r2)
 	if se-cortan-r-r(r1 , r2) .
-	ceq pto-corte(r1 , r2) = mt 
-	if not se-cortan-r-r(r1 , r2) .
 	ceq pto-corte(p1 , c1) = mt p1
 	if esta-en-circunferencia(p1 , c1) .
-	ceq pto-corte(p1 , c1) = mt
-	if not esta-en-circunferencia(p1 , c1) .
 	ceq pto-corte(r1 , c1) = pto-corte-r-c(r1 , c1)
 	if se-cortan-r-c(r1 , c1) .
-	ceq pto-corte(r1 , c1) = mt
-	if not se-cortan-r-c(r1 , c1) .
 	ceq pto-corte(c1 , c2) = pto-corte-c-c(c1 , c2)
 	if se-cortan-c-c(c1 , c2) .
+	ceq pto-corte(p1, p2) = mt
+	if not p1 == p2 .	
+	ceq pto-corte(p1 , r1) = mt
+	if not esta-en-recta(p1 , r1) .
+	ceq pto-corte(r1 , r2) = mt 
+	if not se-cortan-r-r(r1 , r2) .
+	ceq pto-corte(p1 , c1) = mt
+	if not esta-en-circunferencia(p1 , c1) .
+	ceq pto-corte(r1 , c1) = mt
+	if not se-cortan-r-c(r1 , c1) .
 	ceq pto-corte(c1 , c2) = mt
 	if not se-cortan-c-c(c1 , c2) .
+
+	
 
 endfm
 
