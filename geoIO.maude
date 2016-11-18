@@ -5,12 +5,14 @@ fmod DICC-PUNTOS is
   pr GEO2D .
   pr QID .
 
-  sorts Dic Entry Pair .
+  sorts Dic Entry Pair EmptyQID .
   subsort Entry < Dic .
+  subsort EmptyQID < Qid .
 
   op _->_ : Qid Figura -> Entry [ctor] .
   op [_ , _] : Entry Entry -> Pair [ctor] .
   op mtD : -> Dic [ctor] .
+  op emptyQID : -> EmptyQID [ctor] .
   op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
 
   var  D : Dic .
@@ -22,7 +24,9 @@ fmod DICC-PUNTOS is
 
   op _[_/_] : Dic Qid Figura -> Dic .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
+  eq D[emptyQID / F] = D [owise] .
   eq D[Q / F] = D . Q -> F [owise] .
+
 
 endfm
 
@@ -90,7 +94,10 @@ fmod GEO-COMMAND-PROCESSING is
  ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = [downQid(T) -> primer-elemento(pto-corte(f1 , f2)), downQid(T) -> primer-elemento(pto-corte(f1 , f2))]
  if primer-elemento(pto-corte(f1 , f2)) == primer-elemento(quitar-primer-elemento(pto-corte(f1 , f2))) /\ long-lista(pto-corte(f1 , f2)) == 2.0 .
  ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = [downQid(T) -> primer-elemento(pto-corte(f1 , f2)), downQid(T) -> primer-elemento(pto-corte(f1 , f2))]
- if  long-lista(pto-corte(f1 , f2)) == 1.0 .
+ if long-lista(pto-corte(f1 , f2)) == 1.0 .
+ ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = [emptyQID -> f1 , emptyQID -> f2]
+ if long-lista(pto-corte(f1 , f2)) == 0.0 .
+
 endfm
 
 mod GEO-DATABASE-HANDLING is
@@ -133,12 +140,11 @@ mod GEO-DATABASE-HANDLING is
                   output : ('Recta 'almacenada) , AtS >
   if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) . 
 
-
  crl [cut] :
      < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D, 
                   output : nil, AtS >
-  => < O : MUDC | input : nilTermList, dic : (D [Q / F] [Q' / F']),
-                  output : 'Puntos'almacenados , AtS >
+  => < O : MUDC | input : nilTermList, dic : ((D [Q / F]) [Q' / F']),
+                  output : ('Puntos 'almacenados) , AtS >
   if [Q -> F , Q' -> F'] := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) . 
 
 
