@@ -1,0 +1,7 @@
+load geoIO.maude
+load ../mUnit.maude
+
+(munit IOGEO2D is
+  assertEqual(3, 3)
+  assertEqual(3, 5)
+endu)

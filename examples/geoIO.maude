@@ -1,4 +1,4 @@
-load GEO2D.maude
+load ../GEO2D.maude
 load full-maude.maude
 
 fmod DICC-PUNTOS is
@@ -96,7 +96,7 @@ mod GEO-DATABASE-HANDLING is
 
 endm
 
-mod MUNIT is
+mod IOGEO2D is
  inc GEO-DATABASE-HANDLING .
  inc META-GEO-SIGN .
  inc LOOP-MODE .

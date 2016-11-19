@@ -37,9 +37,9 @@ fmod MUNIT-SIGNATURE is
 
   *********************************************************************************
   *** Restarts the loop.                                                        ***
-  *** Usage: restart                                                            ***
+  *** Usage: loop(your-init)                                                    ***
   *********************************************************************************
-  op restart : -> @MUnitPredicate@ [ctor] .
+  op loop : @Token@ -> @MUnitPredicate@ [ctor] .
 
   *********************************************************************************
   *** Applies a new command in the loop                                         ***
@@ -61,6 +61,7 @@ endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
+ inc LOOP-MODE .
  pr PRINT .
 
  vars T T' T'' T1 T2 T3 TSB TSB' : Term .
@@ -209,18 +210,42 @@ fmod MUNIT-COMMAND-PROCESSING is
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
 endfm
 
-th MUNIT-DATABASE is
- pr DATABASE-HANDLING .
-
- sort DBClass .
- subsort DBClass < DatabaseClass .
-endth
-
-mod MUNIT-INIT{X :: MUNIT-DATABASE} is
+mod MUNIT is
+ pr MUNIT-COMMAND-PROCESSING .
  inc DATABASE-HANDLING .
  inc META-MUNIT-SIGN .
- inc LOOP-MODE .
  pr PRINT .
+
+ var  MUDC : MUDatabaseClass .
+ var  AtS : AttributeSet .
+ var  UR : UnitResult .
+ var  DB : Database .
+ vars T T' : Term .
+ var  O : Oid .
+ var  S : System .
+
+ sort MUDatabaseClass .
+ subsort MUDatabaseClass < DatabaseClass .
+
+ op MUDatabase : -> MUDatabaseClass [ctor] .
+
+ sort SystemWD .
+ subsort System < SystemWD .
+ op noSys : -> SystemWD [ctor] .
+
+ op system :_ : SystemWD -> Attribute [ctor] .
+
+ crl [munit] :
+     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
+  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
+  if UR := procMUnit(T, T', DB) .
+
+ *** Comparar atributos con upTerm
+
+endm
+
+mod MUNIT-INIT is
+ pr MUNIT .
 
  var  QI : Qid .
  vars QIL QIL' QIL'' : QidList .
@@ -229,21 +254,16 @@ mod MUNIT-INIT{X :: MUNIT-DATABASE} is
  var  DB : Database .
  vars RP RP' : ResultPair .
  var  O : Oid .
- var  X@Database : X$DBClass .
+ var  X@Database : DatabaseClass .
 
  op o : -> Oid [ctor] .
-
- sort MUDatabaseClass .
- subsort MUDatabaseClass < X$DBClass .
-
- op MUDatabase : -> MUDatabaseClass [ctor] .
 
  --- State for LOOP mode:
  subsort Object < State .
  op init-munit : -> System .
 
  op init-state : -> AttributeSet .
- eq init-state = db : initialDatabase, default : 'CONVERSION .
+ eq init-state = db : initialDatabase, default : 'CONVERSION, system : noSys .
 
  rl [init] :
     init-munit
@@ -279,42 +299,6 @@ mod MUNIT-INIT{X :: MUNIT-DATABASE} is
  rl [out] :
     [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
  => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
-endm
-
-view FMDB from MUNIT-DATABASE to DATABASE-HANDLING is
- sort DBClass to DatabaseClass .
-endv
-
-mod MUNIT is
- pr MUNIT-COMMAND-PROCESSING .
- pr MUNIT-INIT{FMDB} .
-
- var  MUDC : MUDatabaseClass .
- var  AtS : AttributeSet .
- var  UR : UnitResult .
- var  DB : Database .
- vars T T' : Term .
- var  O : Oid .
- var  S : System .
-
- sorts Command CommandList .
- subsort Command < CommandList .
-
- op mtCL : -> CommandList [ctor] .
- op __ : CommandList CommandList -> CommandList [ctor assoc id: mtCL] .
-
- op restart : -> Command [ctor] .
- op command : QidList -> Command [ctor] .
-
- crl [munit] :
-     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
-  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
-  if UR := procMUnit(T, T', DB) /\
-     init-munit => S /\
-     S =/= init-munit .
-
- *** Comparar atributos con upTerm
-
 endm
 
 set print conceal on .
