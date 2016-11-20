@@ -1,7 +1,27 @@
 load geoIO.maude
+
+fmod TEST-AUX is
+ pr DICC-PUNTOS .
+
+ var Q : Qid .
+ var P : Punto .
+ var D : Dic .
+
+ op contains? : Dic Qid -> Bool .
+ eq contains?((Q -> P) . D, Q) = true .
+ eq contains?(D, Q) = false [owise] .
+endfm
+
+mod TEST is
+ pr TEST-AUX .
+ pr IOGEO2D .
+endm
+
 load ../mUnit.maude
 
-(munit IOGEO2D is
+(munit TEST is
   assertEqual(3, 3)
   assertEqual(3, 5)
+  loop(init-geo)
+  command(point 3.0 4.0 as pepe)
 endu)

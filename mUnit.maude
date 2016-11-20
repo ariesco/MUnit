@@ -17,6 +17,9 @@ fmod MUNIT-SIGNATURE is
   *********************************************************************************
   op assertTrue : @Bubble@ -> @MUnitPredicate@ [ctor] .
 
+  *** For testing purposes, functionality will be moved to assertTrue later
+  op assertTrueLoop : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
   *********************************************************************************
   *** Indicates that the term introduced in the test is evaluated to true       ***
   *** and print the given message                                               ***
@@ -61,10 +64,9 @@ endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
- inc LOOP-MODE .
  pr PRINT .
 
- vars T T' T'' T1 T2 T3 TSB TSB' : Term .
+ vars T T' T'' T1 T2 T3 TSB TSB' SYS SYS' SYS'' : Term .
  var  ME : ModuleExpression .
  vars QIL QIL' : QidList .
  vars DB DB' : Database .
@@ -83,131 +85,154 @@ fmod MUNIT-COMMAND-PROCESSING is
  op procMUnit : Term Term Database -> UnitResult .
  ceq procMUnit(T, T', DB) = procMUnitAux(ME, T', DB')
   if < DB' ; ME > := evalModExp(parseModExp(T), DB) .
- eq procMUnit(T, T', DB) = [0, 0, '\n '\r '\! 'Error: '\o
-                                  'Wrong 'module 'expression. '\n] [owise] .
+ eq procMUnit(T, T', DB) = < 0, 0, '\n '\r '\! 'Error: '\o
+                                  'Wrong 'module 'expression. '\n > [owise] .
 
  op procMUnitAux : ModuleExpression Term Database -> UnitResult .
- ceq procMUnitAux(ME, T, DB) = procProps(M, T, VDS, B, DB)
+ ceq procMUnitAux(ME, T, DB) = normalize(procProps(M, T, VDS, B, DB, 'noSys.System))
   if compiledModule(ME, DB) /\
      M := getFlatModule(ME, DB) /\
      VDS := getVars(ME, DB) /\
      B := included('META-MODULE, getImports(getTopModule(ME, DB)), DB) .
- ceq procMUnitAux(ME, T, DB) = procProps(M, T, VDS, B, DB')
+ ceq procMUnitAux(ME, T, DB) = normalize(procProps(M, T, VDS, B, DB', 'noSys.System))
   if not compiledModule(ME, DB) /\
      DB' := database(evalModExp(ME, DB)) /\
      M := getFlatModule(ME, DB') /\
      VDS := getVars(ME, DB') /\
      B := included('META-MODULE, getImports(getTopModule(ME, DB')), DB') .
- eq procMUnitAux(ME, T, DB) = [0, 0, '\n '\r '\! 'Error: '\o 'The
-                                  'module 'cannot 'be 'compiled. '\n] [owise] .
+ eq procMUnitAux(ME, T, DB) = < 0, 0, '\n '\r '\! 'Error: '\o 'The
+                                  'module 'cannot 'be 'compiled. '\n > [owise] .
 
- op procProps : Module Term OpDeclSet Bool Database -> UnitResult .
- ceq procProps(M, '__[T, T'], VDS, B, DB) = [N + N', N1 + N1', QIL QIL']
-  if [N, N1, QIL] := procProps(M, T, VDS, B, DB) /\
-     [N', N1', QIL'] := procProps(M, T', VDS, B, DB) .
+ op procProps : Module Term OpDeclSet Bool Database Term -> UnitResult .
+ ceq procProps(M, '__[T, T'], VDS, B, DB, SYS) = < N + N', N1 + N1', QIL QIL' >
+  if [N, N1, QIL, SYS'] := procProps(M, T, VDS, B, DB, SYS) /\
+     [N', N1', QIL', SYS''] := procProps(M, T', VDS, B, DB, SYS') .
 
- ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [1, 0, nil]
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'true.Bool .
- ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'false.Bool .
- ceq procProps(M, 'assertTrue[T], VDS, B, DB) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?))]
+ ceq procProps(M, 'assertTrue[T], VDS, B, DB, SYS) = [0, 1, ('\n '\r 'Error: '\o getMsg(T?)), SYS]
   if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      not (T? :: Term) .
 
- ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB) = [1, 0, nil]
+ ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 == 'true.Bool .
- ceq procProps(M, 'assertTrueMsg[T, 'token[T']], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertTrueMsg[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if TSB := solveBubbles(T, M, B, VDS, DB) /\
      T1 := reduce(M, TSB) /\
      T1 == 'false.Bool /\
      QIL := '\n 'Error 'for 'assertTrue '`( metaPrettyPrint(M, TSB, printOpts) '`)
             ' '---> ' downQid(T') '\n .
- ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertTrueMsg[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [1, 0, nil]
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T1 := reduce(M, solveBubbles(T', M, B, VDS, DB)) .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      T1 =/= T2 .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T', M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [1, 0, nil]
+ *** TODO: Error eqs
+ ceq procProps(M, 'loop['token[T]], VDS, B, DB, SYS) = [0, 0, nil, T'']
+  if Q := downQid(T) /\
+     T' := qid(string(Q) + ".System") /\
+     T'' := rewrite(M, T') [print "Exito"] .
+
+ *** TODO: Error eqs
+ ceq procProps(M, 'command['bubble[T]], VDS, B, DB, SYS) = [0, 0, nil, SYS]
+  if QIL := downQidList(T) /\
+     T' := upTerm(QIL) /\
+     SYS' := sysInput(SYS, T') /\
+     SYS'' := rewrite(M, SYS') [print SYS''] .
+
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      Q := downQid(T') /\
      Q ; SS := getSorts(M) /\
      sameKind(M, Q, S) /\
      sortLeq(M, S, Q) .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      Q := downQid(T') /\
      Q ; SS := getSorts(M) /\
      sameKind(M, Q, S) /\
      not sortLeq(M, S, Q) .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      Q := downQid(T') /\
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [1, 0, nil]
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure .
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure .
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T', M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB) = [1, 0, nil]
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
      metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure .
- ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, nil]
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, nil, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
      metaSearch(M, T1, T2, nil, '*, N, 0) == failure .
- ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB) = [0, 1, QIL]
+ ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (rat(string(downQid(T'')), 10) :: Nat) /\
      QIL := ('\n '\r 'Error: '\o 'Not 'a 'number) .
 
- eq procProps(M, Q[T, T'], VDS, B, DB) = [0, 1, nil] [owise] .
- eq procProps(M, Q[T], VDS, B, DB) = [0, 1, nil] [owise] .
+ eq procProps(M, Q[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
+ eq procProps(M, Q[T], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
 
  op reduce : Module Term -> Term .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
+
+ op rewrite : Module Term -> Term .
+ eq rewrite(M, T) = getTerm(metaRewrite(M, T, unbounded)) .
+
+ *** This function introduces new input into the loop
+ op sysInput : Term Term -> Term .
+ eq sysInput(Q[T1, T2, T3], T) = Q[T, T2, T3] .
+
+ op rename@InInput : Module Term -> Term .
+
 endfm
 
 mod MUNIT is
@@ -222,18 +247,11 @@ mod MUNIT is
  var  DB : Database .
  vars T T' : Term .
  var  O : Oid .
- var  S : System .
 
  sort MUDatabaseClass .
  subsort MUDatabaseClass < DatabaseClass .
 
  op MUDatabase : -> MUDatabaseClass [ctor] .
-
- sort SystemWD .
- subsort System < SystemWD .
- op noSys : -> SystemWD [ctor] .
-
- op system :_ : SystemWD -> Attribute [ctor] .
 
  crl [munit] :
      < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
@@ -245,6 +263,7 @@ mod MUNIT is
 endm
 
 mod MUNIT-INIT is
+ inc LOOP-MODE .
  pr MUNIT .
 
  var  QI : Qid .
@@ -263,7 +282,7 @@ mod MUNIT-INIT is
  op init-munit : -> System .
 
  op init-state : -> AttributeSet .
- eq init-state = db : initialDatabase, default : 'CONVERSION, system : noSys .
+ eq init-state = db : initialDatabase, default : 'CONVERSION .
 
  rl [init] :
     init-munit

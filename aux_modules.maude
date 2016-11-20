@@ -1,11 +1,21 @@
 fmod UNIT-RESULT is
- inc LOOP-MODE .
+ pr META-TERM .
  pr QID-LIST .
+
  sort UnitResult .
- *** Correct test, failed tests, Tests info
- *** TODO: remove when not used
- op [_,_,_] : Nat Nat QidList -> UnitResult [ctor] .
- op [_,_,_] : Nat Nat QidList System -> UnitResult [ctor] .
+
+ *** Correct test, failed tests, Tests info, new System
+ op <_,_,_> : Nat Nat QidList -> UnitResult [ctor] .
+
+ *** Correct test, failed tests, Tests info, new System
+ op [_,_,_,_] : Nat Nat QidList Term -> UnitResult [ctor] .
+
+  var  QIL : QidList .
+  vars N N' : Nat .
+  var  T : Term .
+
+ op normalize : UnitResult -> UnitResult .
+ eq normalize([N, N', QIL, T]) = < N, N', QIL > .
 endfm
 
 
@@ -22,6 +32,6 @@ fmod PRINT is
            '\n '\t ' '\t '`( 'November '15th '`, '\s '2016 '`) '\n .
 
  op printUR : UnitResult -> QidList .
- eq printUR([N, N', QIL]) = '\n qid(string(N + N', 10)) 'test 'cases 'were 'executed. '\n
-                            '\n qid(string(N', 10)) 'failures. '\n QIL .
+ eq printUR(< N, N', QIL >) = '\n qid(string(N + N', 10)) 'test 'cases 'were 'executed. '\n
+                              '\n qid(string(N', 10)) 'failures. '\n QIL .
 endfm
