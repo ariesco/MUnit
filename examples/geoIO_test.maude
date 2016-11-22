@@ -12,16 +12,17 @@ fmod TEST-AUX is
  eq contains?(D, Q) = false [owise] .
 endfm
 
-mod TEST is
+mod TEST-GEO2D is
  pr TEST-AUX .
  pr IOGEO2D .
 endm
 
 load ../mUnit.maude
 
-(munit TEST is
+(munit TEST-GEO2D is
   assertEqual(3, 3)
   assertEqual(3, 5)
   loop(init-geo)
   command(point 3.0 4.0 as pepe)
+  assertTrueLoop(contains?(@dic, 'pepe))
 endu)
