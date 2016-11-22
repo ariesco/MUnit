@@ -288,14 +288,21 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [1, 0, nil, SYS]
+ **********************************************************************************
+ ********************             assertReachable            **********************
+ **********************************************************************************
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
-     metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure .
- ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS]
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                         metaPrettyPrint(M, T2, printOpts) '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
-     metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure .
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure /\
+     QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                         metaPrettyPrint(M, T2, printOpts) '`) ' '\r 'failed. '\o '\n .
  ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
@@ -305,23 +312,32 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
 
- ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [1, 0, nil, SYS]
+ **********************************************************************************
+ ********************           assertReachableBnd           **********************
+ **********************************************************************************
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
-     metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure .
- ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, nil, SYS]
+     metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                            metaPrettyPrint(M, T2, printOpts) '`,
+                                            downQid(T'') '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
-     metaSearch(M, T1, T2, nil, '*, N, 0) == failure .
+     metaSearch(M, T1, T2, nil, '*, N, 0) == failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                            metaPrettyPrint(M, T2, printOpts) '`,
+                                            downQid(T'') '`) ' '\r 'failed. '\o '\n .
  ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertReachableBnd[T, T', T''], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (rat(string(downQid(T'')), 10) :: Nat) /\
-     QIL := ('\n '\r 'Error: '\o 'Not 'a 'number) .
+     QIL := ('\n '\r 'Error: '\o 'Not 'a 'number) [print T''] .
 
  eq procProps(M, Q[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
  eq procProps(M, Q[T], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .

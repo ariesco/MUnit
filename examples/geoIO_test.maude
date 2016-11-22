@@ -35,4 +35,8 @@ load ../mUnit.maude
   command(failure)
   assertTrue(contains?(@dic, 'p1))
   assertTrue(contains?(@dic, 'p2))
+  assertReachable(3,3)
+  assertReachable(3,4)
+  assertReachableBnd('a,'a,3)
+  assertReachableBnd('a,'b,4)
 endu)
