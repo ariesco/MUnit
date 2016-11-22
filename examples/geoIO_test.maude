@@ -22,6 +22,9 @@ load ../mUnit.maude
 (munit TEST-GEO2D is
   assertEqual(3, 3)
   assertEqual(3, 5)
+  assertEqual(3, 5)
+  assertEqual(3, 5)
+  assertEqual(3, 5)
   loop(init-geo)
   command(point 3.0 4.0 as pepe)
   assertTrueLoop(contains?(@dic, 'pepe))

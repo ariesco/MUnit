@@ -16,6 +16,7 @@ fmod UNIT-RESULT is
 
  op normalize : UnitResult -> UnitResult .
  eq normalize([N, N', QIL, T]) = < N, N', QIL > .
+ eq normalize(< N, N', QIL >) = < N, N', QIL > .
 endfm
 
 

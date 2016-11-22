@@ -67,11 +67,11 @@ fmod MUNIT-COMMAND-PROCESSING is
  pr PRINT .
 
  vars T T' T'' T1 T2 T3 TSB TSB' SYS SYS' SYS'' : Term .
+ vars TL TL' TL'' ATTS : TermList .
  var  ME : ModuleExpression .
  vars St St' St'' : String .
  vars VDS ODS : OpDeclSet .
  vars QIL QIL' : QidList .
- vars TL TL' : TermList .
  vars DB DB' : Database .
  var  SB : Substitution .
  vars N N' N1 N1' : Nat .
@@ -79,6 +79,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  var  AtS : AttrSet .
  var  V : Variable .
  var  SS : SortSet .
+ var  C : Constant .
  var  T? : [Term] .
  var  M : Module .
  vars Q Q' : Qid .
@@ -110,7 +111,7 @@ fmod MUNIT-COMMAND-PROCESSING is
                                   'module 'cannot 'be 'compiled. '\n > [owise] .
 
  op procProps : Module Term OpDeclSet Bool Database Term -> UnitResult .
- ceq procProps(M, '__[T, T'], VDS, B, DB, SYS) = < N + N', N1 + N1', QIL QIL' >
+ ceq procProps(M, '__[T, T'], VDS, B, DB, SYS) = [N + N', N1 + N1', QIL QIL', SYS'']
   if [N, N1, QIL, SYS'] := procProps(M, T, VDS, B, DB, SYS) /\
      [N', N1', QIL', SYS''] := procProps(M, T', VDS, B, DB, SYS') .
 
@@ -161,54 +162,29 @@ fmod MUNIT-COMMAND-PROCESSING is
      T'' := rewrite(M, T') [print "Exito loop"] .
 
  *** TODO: Error eqs
- ceq procProps(M, 'command['bubble[T]], VDS, B, DB, SYS) = [0, 0, nil, SYS]
+ ceq procProps(M, 'command['bubble[T]], VDS, B, DB, SYS) = [0, 0, nil, SYS'']
   if QIL := downQidList(T) /\
      T' := upTerm(QIL) /\
      SYS' := sysInput(SYS, T') /\
      SYS'' := rewrite(M, SYS') [print "Exito comando"] .
 
 
- ceq procProps(M, 'assertTrueLoop['bubble[T]], VDS, B, DB, SYS) = [0, 0, nil, T]
-  if < T', SB > := sub4Atts(M, T, SYS) [print T " substitution -> " SB] .
+ *** TODO: Unify with assertTrue (SB =/= none)
+ ceq procProps(M, 'assertTrueLoop['bubble[T]], VDS, B, DB, SYS) = [1, 0, nil, T]
+  if ATTS := getAtts(SYS) /\
+     < T', SB > := sub4Atts(M, T, ATTS) /\
+     T'' := solveBubbles('bubble[T'], M, B, VDS, DB) /\
+     TSB := applySb(T'', SB) /\
+     reduce(M, TSB) == 'true.Bool .
+ ceq procProps(M, 'assertTrueLoop['bubble[T]], VDS, B, DB, SYS) = [0, 1, nil, T]
+  if ATTS := getAtts(SYS) /\
+     < T', SB > := sub4Atts(M, T, ATTS) /\
+     T'' := solveBubbles('bubble[T'], M, B, VDS, DB) /\
+     TSB := applySb(T'', SB) /\
+     reduce(M, TSB) =/= 'true.Bool .
 
- *******************************************************************************
- *** Auxiliary function for replacing terms of the form @att by variables of ***
- *** the appropriate sort in a metarepresented list of qids.                 ***
- *******************************************************************************
- sort Term&Sub .
- op <_,_> : TermList Substitution -> Term&Sub [ctor] .
 
- *** Module where the reductions take place.
- *** Term we are looking for
- *** Current System, where we need to look for the value of the attribute
- op sub4Atts : Module Term Term -> Term&Sub .
- ceq sub4Atts(M, '__[TL], SYS) = < '__[TL'], SB >
-  if < TL', SB > := sub4Atts*(M, TL, 0, < empty, none >) .
- eq sub4Atts(M, T, SYS) = sub4Atts*(M, T, 0, < empty, none >) [owise] .
 
- op sub4Atts* : Module TermList Nat Term&Sub -> Term&Sub .
- eq sub4Atts*(M, empty, N, T&S) = T&S .
- ceq sub4Atts*(M, (T, TL), N, < TL', SB >) = sub4Atts*(M, TL, s(N), < (TL', T), SB >)
-  if Q := downQid(T) /\
-     S := findInOps(M, Q) /\
-     V := qid("V" + string(N, 10) + ":" + string(S)) [print "Variable " V] .
- eq sub4Atts*(M, (T, TL), N, < TL', SB >) = sub4Atts*(M, TL, N, < (TL', T), SB >) [owise print T] .
-
- op findInOps : Module Qid ~> Sort .
- eq findInOps(M, Q) = findInOps(getOps(M), Q) .
-
- op findInOps : OpDeclSet Qid ~> Sort .
- eq findInOps(op Q : S -> 'Attribute [AtS] . ODS, Q) = S .
- ceq findInOps(op Q : S -> 'Attribute [AtS] . ODS, Q') = S
-  if St := string(Q) /\
-     St' := string(Q') /\
-     *** We remove @
-     St'' := substr(St', 1, length(St')) /\
-     find(St, St'', 0) == 0 .
-
- *******************************************************************************
- *** END auxiliary function                                                  ***
- *******************************************************************************
 
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, nil, SYS]
   if { T1, S } := metaReduce(M, solveBubbles(T, M, B, VDS, DB)) /\
@@ -276,12 +252,76 @@ fmod MUNIT-COMMAND-PROCESSING is
  op rewrite : Module Term -> Term .
  eq rewrite(M, T) = getTerm(metaRewrite(M, T, unbounded)) .
 
+ *******************************************************************************
+ *** Auxiliary function for replacing terms of the form @att by variables of ***
+ *** the appropriate sort in a metarepresented list of qids.                 ***
+ *******************************************************************************
+ sort Term&Sub .
+ op <_,_> : TermList Substitution -> Term&Sub [ctor] .
+
+ *** Module where the reductions take place.
+ *** Term we are looking for
+ *** Current System, where we need to look for the value of the attribute
+ op sub4Atts : Module Term TermList -> Term&Sub .
+ ceq sub4Atts(M, '__[TL], ATTS) = < '__[TL'], SB >
+  if < TL', SB > := sub4Atts*(M, TL, ATTS, 0, < empty, none >) .
+ eq sub4Atts(M, T, ATTS) = sub4Atts*(M, T, ATTS, 0, < empty, none >) [owise] .
+
+ op sub4Atts* : Module TermList TermList Nat Term&Sub -> Term&Sub .
+ eq sub4Atts*(M, empty, ATTS, N, T&S) = T&S .
+ ceq sub4Atts*(M, (T, TL), ATTS, N, < TL', SB >) =
+                             sub4Atts*(M, TL, ATTS, s(N), < (TL', T'), SB ; V <- T'' >)
+  if Q := downQid(T) /\
+     Q' := exactOp(M, Q) /\
+     S := findInOps(M, Q') /\
+     V := qid("V" + string(N, 10) + ":" + string(S)) /\
+     T' := upTerm(V) /\
+     T'' := getAtt(ATTS, Q') .
+ eq sub4Atts*(M, (T, TL), ATTS, N, < TL', SB >) = sub4Atts*(M, TL, ATTS, N, < (TL', T), SB >) [owise print T] .
+
+ op exactOp : Module Qid ~> Qid .
+ eq exactOp(M, Q) = exactOp(getOps(M), Q) .
+
+ op exactOp : OpDeclSet Qid ~> Sort .
+ eq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q) = Q .
+ ceq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q') = Q
+  if St := string(Q) /\
+     St' := string(Q') /\
+     *** We remove @
+     St'' := substr(St', 1, length(St')) /\
+     find(St, St'', 0) == 0 .
+
+ op findInOps : Module Qid ~> Sort .
+ eq findInOps(M, Q) = findInOps(getOps(M), Q) .
+
+ op findInOps : OpDeclSet Qid ~> Sort .
+ eq findInOps(op Q : S -> 'Attribute [AtS] . ODS, Q) = S .
+
+ op getAtts : Term ~> TermList .
+ eq getAtts('`[_`,_`,_`][T, T', T'']) = getAtts(T') .
+ eq getAtts('<_:_|_>[T, T', T'']) = getAtts(T'') .
+ eq getAtts('_`,_[TL]) = TL .
+
+ op getAtt : TermList Qid ~> Term .
+ eq getAtt((TL, Q[T], TL'), Q) = T .
+
+ *******************************************************************************
+ *** END auxiliary function                                                  ***
+ *******************************************************************************
+
  *** This function introduces new input into the loop
  op sysInput : Term Term -> Term .
  eq sysInput(Q[T1, T2, T3], T) = Q[T, T2, T3] .
 
- op rename@InInput : Module Term -> Term .
+ op applySb : Term Substitution -> Term .
+ eq applySb(Q[TL], SB) = Q[applySb*(TL, SB)] .
+ eq applySb(C, SB) = C .
+ eq applySb(V, V <- T ; SB) = T .
+ eq applySb(V, SB) = V [owise] .
 
+ op applySb* : TermList Substitution -> TermList .
+ eq applySb*(empty, SB) = empty .
+ eq applySb*((T, TL), SB) = applySb(T, SB), applySb*(TL, SB) .
 endfm
 
 mod MUNIT is
