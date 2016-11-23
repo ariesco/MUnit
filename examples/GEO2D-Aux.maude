@@ -1,0 +1,59 @@
+load full-maude.maude
+load GEO2D.maude
+
+fmod DICC-FIGURAS is
+  pr GEO2D .
+  pr QID .
+
+  sorts Dic Entry DicFiguras .
+  subsort Entry < Dic .
+
+  op _->_ : Qid Figura -> Entry [ctor] .
+  op mtD : -> Dic [ctor] .
+  op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
+
+  vars  D Dp Dr Dc Dp' Dr' Dc' : Dic .
+  vars  Q Q' : Qid .
+  vars F F' : Figura .
+  var p1 : Punto .
+  var r1 : Recta .
+  var c1 : Circunferencia .
+
+  op _[_] : Dic Qid ~> Figura .
+  eq (D . Q -> F)[Q] = F .
+
+  op _[_/_] : Dic Qid Figura -> Dic .
+  eq (D . Q -> F)[Q / F'] = D . Q -> F' .
+  eq D[Q / F] = D . Q -> F [owise] .
+
+  op [_ , _ , _] : Dic Dic Dic -> DicFiguras [ctor] .
+
+  op _._ : DicFiguras Entry -> DicFiguras . 
+  eq [Dp , Dr , Dc] . Q -> p1 = [(Dp . Q -> p1) , Dr , Dc] .
+  eq [Dp , Dr , Dc] . Q -> r1 = [Dp , (Dr . Q -> r1) , Dc] .
+  eq [Dp , Dr , Dc] . Q -> c1 = [Dp , Dr , (Dc . Q -> c1)] .
+
+  op _[_] : DicFiguras Qid ~> Figura .
+  eq [Dp . Q -> p1 , Dr , Dc][Q] = p1 .
+  eq [Dp , Dr . Q -> r1 , Dc][Q] = r1 .
+  eq [Dp , Dr , Dc . Q -> c1][Q] = c1 .
+
+  op _[_/_] : DicFiguras Qid Figura -> DicFiguras .
+  eq [Dp , Dr , Dc][Q / p1] = [Dp[Q / p1], Dr, Dc] .
+  eq [Dp , Dr , Dc][Q / r1] = [Dp, Dr[Q / r1], Dc] .
+  eq [Dp , Dr , Dc][Q / c1] = [Dp, Dr, Dc[Q / c1]] .
+
+  op _U_ : DicFiguras DicFiguras -> DicFiguras .
+  eq [Dp , Dr , Dc]U[Dp' . Q -> p1 , Dr' , Dc'] = [Dp[Q / p1] , Dr , Dc] U [Dp' , Dr' , Dc'] .
+  eq [Dp , Dr , Dc]U[mtD , Dr' . Q -> r1 , Dc'] = [Dp , Dr[Q / r1] , Dc] U [mtD , Dr' , Dc'] .
+  eq [Dp , Dr , Dc]U[mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
+  eq [Dp , Dr , Dc]U[mtD , mtD , mtD] = [Dp , Dr , Dc] .
+
+endfm
+
+
+
+***(
+ 
+
+)

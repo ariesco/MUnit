@@ -1,34 +1,5 @@
 load GEO2D.maude
-load full-maude.maude
-
-fmod DICC-PUNTOS is
-  pr GEO2D .
-  pr QID .
-
-  sorts Dic Entry Pair EmptyQID .
-  subsort Entry < Dic .
-  subsort EmptyQID < Qid .
-
-  op _->_ : Qid Figura -> Entry [ctor] .
-  op [_ , _] : Entry Entry -> Pair [ctor] .
-  op mtD : -> Dic [ctor] .
-  op emptyQID : -> EmptyQID [ctor] .
-  op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
-
-  var  D : Dic .
-  var  Q : Qid .
-  vars F F' : Figura .
-
-  op _[_] : Dic Qid ~> Figura .
-  eq (D . Q -> F)[Q] = F .
-
-  op _[_/_] : Dic Qid Figura -> Dic .
-  eq (D . Q -> F)[Q / F'] = D . Q -> F' .
-  eq D[emptyQID / F] = D [owise] .
-  eq D[Q / F] = D . Q -> F [owise] .
-
-
-endfm
+load GEO2D-Aux.maude
 
 fmod GEO-SIGNATURE is
   inc FULL-MAUDE-SIGN .
@@ -38,7 +9,7 @@ fmod GEO-SIGNATURE is
 
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
-  op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
 
 endfm
@@ -54,7 +25,7 @@ endfm
 
 fmod GEO-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
- pr DICC-PUNTOS .
+ pr DICC-FIGURAS .
  pr GEO2D .
 
  vars T T' T'' NP NC NR : Term .
@@ -81,32 +52,31 @@ fmod GEO-COMMAND-PROCESSING is
      F' := float(S') .
 
  op processCircumference : Term Punto Term -> Entry .
- ceq processCircumference('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
+ ceq processCircumference('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F) 
   if Q := downQid(T)
   /\ S := string(Q)
   /\ F := float(S) .
-
+     
  op processLine : Term Punto Punto -> Entry .
  eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
 
- op processCutPoint : Term Term Figura Figura -> Pair .
- ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = processCutPointAux(p1, p2, f1, f2, 1entrada,2entrada)
- ***ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = [1entrada, 2entrada]
+ op processCutPoint : Term Term Figura Figura -> Dic .
+ ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = processCutPointAux(p1, p2, f1, f2, 1entrada,2entrada) 
   if p1 := primer-elemento(pto-corte(f1 , f2))
   /\ p2 := primer-elemento(quitar-primer-elemento(pto-corte(f1 , f2)))
-  /\ 1entrada := downQid(T) -> p1
+  /\ 1entrada := downQid(T) -> p1 
   /\ 2entrada := downQid(T') -> p2 .
 
- op processCutPointAux : Punto Punto Figura Figura Entry Entry -> Pair .
- ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = [1entrada, 2entrada]
-  if not p1 == p2
+ op processCutPointAux : Punto Punto Figura Figura Entry Entry -> Dic .
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada . 2entrada
+  if not p1 == p2 
   /\ long-lista(pto-corte(f1 , f2)) == 2.0 .
- ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = [1entrada, 1entrada]
-  if p1 == p2
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
+  if p1 == p2 
   /\ long-lista(pto-corte(f1 , f2)) == 2.0 .
- ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = [1entrada, 1entrada]
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
   if long-lista(pto-corte(f1 , f2)) == 1.0 .
- ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = [emptyQID -> f1 , emptyQID -> f2]
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = mtD
   if long-lista(pto-corte(f1 , f2)) == 0.0 .
 
 endfm
@@ -114,7 +84,7 @@ endfm
 mod GEO-DATABASE-HANDLING is
  pr GEO-COMMAND-PROCESSING .
  inc DATABASE-HANDLING .
- pr DICC-PUNTOS .
+ pr DICC-FIGURAS .
 
  sort GEODatabaseClass .
  subsort GEODatabaseClass < DatabaseClass .
@@ -125,10 +95,11 @@ mod GEO-DATABASE-HANDLING is
  vars T1 T2 T3 T4 : Term .
  var  F F' : Figura .
  var  O : Oid .
- var  D : Dic .
+ var  D : DicFiguras .
+ var  D' : Dic .
  var  Q Q' : Qid .
 
- op dic :_ : Dic -> Attribute [ctor] .
+ op dic :_ : DicFiguras -> Attribute [ctor] .
 
  crl [point] :
      < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
@@ -149,19 +120,18 @@ mod GEO-DATABASE-HANDLING is
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
                   output : ('Recta 'almacenada) , AtS >
-  if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) .
+  if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) . 
 
  crl [cut] :
-     < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D,
+     < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D, 
                   output : nil, AtS >
-  => < O : MUDC | input : nilTermList, dic : ((D [Q / F]) [Q' / F']),
+  => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
                   output : ('Puntos 'almacenados) , AtS >
-  if [Q -> F , Q' -> F'] := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) .
-
+  if D' := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) . 
 
 endm
 
-mod IOGEO2D is
+mod MUNIT is
  inc GEO-DATABASE-HANDLING .
  inc META-GEO-SIGN .
  inc LOOP-MODE .
@@ -184,10 +154,9 @@ mod IOGEO2D is
  op init-geo : -> System .
 
  op init-state : -> AttributeSet .
- eq init-state = dic : mtD, db : initialDatabase, default : 'CONVERSION .
-
+ eq init-state = dic : [mtD, mtD, mtD], db : initialDatabase, default : 'CONVERSION . 
  op geo-banner : -> QidList .
- eq geo-banner = '\n '\t 'GEO: 'blah 'a 'unit 'testing 'framework 'for 'Maude.
+ eq geo-banner = '\n '\t 'GEO: 'GEO2D 'a 'unit 'testing 'framework 'for 'Maude.
            '\n '\t ' '\t '`( 'October '27th '`, '\s '2016 '`) '\n .
 
  rl [init] :
