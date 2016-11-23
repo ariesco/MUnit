@@ -30,7 +30,7 @@ fmod PRINT is
 
  op mu-banner : -> QidList .
  eq mu-banner = '\n '\t 'MUnit: 'a 'unit 'testing 'framework 'for 'Maude.
-           '\n '\t ' '\t '`( 'November '15th '`, '\s '2016 '`) '\n .
+           '\n '\t ' '\t Version 1.0 '`( 'November '23rd '`, '\s '2016 '`) '\n .
 
  op printUR : UnitResult -> QidList .
  eq printUR(< N, N', QIL >) = '\n qid(string(N + N', 10)) 'test 'cases 'were 'executed. '\n
