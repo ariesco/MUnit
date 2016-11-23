@@ -483,24 +483,72 @@ fmod MUNIT-COMMAND-PROCESSING is
  ********************             assertReachable            **********************
  **********************************************************************************
  ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+  if ATTS := getAtts(SYS) /\
+     'bubble[TI] := T /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure /\
      QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
                                          metaPrettyPrint(M, T2, printOpts) '`) '
             '\g 'passed. '\o '\n .
-
-
-
-
-
-
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                         metaPrettyPrint(M, T2, printOpts) '`) '
+            '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertReachable['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T2 := reduce(M, TIS1') /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachable '`( downQidList(T) '`, downQidList(T') '`) '
+            '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+  if ATTS := getAtts(SYS) /\
+     'bubble[TI] := T /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure /\
      QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
                                          metaPrettyPrint(M, T2, printOpts) '`) '
+            '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure /\
+     QIL := '\! '\n 'assertReachable '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                         metaPrettyPrint(M, T2, printOpts) '`) '
+            '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertReachable['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T2 := reduce(M, TIS1') /\
+     metaSearch(M, T1, T2, nil, '*, unbounded, 0) == failure /\
+     QIL := '\! '\n 'assertReachable '`( downQidList(T) '`, downQidList(T') '`) '
             '\r 'failed. '\o '\n .
  ceq procProps(M, 'assertReachable[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
@@ -515,20 +563,88 @@ fmod MUNIT-COMMAND-PROCESSING is
  ********************           assertReachableBnd           **********************
  **********************************************************************************
  ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+  if ATTS := getAtts(SYS) /\
+     'bubble[TI] := T /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
      metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure /\
      QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
                                             metaPrettyPrint(M, T2, printOpts) '`,
                                             downQid(T'') '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                            metaPrettyPrint(M, T2, printOpts) '`,
+                                            downQid(T'') '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertReachableBnd['bubble[T], 'bubble[T'], 'token[T'']], VDS,
+               B, DB, SYS) = [1, 0, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T2 := reduce(M, TIS1') /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( downQidList(T) '`, downQidList(T') '`,
+                                            downQid(T'') '`) ' '\g 'passed. '\o '\n .
+
+
+
+
+
+
+
+
  ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+  if ATTS := getAtts(SYS) /\
+     'bubble[TI] := T /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
      T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
      N := rat(string(downQid(T'')), 10) /\
      metaSearch(M, T1, T2, nil, '*, N, 0) == failure /\
      QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
                                             metaPrettyPrint(M, T2, printOpts) '`,
+                                            downQid(T'') '`) ' '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T1 := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     T2 := reduce(M, solveBubbles(T', M, B, VDS, DB)) /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) == failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( metaPrettyPrint(M, T1, printOpts) '`,
+                                            metaPrettyPrint(M, T2, printOpts) '`,
+                                            downQid(T'') '`) ' '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertReachableBnd['bubble[T], 'bubble[T'], 'token[T'']], VDS,
+               B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T2 := reduce(M, TIS1') /\
+     N := rat(string(downQid(T'')), 10) /\
+     metaSearch(M, T1, T2, nil, '*, N, 0) == failure /\
+     QIL := '\! '\n 'assertReachableBnd '`( downQidList(T) '`, downQidList(T') '`,
                                             downQid(T'') '`) ' '\r 'failed. '\o '\n .
  ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (rat(string(downQid(T'')), 10) :: Nat) /\
@@ -537,6 +653,12 @@ fmod MUNIT-COMMAND-PROCESSING is
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
+
+ **********************************************************************************
+ **********************************************************************************
+ ********************          AUXILIARY FUNCTIONS           **********************
+ **********************************************************************************
+ **********************************************************************************
 
  eq procProps(M, Q[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
  eq procProps(M, Q[T], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
