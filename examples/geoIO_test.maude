@@ -43,6 +43,8 @@ load ../mUnit.maude
   assertTrue(3 == 4)
   assertEqual(contains?(@dic, 'p1), contains?(@dic, 'p1))
   assertEqual(false, contains?(@dic, 'p1))
+  assertSort(contains?(@dic, 'p1), Bool)
+  assertSort(contains?(@dic, 'p1), Nat)
   assertTrueMsg(3 == 3, "Should work")
   assertTrueMsg(3 == 4, "Should not work")
   assertTrueMsg(contains?(@dic, 'p1), "Should work. From loop")
