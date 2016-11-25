@@ -50,10 +50,3 @@ fmod DICC-FIGURAS is
   eq [Dp , Dr , Dc]U[mtD , mtD , mtD] = [Dp , Dr , Dc] .
 
 endfm
-
-
-
-***(
- 
-
-)

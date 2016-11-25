@@ -1,0 +1,48 @@
+load mUnit.maude
+
+(munit PUNTO is 
+		*** comenzaremos viendo como se comportan las funciones referidas a las listas.
+	***assertEqual( , )
+	***assertTrue()
+	assertEqual(mt p(1.0 1.0), p(1.0 1.0))
+	assertEqual(mt p(1.0 1.0) mt p(2.0 2.0), p(1.0 1.0) p(2.0 2.0))
+		*** Funcion lista-vacia.
+	assertTrue(lista-vacia(mt))
+	assertTrue(lista-vacia(mt mt mt))
+	assertTrue(lista-vacia(p(1.0 0.0)))
+	assertTrue(lista-vacia(mt p(1.0 0.0)))
+		*** Funcion quitar-primer-elemento
+	assertEqual(quitar-primer-elemento(mt), mt)
+	assertEqual(quitar-primer-elemento(p(1.0 1.0)), mt)
+	assertEqual(quitar-primer-elemento(p(1.0 1.0) mt), mt)
+	assertEqual(quitar-primer-elemento(mt p(1.0 1.0) mt), mt p(1.0 1.0))
+		*** Funcion primer-elemento.
+	assertEqual(primer-elemento(mt), mt)
+	assertEqual(primer-elemento(mt p(1.0 1.0)), p(1.0 1.0))
+	assertEqual(primer-elemento(p(1.0 1.0) mt), mt)
+	assertEqual(primer-elemento(mt p(1.0 1.0) mt), p(1.0 1.0))
+		*** Funcion long-lista.
+	assertEqual(long-lista(mt), 0.0)
+	assertEqual(long-lista(mt p(1.0 1.0)), 1.0)
+	assertEqual(long-lista(p(1.0 1.0) mt), 2.0)
+	assertEqual(long-lista(p(1.0 1.0) mt), 1.0)
+	assertEqual(long-lista(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 4.0)
+	assertEqual(long-lista(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 3.0)
+		*** Veamos ahora las funciones referidas a los puntos.
+		*** Funcion pto-trans.
+	assertEqual(pto-trans(p(1.0 0.0)), p(1.0 0.0))
+	assertEqual(pto-trans(p(1.0 0.0)), p(0.0 1.0))
+		*** Funcion distancia.
+	assertEqual(distancia(p(1.0 0.0), p(0.0 1.0)), sqrt(2.0))
+	assertEqual(distancia(p(0.0 0.0), p(4.0 3.0)), 5.0)
+	assertEqual(distancia(p(1.0 0.0), p(2.0 0.0)), 1.0)
+	assertEqual(distancia(p(1.0 1.0), p(1.0 3.0)), 2.0)
+		*** Veamos ahora las funciones referidas a las ecuaciones de segundo grado.
+	assertEqual(ecu-segundo-grado-1(-1.0, 2.0, 3.0), -1.0)
+	assertEqual(ecu-segundo-grado-1(-1.0, 2.0, 3.0), 3.0)
+	assertEqual(ecu-segundo-grado-2(-3.0, 2.0, 1.0), 1.0)
+	assertEqual(ecu-segundo-grado-2(-3.0, 2.0, 1.0), -1.0 / 3.0)
+	assertEqual(ecu-segundo-grado-1(0.0, 5.0, -2.0), ecu-segundo-grado-2(0.0, 5.0, -2.0))
+	assertEqual(ecu-segundo-grado-1(0.0, 5.0, -2.0), ecu-segundo-grado-2(0.0, 1.0, -2.0 / 5.0))
+
+endu)

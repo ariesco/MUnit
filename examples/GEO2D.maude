@@ -41,10 +41,12 @@ fmod PUNTO is
 
 	op ecu-segundo-grado-1 : Float Float Float -> Float .
 	*** Devuelve el valor de una ecuacion de segundo grado en el caso +
+	*** Recibe los valores correspondientes a ax^2 + bx + c.
 	eq ecu-segundo-grado-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
 
 	op ecu-segundo-grado-2 : Float Float Float -> Float .
 	*** Devuelve el valor de una ecuacion de segundo grado en el caso -
+	*** Recibe los valores correspondientes a ax^2 + bx + c.
 	eq ecu-segundo-grado-2(a , b , c) = (- b - sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) .
 
 endfm
@@ -334,6 +336,3 @@ fmod GEO2D is
 	if not se-cortan-c-c(c1 , c2) .
 
 endfm	
-
-
-
