@@ -28,7 +28,7 @@ fmod DICC-FIGURAS is
 
   op [_ , _ , _] : Dic Dic Dic -> DicFiguras [ctor] .
 
-  op _._ : DicFiguras Entry -> DicFiguras . 
+  op _._ : DicFiguras Entry -> DicFiguras .
   eq [Dp , Dr , Dc] . Q -> p1 = [(Dp . Q -> p1) , Dr , Dc] .
   eq [Dp , Dr , Dc] . Q -> r1 = [Dp , (Dr . Q -> r1) , Dc] .
   eq [Dp , Dr , Dc] . Q -> c1 = [Dp , Dr , (Dc . Q -> c1)] .
@@ -44,9 +44,9 @@ fmod DICC-FIGURAS is
   eq [Dp , Dr , Dc][Q / c1] = [Dp, Dr, Dc[Q / c1]] .
 
   op _U_ : DicFiguras DicFiguras -> DicFiguras .
-  eq [Dp , Dr , Dc]U[Dp' . Q -> p1 , Dr' , Dc'] = [Dp[Q / p1] , Dr , Dc] U [Dp' , Dr' , Dc'] .
-  eq [Dp , Dr , Dc]U[mtD , Dr' . Q -> r1 , Dc'] = [Dp , Dr[Q / r1] , Dc] U [mtD , Dr' , Dc'] .
-  eq [Dp , Dr , Dc]U[mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
-  eq [Dp , Dr , Dc]U[mtD , mtD , mtD] = [Dp , Dr , Dc] .
+  eq [Dp , Dr , Dc] U [Dp' . Q -> p1 , Dr' , Dc'] = [Dp[Q / p1] , Dr , Dc] U [Dp' , Dr' , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , Dr' . Q -> r1 , Dc'] = [Dp , Dr[Q / r1] , Dc] U [mtD , Dr' , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , mtD , mtD] = [Dp , Dr , Dc] .
 
 endfm
