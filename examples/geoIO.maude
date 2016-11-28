@@ -148,7 +148,7 @@ mod GEO-DATABASE-HANDLING is
      NAM' := new-name(Q', Q) /\
      F := D[Q] /\
      F' := D[Q'] /\
-     D' := processCutPoint('token[upTerm(NAM)], 'token[upTerm(NAM')], F, F') .
+     D' := processCutPoint('token[upTerm(NAM)], 'token[upTerm(NAM')], F, F') [print " sdfds "] .
 
 
 endm
