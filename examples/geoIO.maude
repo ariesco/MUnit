@@ -9,7 +9,10 @@ fmod GEO-SIGNATURE is
 
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
+  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
+  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] . 
   op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op line`from_to_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point`of_and_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
 
@@ -33,7 +36,7 @@ fmod GEO-COMMAND-PROCESSING is
  vars Q Q' Q'' name1 name2 : Qid .
  vars S S' : String .
  vars F F' : Float .
- vars P1 P2 p1 p2 : Punto .
+ vars P1 P2 p1 p2 p3 : Punto .
  vars f1 f2 : Figura .
  vars 1entrada 2entrada : Entry .
 
@@ -52,11 +55,19 @@ fmod GEO-COMMAND-PROCESSING is
      F := float(S) /\
      F' := float(S') .
 
- op processCircumference : Term Punto Term -> Entry .
- ceq processCircumference('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
+ op processCircumference-1 : Term Punto Term -> Entry .
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
   if Q := downQid(T)
   /\ S := string(Q)
   /\ F := float(S) .
+
+ op processCircumference-2 : Term Term Punto Punto Punto -> Entry .
+ ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NC) -> c(p1, F)
+  if F := distancia(p2, p3) 
+  /\ not F == 0.0 .
+ ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NP) -> p1
+  if F := distancia(p2, p3)
+  /\ F == 0.0 .
 
  op processLine : Term Punto Punto -> Entry .
  eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
@@ -103,7 +114,7 @@ mod GEO-DATABASE-HANDLING is
  var  D : DicFiguras .
  var  D' : Dic .
  var  D? : [Dic] .
- vars Q Q' NAM NAM' : Qid .
+ vars Q Q' name1 name2 : Qid .
 
  op dic :_ : DicFiguras -> Attribute [ctor] .
 
@@ -111,23 +122,46 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Punto 'almacenado) , AtS >
+                  output : ('Punto 'almacenado Q) , AtS >
   if Q -> F := processPoint(T1 , T2) .
 
- crl [circumference] :
+ crl [circumference1] :
      < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Circunferencia 'almacenada) , AtS >
-  if Q -> F := processCircumference(T1 , D[downQid(T2)] , T3) .
+                  output : ('Circunferencia 'almacenada Q) , AtS >
+  if Q -> F := processCircumference-1(T1 , D[downQid(T2)] , T3) .
 
- crl [line] :
+ crl [circumference2] :
+     < O : MUDC | input : ('circumference_in_with`radius`distance`from_to_[T1 , 'token[T2] , 'token[T3], 'token[T4]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Circunferencia 'almacenada Q) , AtS >
+  if Q -> F := processCircumference-2(T1, 'token[T2], D[downQid(T2)], D[downQid(T3)], D[downQid(T4)]) .
+
+ crl [circumference3] :
+     < O : MUDC | input : ('circumference`in_with`radius`distance`from_to_['token[T1] , 'token[T2], 'token[T3]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Circunferencia 'almacenada Q) , AtS >
+  if name1 := new-name(downQid(T1), downQid(T2)) /\
+     name2 := new-name(name1, downQid(T3)) /\
+     Q -> F := processCircumference-2('token[upTerm(name2)], 'token[T1], D[downQid(T1)], D[downQid(T2)], D[downQid(T3)]) .
+
+ crl [line1] :
      < O : MUDC | input : ('line_from_to_[T1 , 'token[T2] , 'token[T3]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Recta 'almacenada) , AtS >
+                  output : ('Recta 'almacenada Q) , AtS >
   if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) .
 
+ crl [line2] :
+     < O : MUDC | input : ('line`from_to_['token[T1] , 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Recta 'almacenada Q) , AtS >
+  if name1 := new-name(downQid(T1), downQid(T2)) /\
+     Q -> F := processLine('token[upTerm(name1)], D[downQid(T1)] , D[downQid(T2)]) [print " sdfds "] .
 
  crl [cut1] :
      < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D,
@@ -138,17 +172,15 @@ mod GEO-DATABASE-HANDLING is
 
 
  crl [cut2] :
-     < O : MUDC | input : ('cut`point`of_and_['token[T3], 'token[T4]]), dic : D,
+     < O : MUDC | input : ('cut`point`of_and_['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
                   output : ('Puntos 'almacenados) , AtS >
-  if Q := downQid(T3) /\
-     Q' := downQid(T4) /\
-     NAM := new-name(Q, Q') /\
-     NAM' := new-name(Q', Q) /\
-     F := D[Q] /\
-     F' := D[Q'] /\
-     D' := processCutPoint('token[upTerm(NAM)], 'token[upTerm(NAM')], F, F') [print " sdfds "] .
+  if Q := downQid(T1) /\
+     Q' := downQid(T2) /\
+     name1 := new-name(Q, Q') /\
+     name2 := new-name(Q', Q) /\
+     D' := processCutPoint('token[upTerm(name1)], 'token[upTerm(name2)], D[Q], D[Q']) .
 
 
 endm
@@ -226,10 +258,17 @@ print conceal db .
 *** for debugging purposes
 set print attribute on .
 
+
 loop init-geo .
 
-(point 3.4 4.2 as a)
 
-(point 3.4 4.2 as b)
+(point 0.0 0.0 as p1)
+(point 1.0 1.0 as p2)
+(point 1.0 0.0 as p3)
+(point 0.0 1.0 as p4)
+(line r1 from p1 to p2)
+(line from p3 to p4)
+(circumference c1 in p1 with radius 5.0)
+(circumference c2 in p2 with radius distance from p3 to p4)
+(circumference in p4 with radius distance from p1 to p2)
 
-(cut point of a and b)
