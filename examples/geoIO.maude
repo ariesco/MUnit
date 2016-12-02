@@ -9,8 +9,8 @@ fmod GEO-SIGNATURE is
 
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
-  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
-  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] . 
+  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] .
   op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op line`from_to_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
@@ -63,7 +63,7 @@ fmod GEO-COMMAND-PROCESSING is
 
  op processCircumference-2 : Term Term Punto Punto Punto -> Entry .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NC) -> c(p1, F)
-  if F := distancia(p2, p3) 
+  if F := distancia(p2, p3)
   /\ not F == 0.0 .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NP) -> p1
   if F := distancia(p2, p3)
@@ -170,7 +170,6 @@ mod GEO-DATABASE-HANDLING is
                   output : ('Puntos 'almacenados) , AtS >
   if D' := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) .
 
-
  crl [cut2] :
      < O : MUDC | input : ('cut`point`of_and_['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
@@ -185,7 +184,7 @@ mod GEO-DATABASE-HANDLING is
 
 endm
 
-mod MUNIT is
+mod IOGEO2D is
  inc GEO-DATABASE-HANDLING .
  inc META-GEO-SIGN .
  inc LOOP-MODE .
