@@ -24,6 +24,7 @@ fmod DICC-FIGURAS is
 
   op _[_/_] : Dic Qid Figura -> Dic .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
+  ***eq (D . Q -> F)[Q' / F] = D . Q -> F .
   eq D[Q / F] = D . Q -> F [owise] .
 
   op [_ , _ , _] : Dic Dic Dic -> DicFiguras [ctor] .

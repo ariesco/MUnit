@@ -11,7 +11,7 @@ load ../mUnit.maude
 	assertTrue(lista-vacia(mt))
 	assertTrue(lista-vacia(mt mt mt))
 	assertTrueMsg(lista-vacia(p(1.0 0.0)), "Should fail")
-	assertTrue(lista-vacia(mt p(1.0 0.0)))
+	assertTrueMsg(lista-vacia(mt p(1.0 0.0)), "Should fail")
 		*** Funcion quitar-primer-elemento
 	assertEqual(quitar-primer-elemento(mt), mt)
 	assertEqual(quitar-primer-elemento(p(1.0 1.0)), mt)

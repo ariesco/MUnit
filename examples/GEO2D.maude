@@ -69,6 +69,26 @@ fmod RECTA is
 	vars t : Bool .
 	vars l l1 : Lista .
 
+	op v-prod-escalar : Vector Vector -> Float .
+	***Calcula el producto escalar de dos vectores
+	eq v-prod-escalar(v(z11 z12) , v(z21 z22)) = z11 * z21 + z12 * z22 .
+
+	op v-modulo : Vector -> Float .
+	***Calcula el modulo de un vector
+	eq v-modulo(v1) = v-prod-escalar(v1 , v1) ^ (0.5) .
+
+	op vector-perpendicular : Vector -> Vector .
+	*** Devuelve el vector perpendicular a uno dado
+	eq vector-perpendicular(v(z11 z12)) = v(z12 (- z11)) .
+
+	op v-perpendiculares : Vector Vector -> Bool .
+	***Comprueba si dos vectores son perpendiculares
+	eq v-perpendiculares(v1 , v2) = (v-prod-escalar(v1 , v2) == 0.0) .
+
+	op vector-director-recta : Recta -> Vector .
+	*** Devuelve el vector director de una recta
+	eq vector-director-recta(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
+
 	op ecu-recta-m : Recta -> Float .
 	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
 	*** para poder "construirla" de forma y = mx + n , teniendo cuidado 
@@ -84,6 +104,26 @@ fmod RECTA is
 	*** en las que son de la forma  x = n
 	eq ecu-recta-n(r(p(z11 z12) p(z21 z22)))= z12 - (z11 * ecu-recta-m(r(p(z11 z12) p(z21 z22)))) .
 
+	op son-iguales : Recta Recta -> Bool .
+	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
+	*** pues una recta puede construirse mediantes infinitos pares de puntos.
+	eq son-iguales(r1 , r2) = (ecu-recta-m(r1) == ecu-recta-m(r2)) and (ecu-recta-n(r1) == ecu-recta-n(r2))	.
+
+	op recta-mediante-vector : Vector Punto -> Recta .
+	*** Construye una recta mediante un vector y un punto dados.
+	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p((z11 + z21) (z12 + z22)) p(z21 z22)) 
+	if not z11 == 0.0 .
+	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p(z21 (z22 + 1.0)))
+	if z11 == 0.0 .
+
+	op recta-perpendicular : Recta Punto -> Recta .
+	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
+	eq recta-perpendicular(r1 , p1) = recta-mediante-vector(vector-perpendicular(vector-director-recta(r1)) , p1) .
+
+	op r-perpendiculares : Recta Recta -> Bool .
+	***Comprueba si dos rectas son perpendiculares
+	eq r-perpendiculares(r1 , r2) = v-perpendiculares(vector-director-recta(r1) , vector-director-recta(r2)) .
+
 	op vertical : Recta -> Bool .
 	*** Comprueba si una recta es de la forma x = n .
 	ceq vertical(r(p(z11 z12) p(z21 z22))) = true
@@ -97,17 +137,19 @@ fmod RECTA is
 	if (z22 - z12) == 0.0 . 	
 	ceq horizontal(r(p(z11 z12) p(z21 z22))) = false
 	if not ((z22 - z12) == 0.0) .
-
+	
+	op esta-en-recta : Punto Recta -> Bool .
+	*** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
+	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
+	*** que la distancia entre estos el punto estara contenido en la recta.
+	eq esta-en-recta(p1,r(p2 p3)) = (distancia(p1 , p2) + distancia(p1 , p3)) == distancia(p2 , p3) . 
+	
 	op se-cortan-r-r : Recta Recta -> Bool .
-	*** comprueba si dos rectas se cortan a pratir de la pendiente de estas
+	*** comprueba si dos rectas se cortan a partir de la pendiente de estas
 	*** devolviendo el valor false si son paralelas y true en caso contrario.
 	*** El caso en que sean coincidentes debera verse de forma manual comparandolas.
+	********************************************************************************** falla caso vertical y horizontal
 	eq se-cortan-r-r(r1 , r2) = not (ecu-recta-m(r1) == ecu-recta-m(r2)) .
-
-	op son-iguales : Recta Recta -> Bool .
-	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
-	*** pues una recta puede construirse mediantes infinitos pares de puntos.
-	eq son-iguales(r1 , r2) = (ecu-recta-m(r1) == ecu-recta-m(r2)) and (ecu-recta-n(r1) == ecu-recta-n(r2))	.
 
 	op pto-corte-r-r : Recta Recta -> Punto .
 	*** Devuelve el punto de corte de dos rectas dadas.
@@ -133,52 +175,6 @@ fmod RECTA is
 	if horizontal(r1) .
 	ceq pto-corte-y(r1 , r2) = ecu-recta-n(r2)
 	if horizontal(r2) .
-	
-	op esta-en-recta : Punto Recta -> Bool .
-	*** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
-	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
-	*** que la distancia entre estos el punto estara contenido en la recta.
-	eq esta-en-recta(p1,r(p2 p3)) = (distancia(p1 , p2) + distancia(p1 , p3)) == distancia(p2 , p3) . 
-
-	op convierte-en-recta : Float Float -> Recta .
-	*** Recibe los parametros m y n de las ecuaciones de una recta y devuelve una recta dada por dos puntos,
-	*** no funciona con rectas horizontales.
-	eq convierte-en-recta(m , n) = r(p(0.0 n) p(1.0 (m + n))) .
-
-	op vector-director-recta : Recta -> Vector .
-	*** Devuelve el vector director de una recta
-	eq vector-director-recta(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
-
-	op recta-mediante-vector : Vector Punto -> Recta .
-	*** Construye una recta mediante un vector y un punto dados.
-	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p((z11 + z21) (z12 + z22)) p(z21 z22)) 
-	if not z11 == 0.0 .
-	ceq recta-mediante-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p(z21 (z22 + 1.0)))
-	if z11 == 0.0 .
-
-	op vector-perpendicular : Vector -> Vector .
-	*** Devuelve el vector perpendicular a uno dado
-	eq vector-perpendicular(v(z11 z12)) = v(z12 (- z11)) .
-
-	op recta-perpendicular : Recta Punto -> Recta .
-	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
-	eq recta-perpendicular(r1 , p1) = recta-mediante-vector(vector-perpendicular(vector-director-recta(r1)) , p1) .
-
-	op v-prod-escalar : Vector Vector -> Float .
-	***Calcula el producto escalar de dos vectores
-	eq v-prod-escalar(v(z11 z12) , v(z21 z22)) = z11 * z21 + z12 * z22 .
-
-	op v-perpendiculares : Vector Vector -> Bool .
-	***Comprueba si dos vectores son perpendiculares
-	eq v-perpendiculares(v1 , v2) = (v-prod-escalar(v1 , v2) == 0.0) .
-
-	op r-perpendiculares : Recta Recta -> Bool .
-	***Comprueba si dos rectas son perpendiculares
-	eq r-perpendiculares(r1 , r2) = v-perpendiculares(vector-director-recta(r1) , vector-director-recta(r2)) .
-
-	op v-modulo : Vector -> Float .
-	***Calcula el modulo de un vector
-	eq v-modulo(v1) = v-prod-escalar(v1 , v1) ^ (0.5) .
 
 endfm
 
@@ -188,7 +184,7 @@ fmod CIRCUNFERENCIA is
 	sorts Circunferencia .
 
 	op c : Punto Float -> Circunferencia [ctor] .
-	*** Define una circunferencia como un par punto, real, correspondiendo estos con el 
+	*** Define una circunferencia como un par (punto, real), correspondiendo estos con el 
 	*** centro y el radio.
 	
 	vars p1 p2 p3 p4 : Punto .
@@ -198,11 +194,6 @@ fmod CIRCUNFERENCIA is
 	vars c1 c2 : Circunferencia .
 	vars t : Bool .
 	vars l l1 : Lista .
-
-	op esta-en-circunferencia : Punto Circunferencia -> Bool .
-	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
-	*** al centro con el radio
-	eq esta-en-circunferencia(p1 ,c(p2 , z11)) = distancia(p1 , p2) == z11 .
 		
 	op centro-circunferencia : Circunferencia -> Punto .
 	*** Devuelve el centro de la circunferencia
@@ -212,15 +203,12 @@ fmod CIRCUNFERENCIA is
 	*** Devuelve el radio de la circunferencia
 	eq radio-circunferencia(c(p1 , z11)) = z11 .
 
-	op se-cortan-c-c : Circunferencia Circunferencia -> Bool .
-	*** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
-	ceq se-cortan-c-c(c1, c2) = distancia(centro-circunferencia(c1) , centro-circunferencia(c2)) <= (radio-circunferencia(c1) + radio-circunferencia(c2))
-	if not (centro-circunferencia(c1) == centro-circunferencia(c2)) . 
-	ceq se-cortan-c-c(c1, c2) = radio-circunferencia(c1) == radio-circunferencia(c2)
-	if (centro-circunferencia(c1) == centro-circunferencia(c2)) .
+	op esta-en-circunferencia : Punto Circunferencia -> Bool .
+	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
+	*** al centro con el radio
+	eq esta-en-circunferencia(p1 ,c(p2 , z11)) = distancia(p1 , p2) == z11 .
 
 	op se-cortan-r-c : Recta Circunferencia -> Bool .
-	*** Puede fallar falta comprobar
 	*** Comprueba si una recta y una circunferencia se cortan mediante la comparacion de la
 	*** distancia de la recta al centro de la circunferencia.
 	eq se-cortan-r-c(r1 , c(p1 , z11)) = distancia(pto-corte-r-r(r1 , recta-perpendicular(r1 , p1)) , p1) <= z11 .
@@ -256,6 +244,13 @@ fmod CIRCUNFERENCIA is
 	/\ Aux-C := ecu-segundo-grado-1(1.0 , Aux-A , Aux-B)
 	/\ Aux-D := ecu-segundo-grado-2(1.0 , Aux-A , Aux-B) .
 
+	op se-cortan-c-c : Circunferencia Circunferencia -> Bool .
+	*** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
+	ceq se-cortan-c-c(c1, c2) = distancia(centro-circunferencia(c1) , centro-circunferencia(c2)) <= (radio-circunferencia(c1) + radio-circunferencia(c2))
+	if not (centro-circunferencia(c1) == centro-circunferencia(c2)) . 
+	ceq se-cortan-c-c(c1, c2) = radio-circunferencia(c1) == radio-circunferencia(c2)
+	if (centro-circunferencia(c1) == centro-circunferencia(c2)) .
+
 	op pto-corte-c-c : Circunferencia Circunferencia -> Lista .
 	ceq pto-corte-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = pto-corte-circunferencias-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
 	if not (z11 == z21) .
@@ -267,7 +262,9 @@ fmod CIRCUNFERENCIA is
 	op pto-corte-circunferencias-x-dis : Circunferencia Circunferencia -> Lista .
 	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
 	*** solo funciona si los centros no tienen la misma X, habria que hacer caso contrario
-	eq pto-corte-circunferencias-x-dis(c1 , c2) = pto-corte-circunferencias-1(c1 , c2) pto-corte-circunferencias-2(c1 , c2) .
+	ceq pto-corte-circunferencias-x-dis(c1 , c2) = p1 p2
+	if p1 := pto-corte-circunferencias-1(c1 , c2) 
+	/\ p2 := pto-corte-circunferencias-2(c1 , c2) .
 
 	op pto-corte-circunferencias-1 : Circunferencia Circunferencia -> Punto .
 	*** halla el primer punto de corte de las dos circunferencias.
