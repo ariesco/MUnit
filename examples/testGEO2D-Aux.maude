@@ -1,0 +1,34 @@
+load GEO2D-Aux.maude
+load ../mUnit.maude
+
+(munit LISTA-FIGURAS is
+		***Constructores de la lista
+	assertEqual(mtf & mtf, mtf)	
+	assertEqual(mtf & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0))
+	assertEqual(p(0.0 0.0) & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0) & p(0.0 0.0))
+
+endu)
+
+(munit DICC-FIGURAS is
+		***Veamos las funciones referidas a los diccionarios simples para figuras
+		***Veamos el operador _[_]
+	assertEqual(qid(string('p1)) -> p(0.0 0.0) [qid(string('p1))], p(0.0 0.0))
+		***Veamos el operador _[_/_]
+	assertEqual(qid(string('p1)) -> p(0.0 0.0) [qid(string('p1)) / p(1.0 1.0)], qid(string('p1)) -> p(1.0 1.0))
+	assertEqual(qid(string('p1)) -> p(0.0 0.0) [qid(string('p2)) / p(1.0 1.0)], (qid(string('p1)) -> p(0.0 0.0)) . (qid(string('p2))-> p(1.0 1.0)))
+		***Veamos la funcion _in_
+	assertTrue(p(0.0 0.0) in (qid(string('p1)) -> p(0.0 0.0)) . (qid(string('p2))-> p(1.0 1.0)))
+	assertTrue(p(0.0 0.0) in (qid(string('p1)) -> p(0.0 0.0)) . (qid(string('p2))-> p(1.0 1.0)))
+	assertTrue(p(0.0 1.0) in (qid(string('p1)) -> p(0.0 0.0)) . (qid(string('p2))-> p(1.0 1.0)))
+		***Veamos la funcion nombre
+	assertEqual(nombre(qid(string('p)) -> p(0.0 0.0), p(0.0 0.0)), qid(string('p)))
+	assertEqual(nombre(qid(string('p)) -> p(0.0 0.0), p(0.0 0.0)), qid(string('p1)))
+		***Veamos las funciones referidas a los diccionarios para figuras
+		***Veamos el operador _[_]
+	assertEqual([(qid(string('p1)) -> p(0.0 0.0)), mtD, mtD ] [qid(string('p1))], p(0.0 0.0))
+		***Veamos el opertador _[_/_]
+	assertEqual([mtD, mtD, mtD] [qid(string('p1)) / p(1.0 1.0)], [(qid(string('p1)) -> p(1.0 1.0)), mtD, mtD])
+	assertEqual([mtD, mtD, mtD] [qid(string('r1)) / r(p(1.0 1.0) p(0.0 0.0))], [mtD, (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), mtD])
+	assertEqual([mtD, mtD, mtD] [qid(string('c1)) / c(p(1.0 1.0), 1.0)], [mtD, mtD, (qid(string('c1)) -> c(p(1.0 1.0), 1.0))])
+
+endu)

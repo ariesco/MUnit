@@ -1,12 +1,25 @@
 load full-maude.maude
 load GEO2D.maude
 
+fmod LISTA-FIGURAS is
+  pr GEO2D .
+   
+  sort ListaFiguras .
+  subsort Figura < ListaFiguras .
+
+  op mtf : -> ListaFiguras [ctor] .
+  op _&_ : ListaFiguras ListaFiguras -> ListaFiguras [ctor assoc comm id: mtf] . 
+
+endfm
+
 fmod DICC-FIGURAS is
   pr GEO2D .
   pr QID .
+  pr QID-LIST .
+  pr LISTA-FIGURAS .
 
   sorts Dic Entry DicFiguras .
-  subsort Entry < Dic .
+  subsorts Entry < Dic .
 
   op _->_ : Qid Figura -> Entry [ctor] .
   op mtD : -> Dic [ctor] .
@@ -18,14 +31,25 @@ fmod DICC-FIGURAS is
   var p1 : Punto .
   var r1 : Recta .
   var c1 : Circunferencia .
+  vars Lf1 Lf2 : ListaFiguras .
 
   op _[_] : Dic Qid ~> Figura .
   eq (D . Q -> F)[Q] = F .
 
   op _[_/_] : Dic Qid Figura -> Dic .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
-  ***eq (D . Q -> F)[Q' / F] = D . Q -> F .
+  eq (D . Q -> F)[Q' / F] = D . Q -> F .
   eq D[Q / F] = D . Q -> F [owise] .
+
+  op _in_ : Figura Dic -> Bool .
+  eq F in D . (Q -> F) = true .
+  eq F in D = false [owise] .
+
+  op nombre : Dic Figura -> QidList .
+  ceq nombre(D . Q -> F, F) = Q
+    if F in D . Q -> F .
+  ceq nombre(D , F) = nil
+    if not (F in D ) . 
 
   op [_ , _ , _] : Dic Dic Dic -> DicFiguras [ctor] .
 
@@ -49,5 +73,11 @@ fmod DICC-FIGURAS is
   eq [Dp , Dr , Dc] U [mtD , Dr' . Q -> r1 , Dc'] = [Dp , Dr[Q / r1] , Dc] U [mtD , Dr' , Dc'] .
   eq [Dp , Dr , Dc] U [mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
   eq [Dp , Dr , Dc] U [mtD , mtD , mtD] = [Dp , Dr , Dc] .
+
+  op nombre : DicFiguras ListaFiguras -> QidList .
+  eq nombre([Dp, Dr, Dc], (Lf1 & p1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dp, p1) .
+  eq nombre([Dp, Dr, Dc], (Lf1 & r1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dr, r1) .
+  eq nombre([Dp, Dr, Dc], (Lf1 & c1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dc, c1) .
+  eq nombre([Dp, Dr, Dc], mtf) = nil . 
 
 endfm
