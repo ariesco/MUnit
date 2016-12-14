@@ -30,5 +30,20 @@ endu)
 	assertEqual([mtD, mtD, mtD] [qid(string('p1)) / p(1.0 1.0)], [(qid(string('p1)) -> p(1.0 1.0)), mtD, mtD])
 	assertEqual([mtD, mtD, mtD] [qid(string('r1)) / r(p(1.0 1.0) p(0.0 0.0))], [mtD, (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), mtD])
 	assertEqual([mtD, mtD, mtD] [qid(string('c1)) / c(p(1.0 1.0), 1.0)], [mtD, mtD, (qid(string('c1)) -> c(p(1.0 1.0), 1.0))])
-
+		***Veamos el operador _U_
+	assertEqual([mtD, mtD, mtD] U [(qid(string('p1)) -> p(1.0 1.0)), mtD, mtD], [(qid(string('p1)) -> p(1.0 1.0)), mtD, mtD])
+	assertEqual([(qid(string('p1)) -> p(1.0 1.0)), mtD, mtD] U [mtD, (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), mtD], [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), mtD])
+	assertEqual([(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), mtD] U [mtD, mtD, (qid(string('c1)) -> c(p(1.0 1.0), 1.0))], [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), (qid(string('c1)) -> c(p(1.0 1.0), 1.0))])
+	assertEqual([mtD, mtD, mtD] U [mtD, mtD, (qid(string('c1)) -> c(p(0.0 0.0), 1.0))], [mtD, mtD, (qid(string('c1)) -> c(p(0.0 0.0), 1.0))] )
+		***Veamos la funcion in
+	assertEqual(p(1.0 1.0) in [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), (qid(string('c1)) -> c(p(1.0 1.0), 1.0))], true)
+	assertEqual(r(p(1.0 1.0) p(0.0 0.0)) in [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), (qid(string('c1)) -> c(p(1.0 1.0), 1.0))], true)
+	assertEqual(c(p(1.0 1.0), 1.0) in [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), (qid(string('c1)) -> c(p(1.0 1.0), 1.0))], true)
+	assertEqual(p(0.0 0.0) in [(qid(string('p1)) -> p(1.0 1.0)), (qid(string('r1)) -> r(p(1.0 1.0)) p(0.0 0.0)), (qid(string('c1)) -> c(p(1.0 1.0), 1.0))], false)
+	assertEqual(p(0.0 0.0) in [mtD, mtD, mtD], false)
+		***Veamos la funcion nombre
+	assertEqual(nombre([(qid(string('p)) -> p(0.0 0.0)), mtD, mtD], p(0.0 0.0)), qid(string('p)))
+	assertEqual(nombre([mtD, mtD, mtD], p(0.0 0.0)), nil)
+	assertEqual(nombre([(qid(string('p2)) -> p(0.0 0.0)) . (qid(string('p2)) -> p(1.0 1.0)), mtD, mtD], p(1.0 1.0)) & p(0.0 0.0), qid(string('p2)) qid(string('p1)))
+		
 endu)

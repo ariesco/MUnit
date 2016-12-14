@@ -74,6 +74,12 @@ fmod DICC-FIGURAS is
   eq [Dp , Dr , Dc] U [mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
   eq [Dp , Dr , Dc] U [mtD , mtD , mtD] = [Dp , Dr , Dc] .
 
+  op _in_ : Figura DicFiguras -> Bool .
+  eq F in [Dp . Q -> F, Dr , Dc] = true .
+  eq F in [Dp , Dr . Q -> F, Dc] = true .
+  eq F in [Dp, Dr , Dc . Q -> F] = true .
+  eq F in [Dp, Dr, Dc] = false [owise] .
+
   op nombre : DicFiguras ListaFiguras -> QidList .
   eq nombre([Dp, Dr, Dc], (Lf1 & p1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dp, p1) .
   eq nombre([Dp, Dr, Dc], (Lf1 & r1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dr, r1) .
