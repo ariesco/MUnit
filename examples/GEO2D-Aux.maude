@@ -45,11 +45,13 @@ fmod DICC-FIGURAS is
   eq F in D . (Q -> F) = true .
   eq F in D = false [owise] .
 
+  op contains? : Dic Qid -> Bool .
+  eq contains?((Q -> F) . D, Q) = true .
+  eq contains?(D, Q) = false [owise] .
+
   op nombre : Dic Figura -> QidList .
-  ceq nombre(D . Q -> F, F) = Q
-    if F in D . Q -> F .
-  ceq nombre(D , F) = nil
-    if not (F in D ) . 
+  eq nombre(D . Q -> F, F) = Q .
+  eq nombre(D , F) = nil [owise] . 
 
   op [_ , _ , _] : Dic Dic Dic -> DicFiguras [ctor] .
 
@@ -79,6 +81,12 @@ fmod DICC-FIGURAS is
   eq F in [Dp , Dr . Q -> F, Dc] = true .
   eq F in [Dp, Dr , Dc . Q -> F] = true .
   eq F in [Dp, Dr, Dc] = false [owise] .
+
+  op contains? : DicFiguras Qid -> Bool .
+  eq contains?([(Q -> F) . Dp, Dr, Dc], Q) = true .
+  eq contains?([Dp, (Q -> F) . Dr, Dc], Q) = true .
+  eq contains?([Dp, Dr, (Q -> F) . Dc], Q) = true .
+  eq contains?([Dp, Dr, Dc], Q) = false [owise] .
 
   op nombre : DicFiguras ListaFiguras -> QidList .
   eq nombre([Dp, Dr, Dc], (Lf1 & p1)) = nombre([Dp, Dr, Dc], Lf1) nombre(Dp, p1) .
