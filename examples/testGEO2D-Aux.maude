@@ -3,7 +3,7 @@ load ../mUnit.maude
 ***(
 (munit LISTA-FIGURAS is
 		***Constructores de la lista
-	assertEqual(mtf & mtf, mtf)	
+	assertEqual(mtf & mtf, mtf)
 	assertEqual(mtf & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0))
 	assertEqual(p(0.0 0.0) & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0) & p(0.0 0.0))
 endu)
@@ -28,22 +28,22 @@ endu)
 	assertEqual(nombre('p -> p(0.0 0.0), p(0.0 0.0)), 'r)
 		***Veamos las funciones referidas a los diccionarios para figuras
 		***Veamos el operador _[_]
-	assertEqual([('p1 -> p(0.0 0.0)), mtD, mtD ] ['p1], p(0.0 0.0))
+	assertEqual(([('p1 -> p(0.0 0.0)), mtD, mtD ] ['p1]), p(0.0 0.0))
 		***Veamos el opertador _[_/_]
-	assertEqual([mtD, mtD, mtD] ['p1 / p(1.0 1.0)], [('p1 -> p(1.0 1.0)), mtD, mtD])
-	assertEqual([mtD, mtD, mtD] ['r1 / r(p(1.0 1.0) p(0.0 0.0))], [mtD, ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD])
-	assertEqual([mtD, mtD, mtD] ['c1 / c(p(1.0 1.0), 1.0)], [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))])
-	assertEqual([mtD, mtD, ('c1 -> c(p(3.0 3.0), 3.0))] ['c1 / c(p(1.0 1.0), 1.0)], [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))])
+	assertEqual(([mtD, mtD, mtD] ['p1 / p(1.0 1.0)]), [('p1 -> p(1.0 1.0)), mtD, mtD])
+	assertEqual(([mtD, mtD, mtD] ['r1 / r(p(1.0 1.0) p(0.0 0.0))]), [mtD, ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD])
+	assertEqual(([mtD, mtD, mtD] ['c1 / c(p(1.0 1.0), 1.0)]), [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))])
+	assertEqual(([mtD, mtD, ('c1 -> c(p(3.0 3.0), 3.0))] ['c1 / c(p(1.0 1.0), 1.0)]), [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))])
 		***Veamos el operador _U_
-	assertEqual([mtD, mtD, mtD] U [('p1 -> p(1.0 1.0)), mtD, mtD] , [('p1 -> p(1.0 1.0)), mtD, mtD])
-	assertEqual([('p1 -> p(1.0 1.0)), mtD, mtD] U [mtD, ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD] , [('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD])
-	assertEqual([('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD] U [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))] , [('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), ('c1 -> c(p(1.0 1.0), 1.0))])
-	assertEqual([mtD, mtD, mtD] U [mtD, mtD, ('c1 -> c(p(0.0 0.0), 1.0))] , [mtD, mtD, ('c1 -> c(p(0.0 0.0), 1.0))] )
+	assertEqual(([mtD, mtD, mtD] U [('p1 -> p(1.0 1.0)), mtD, mtD]) , [('p1 -> p(1.0 1.0)), mtD, mtD])
+	assertEqual(([('p1 -> p(1.0 1.0)), mtD, mtD] U [mtD, ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD]) , [('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD])
+	assertEqual(([('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), mtD] U [mtD, mtD, ('c1 -> c(p(1.0 1.0), 1.0))]) , [('p1 -> p(1.0 1.0)), ('r1 -> r(p(1.0 1.0) p(0.0 0.0))), ('c1 -> c(p(1.0 1.0), 1.0))])
+	assertEqual(([mtD, mtD, mtD] U [mtD, mtD, ('c1 -> c(p(0.0 0.0), 1.0))]) , [mtD, mtD, ('c1 -> c(p(0.0 0.0), 1.0))] )
 		***Veamos la funcion in
 	assertTrue(p(0.0 0.0) in [('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))])
 	assertTrue(r(p(1.0 1.0) p(0.0 0.0)) in [('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))])
 	assertTrue(c(p(1.0 1.0), 1.0) in [('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))])
-	assertTrue(p(0.0 0.0) in [mtD, mtD, mtD])
+	assertFalse(p(0.0 0.0) in [mtD, mtD, mtD])
 		***Veamos la funcino constains?
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'p))
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'r))

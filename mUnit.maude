@@ -17,6 +17,12 @@ fmod MUNIT-SIGNATURE is
   *********************************************************************************
   op assertTrue : @Bubble@ -> @MUnitPredicate@ [ctor] .
 
+  **********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to false       ***
+  *** Usage: assertFalse(f(t_1, ..., t_n))                                       ***
+  **********************************************************************************
+  op assertFalse : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
   *********************************************************************************
   *** Indicates that the term introduced in the test is evaluated to true       ***
   *** and print the given message                                               ***
@@ -190,6 +196,78 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (T? :: Term) /\
      QIL := '\n '\r 'Error: '\o getMsg(T?) .
  ceq procProps(M, 'assertTrue['bubble[T]], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < T', SB > := sub4Atts(M, T, ATTS) /\
+     SB =/= none /\
+     T'' := solveBubbles('bubble[T'], M, B, VDS, DB) /\
+     TSB := applySb(T'', SB) /\
+     T? := reduce(M, TSB) /\
+     not (T? :: Term) /\
+     QIL := '\n '\r 'Error: '\o getMsg(T?) .
+
+ **********************************************************************************
+ ********************                assertFalse               ********************
+ **********************************************************************************
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if 'bubble[T1] := T /\
+     ATTS := getAtts(SYS) /\
+     < T1, none > := sub4Atts(M, T1, ATTS) /\
+     T' := solveBubbles(T, M, B, VDS, DB) /\
+     reduce(M, T') == 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
+            '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T' := solveBubbles(T, M, B, VDS, DB) /\
+     reduce(M, T') == 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
+            '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T' := solveBubbles(T, M, B, VDS, DB) /\
+     T1 := reduce(M, T') /\
+     T1 =/= 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
+            '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if 'bubble[T2] := T /\
+     ATTS := getAtts(SYS) /\
+     < T2, none > := sub4Atts(M, T2, ATTS) /\
+     T' := solveBubbles(T, M, B, VDS, DB) /\
+     T1 := reduce(M, T') /\
+     T1 =/= 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
+            '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertFalse['bubble[T]], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < T', SB > := sub4Atts(M, T, ATTS) /\
+     SB =/= none /\
+     T'' := solveBubbles('bubble[T'], M, B, VDS, DB) /\
+     TSB := applySb(T'', SB) /\
+     reduce(M, TSB) == 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( downQidList(T) '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertFalse['bubble[T]], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < T', SB > := sub4Atts(M, T, ATTS) /\
+     SB =/= none /\
+     T'' := solveBubbles('bubble[T'], M, B, VDS, DB) /\
+     TSB := applySb(T'', SB) /\
+     T1 := reduce(M, TSB) /\
+     T1 =/= 'false.Bool /\
+     QIL := '\! '\n 'assertFalse '`( downQidList(T) '`) ' '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     not (T? :: Term) /\
+     QIL := '\n '\r 'Error: '\o getMsg(T?) .
+ ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if 'bubble[T1] := T /\
+     ATTS := getAtts(SYS) /\
+     < T1, none > := sub4Atts(M, T1, ATTS) /\
+     T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
+     not (T? :: Term) /\
+     QIL := '\n '\r 'Error: '\o getMsg(T?) .
+ ceq procProps(M, 'assertFalse['bubble[T]], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < T', SB > := sub4Atts(M, T, ATTS) /\
      SB =/= none /\
