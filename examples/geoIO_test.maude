@@ -1,5 +1,5 @@
 load geoIO.maude
-
+***(
 fmod TEST-AUX is
  pr DICC-FIGURAS .
 
@@ -11,9 +11,9 @@ fmod TEST-AUX is
 *** eq contains?((Q -> P) . D, Q) = true .
  eq contains?(D, Q) = false [owise] .
 endfm
-
+)
 mod TEST-GEO2D is
- pr TEST-AUX .
+ ***pr TEST-AUX .
  pr IOGEO2D .
 endm
 
