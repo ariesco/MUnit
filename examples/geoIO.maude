@@ -207,24 +207,28 @@ mod GEO-DATABASE-HANDLING is
      D' := processCutPoint('token[upTerm(name1)], 'token[upTerm(name2)], D[Q], D[Q']) /\
      names := mod-elements(D U [D' , mtD , mtD], D') .
 
- crl[perpendicular1] :
+ crl [perpendicular] :
      < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
-  => < O : MUDC | input : nilTermList, dic : D ,
-                  output : (Q Q' 'are 'perpendicular) , AtS >
+  => < O : MUDC | input : nilTermList, dic : D, output : QIL, AtS >
   if Q := downQid(T1) /\
      Q' := downQid(T2) /\
-     processPerpendicular(D[Q], D[Q']) == true .
+     B := processPerpendicular(D[Q], D[Q']) /\
+     QIL := if B
+            then (Q Q' 'are 'perpendicular)
+            else (Q Q' 'are 'not 'perpendicular)
+            fi .
 
- crl[perpendicular2] :
+***(
+ crl [perpendicular2] :
      < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : D ,
-                  output : (Q Q' 'aren't 'perpendicular) , AtS >
+                  output : (Q Q' 'aren't 'perpendicular), AtS >
   if Q := downQid(T1) /\
      Q' := downQid(T2) /\
      processPerpendicular(D[Q], D[Q']) == false .
-
+)
 
 endm
 
