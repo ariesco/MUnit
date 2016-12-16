@@ -36,6 +36,12 @@ fmod MUNIT-SIGNATURE is
   *********************************************************************************
   op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
 
+  ************************************************************************************
+  *** Indicates that both terms are reduced to a different normal form.            ***
+  *** Usage: assertDifferent(t, t')                                                ***
+  ************************************************************************************
+  op assertDifferent : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+
   *********************************************************************************
   *** Indicates that t' is reachable from t' within an unbounded number         ***
   *** of steps.                                                                 ***
@@ -415,6 +421,87 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if T? := solveBubbles(T', M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
+
+ **************************************************************************************
+ ********************                assertDifferent               ********************
+ **************************************************************************************
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if 'bubble[TI] := T /\
+     ATTS := getAtts(SYS) /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     T1 := reduce(M, TSB) /\
+     T1 := reduce(M, TSB') /\
+     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     T1 := reduce(M, TSB) /\
+     T1 := reduce(M, TSB') /\
+     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if 'bubble[TI] := T /\
+     ATTS := getAtts(SYS) /\
+     < TI, none > := sub4Atts(M, TI, ATTS) /\
+     'bubble[TI'] := T /\
+     < TI', none > := sub4Atts(M, TI', ATTS) /\
+     TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     T1 := reduce(M, TSB) /\
+     T2 := reduce(M, TSB') /\
+     T1 =/= T2 /\
+     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (getAtts(SYS) :: Term) /\
+     TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     T1 := reduce(M, TSB) /\
+     T2 := reduce(M, TSB') /\
+     T1 =/= T2 /\
+     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T1 := reduce(M, TIS1') /\
+     QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
+            '\r 'failed. '\o '\n [print TIS' " y " TIS1'] .
+ ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if ATTS := getAtts(SYS) /\
+     < TI, SB > := sub4Atts(M, T, ATTS) /\
+     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
+     ((SB =/= none) or (SB' =/= none)) /\
+     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
+     TIS' := applySb(TIS, SB) /\
+     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
+     TIS1' := applySb(TIS1, SB') /\
+     T1 := reduce(M, TIS') /\
+     T2 := reduce(M, TIS1') /\
+     T1 =/= T2 /\
+     QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
+            '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+  if T? := solveBubbles(T, M, B, VDS, DB) /\
+     not (T? :: Term) /\
+     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
+ ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T', M, B, VDS, DB) /\
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .

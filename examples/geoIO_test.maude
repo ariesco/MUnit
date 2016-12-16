@@ -22,6 +22,7 @@ load ../mUnit.maude
 (munit TEST-GEO2D is
   assertEqual(3, 3)
   assertEqual(3, 5)
+  assertDifferent(3, 4)
   assertTrue(3 == 3)
   assertTrue(3 == 4)
   assertTrueMsg(3 == 3, "Should work")

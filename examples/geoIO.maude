@@ -130,7 +130,7 @@ mod GEO-DATABASE-HANDLING is
  var  D' : Dic .
  var  D? : [Dic] .
  vars Q Q' name1 name2 : Qid .
- var names : QidList .
+ var names QIL : QidList .
  var b : Bool .
 
  op dic :_ : DicFiguras -> Attribute [ctor] .
@@ -213,8 +213,8 @@ mod GEO-DATABASE-HANDLING is
   => < O : MUDC | input : nilTermList, dic : D, output : QIL, AtS >
   if Q := downQid(T1) /\
      Q' := downQid(T2) /\
-     B := processPerpendicular(D[Q], D[Q']) /\
-     QIL := if B
+     b := processPerpendicular(D[Q], D[Q']) /\
+     QIL := if b
             then (Q Q' 'are 'perpendicular)
             else (Q Q' 'are 'not 'perpendicular)
             fi .
