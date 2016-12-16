@@ -15,6 +15,7 @@ fmod GEO-SIGNATURE is
   op line`from_to_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point`of_and_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op are`perpendicular_and_? : @Token@ @Token@ -> @GeoCommand@ [ctor] .
 
 endfm
 
@@ -37,6 +38,7 @@ fmod GEO-COMMAND-PROCESSING is
  vars S S' : String .
  vars F F' : Float .
  vars P1 P2 p1 p2 p3 : Punto .
+ vars r1 r2 : Recta .
  vars f1 f2 : Figura .
  vars 1entrada 2entrada : Entry .
  vars D Dp Dr Dc : Dic .
@@ -97,6 +99,9 @@ fmod GEO-COMMAND-PROCESSING is
   if long-lista(pto-corte(f1 , f2)) == 1.0 .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = mtD
   if long-lista(pto-corte(f1 , f2)) == 0.0 .
+ 
+ op processPerpendicular : Recta Recta -> Bool .
+ eq processPerpendicular(r1, r2) = r-perpendiculares(r1, r2) .
 
  op new-name : Qid Qid -> Qid .
  eq new-name(name1, name2) = qid(string(name1) + string(name2)) .
@@ -126,6 +131,7 @@ mod GEO-DATABASE-HANDLING is
  var  D? : [Dic] .
  vars Q Q' name1 name2 : Qid .
  var names : QidList .
+ var b : Bool .
 
  op dic :_ : DicFiguras -> Attribute [ctor] .
 
@@ -141,7 +147,7 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Circunferencia names) , AtS >
+                  output : ('Circunferencia 'almacenada names) , AtS >
   if Q -> F := processCircumference-1(T1 , D[downQid(T2)] , T3) /\
      names := mod-elements(D [Q / F], Q -> F) .
 
@@ -149,7 +155,7 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('circumference_in_with`radius`distance`from_to_[T1 , 'token[T2] , 'token[T3], 'token[T4]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Circunferencia names) , AtS >
+                  output : ('Circunferencia 'almacenada names) , AtS >
   if Q -> F := processCircumference-2(T1, 'token[T2], D[downQid(T2)], D[downQid(T3)], D[downQid(T4)]) /\
      names := mod-elements(D [Q / F], Q -> F) .
 
@@ -157,7 +163,7 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('circumference`in_with`radius`distance`from_to_['token[T1] , 'token[T2], 'token[T3]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Circunferencia names) , AtS >
+                  output : ('Circunferencia 'almacenada names) , AtS >
   if name1 := new-name(downQid(T1), downQid(T2)) /\
      name2 := new-name(name1, downQid(T3)) /\
      Q -> F := processCircumference-2('token[upTerm(name2)], 'token[T1], D[downQid(T1)], D[downQid(T2)], D[downQid(T3)]) /\
@@ -200,6 +206,24 @@ mod GEO-DATABASE-HANDLING is
      name2 := new-name(Q', Q) /\
      D' := processCutPoint('token[upTerm(name1)], 'token[upTerm(name2)], D[Q], D[Q']) /\
      names := mod-elements(D U [D' , mtD , mtD], D') .
+
+ crl[perpendicular1] : 
+     < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : D ,
+                  output : (Q Q' 'are 'perpendicular) , AtS >
+  if Q := downQid(T1) /\
+     Q' := downQid(T2) /\
+     processPerpendicular(D[Q], D[Q']) == true .
+
+ crl[perpendicular2] : 
+     < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : D ,
+                  output : (Q Q' 'aren't 'perpendicular) , AtS >
+  if Q := downQid(T1) /\
+     Q' := downQid(T2) /\
+     processPerpendicular(D[Q], D[Q']) == false .
 
 
 endm
@@ -280,7 +304,7 @@ set print attribute on .
 
 loop init-geo .
 
-
+***(
 (point 0.0 0.0 as p1)
 (point 1.0 1.0 as p2)
 (point 1.0 0.0 as p3)
@@ -293,3 +317,16 @@ loop init-geo .
 (circumference in p4 with radius distance from p1 to p2)
 (cut point of c1 and c2)
 (circumference zero in p1 with radius 0.0)
+(are perpendicular r1 and p3p4 ?)
+)
+
+***(
+(point 0.0 0.0 as p1)
+(point 1.0 0.0 as p2)
+(line r1 from p1 to p2)
+(circumference c1 in p1 with radius distance from p1 to p2)
+(circumference c2 in p2 with radius distance from p1 to p2)
+(cut point p3 and p4 of c1 and c2)
+(line r2 from p3 to p4)
+(are perpendicular r1 and r2 ?)
+)
