@@ -9,8 +9,8 @@ fmod GEO-SIGNATURE is
 
   op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
   op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
-  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] . 
-  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] . 
+  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] .
   op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op line`from_to_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
@@ -62,17 +62,17 @@ fmod GEO-COMMAND-PROCESSING is
  ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
   if Q := downQid(T)
   /\ S := string(Q)
-  /\ F := float(S) 
+  /\ F := float(S)
   /\ not F == 0.0 .
- ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> P1 
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> P1
   if Q := downQid(T)
   /\ S := string(Q)
-  /\ F := float(S) 
+  /\ F := float(S)
   /\ F == 0.0 .
 
  op processCircumference-2 : Term Term Punto Punto Punto -> Entry .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NC) -> c(p1, F)
-  if F := distancia(p2, p3) 
+  if F := distancia(p2, p3)
   /\ not F == 0.0 .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NP) -> p1
   if F := distancia(p2, p3)
@@ -99,7 +99,7 @@ fmod GEO-COMMAND-PROCESSING is
   if long-lista(pto-corte(f1 , f2)) == 1.0 .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = mtD
   if long-lista(pto-corte(f1 , f2)) == 0.0 .
- 
+
  op processPerpendicular : Recta Recta -> Bool .
  eq processPerpendicular(r1, r2) = r-perpendiculares(r1, r2) .
 
@@ -207,7 +207,7 @@ mod GEO-DATABASE-HANDLING is
      D' := processCutPoint('token[upTerm(name1)], 'token[upTerm(name2)], D[Q], D[Q']) /\
      names := mod-elements(D U [D' , mtD , mtD], D') .
 
- crl[perpendicular1] : 
+ crl[perpendicular1] :
      < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : D ,
@@ -216,7 +216,7 @@ mod GEO-DATABASE-HANDLING is
      Q' := downQid(T2) /\
      processPerpendicular(D[Q], D[Q']) == true .
 
- crl[perpendicular2] : 
+ crl[perpendicular2] :
      < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : D ,
@@ -228,7 +228,7 @@ mod GEO-DATABASE-HANDLING is
 
 endm
 
-mod MUNIT is
+mod IOGEO2D is
  inc GEO-DATABASE-HANDLING .
  inc META-GEO-SIGN .
  inc LOOP-MODE .
@@ -312,7 +312,7 @@ loop init-geo .
 (line r1 from p1 to p2)
 (line from p3 to p4)
 (circumference c1 in p1 with radius 1.0)
-(circumference c2 in p2 with radius 1.0) 
+(circumference c2 in p2 with radius 1.0)
 (circumference c3 in p2 with radius distance from p3 to p4)
 (circumference in p4 with radius distance from p1 to p2)
 (cut point of c1 and c2)
