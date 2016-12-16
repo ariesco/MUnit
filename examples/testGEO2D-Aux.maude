@@ -1,13 +1,13 @@
 load GEO2D-Aux.maude
 load ../mUnit.maude
-***(
+
 (munit LISTA-FIGURAS is
 		***Constructores de la lista
 	assertEqual(mtf & mtf, mtf)
 	assertEqual(mtf & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0))
 	assertEqual(p(0.0 0.0) & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0) & p(0.0 0.0))
 endu)
-)
+
 (munit DICC-FIGURAS is
 		***Veamos las funciones referidas a los diccionarios simples para figuras
 		***Veamos el operador _[_]
@@ -18,11 +18,11 @@ endu)
 		***Veamos la funcion _in_
 	assertTrue(p(0.0 0.0) in ('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)))
 	assertTrue(p(0.0 0.0) in ('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)))
-	assertTrue(p(0.0 1.0) in ('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)))
+	assertFalse(p(0.0 1.0) in ('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)))
 		***Veamos la funcion contains?
 	assertTrue(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'p1))
 	assertTrue(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'p2))
-	assertTrue(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'r1))
+	assertFalse(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'r1))
 		***Veamos la funcion nombre
 	assertEqual(nombre('p -> p(0.0 0.0), p(0.0 0.0)), 'p)
 	assertEqual(nombre('p -> p(0.0 0.0), p(0.0 0.0)), 'r)
@@ -48,7 +48,7 @@ endu)
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'p))
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'r))
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'c))
-	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 's))
+	assertFalse(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 's))
 		***Veamos la funcion nombre
 	assertEqual(nombre([('p -> p(0.0 0.0)), mtD, mtD], p(0.0 0.0)), 'p)
 	assertEqual(nombre([mtD, mtD, mtD], p(0.0 0.0)), nil)
