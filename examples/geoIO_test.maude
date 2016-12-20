@@ -34,7 +34,7 @@ load ../mUnit.maude
   command(circumference c2 in p1 with radius 0.0)
   assertFalse(contains?(@dic, 'c2))  
   ***Mismo patron, pero introduciendo el radio en base a la distancia entre dos puntos.
-  command(circumference c3 in p1 with radius distance from p1 to p3)
+  command(circumference c3 in p1 with radius distance from p1 to p2)
   assertTrue(contains?(@dic, 'c3))  
   ***De nuevo comprobamos para radio cero.
   command(circumference c4 in p1 with radius distance from p1 to p1)
@@ -45,8 +45,56 @@ load ../mUnit.maude
   ***De nuevo comprobamos para radio cero.
   command(circumference in p2 with radius distance from p3 to p3)
   assertFalse(contains?(@dic, 'p1p3p3))  
+  loop(init-geom)
+  loop(init-geo)
   ***Para continuar veremos que la funcion pto de corte funciona bien.
-  ***Primero introduciendo manualmente los nombres de los nuevos puntos.
+  ***Para ello volvemos a dar los puntos y las rectas para evitar problemas con los nombres.
+  command(point 0.0 0.0 as p1)  
+  command(point 1.0 1.0 as p2)
+  command(point 1.0 0.0 as p3)
+  command(point 0.0 1.0 as p4)
+  command(line r1 from p1 to p2)
+  command(line r2 from p3 to p4)
+  command(circumference c1 in p1 with radius distance from p1 to p2)
+  command(circumference c2 in p2 with radius distance from p1 to p2)  
+  ***Veremos las funciones dando a los puntos nombres manualmente.
+  ***Rectas con rectas
+  command(cut point p5 and p6 of r1 and r2)
+  assertTrue(contains?(@dic, 'p5))
+  assertFalse(contains?(@dic, 'p6))
+  *** esto ultimo se debe a que dos rectas solo se cortan en un punto, y por tanto no existe p6
+  ***Rectas con circunferencias.
+  command(cut point p7 and p8 of c1 and r2)
+  assertTrue(contains?(@dic, 'p7))
+  assertTrue(contains?(@dic, 'p8))
+  ***Dos circunferencias.
+  command(cut point p9 and p10 of c1 and c2)
+  assertTrue(contains?(@dic, 'p9))
+  assertTrue(contains?(@dic, 'p10))
+  ***De nuevo repetimos todo el proceso, pero esta vez se nombraran automaticamente
+  loop(init-geom)
+  loop(init-geo)
+  command(point 0.0 0.0 as p1)  
+  command(point 1.0 1.0 as p2)
+  command(point 1.0 0.0 as p3)
+  command(point 0.0 1.0 as p4)
+  command(line from p1 to p2)
+  command(line from p3 to p4)
+  command(circumference in p1 with radius distance from p1 to p2)
+  command(circumference in p2 with radius distance from p1 to p2)  
+  ***Veremos las funciones dando a los puntos nombres manualmente.
+  ***Rectas con rectas
+  command(cut point of p1p2 and p3p4)
+  assertTrue(contains?(@dic, 'p1p2p3p4))
+  *** esto ultimo se debe a que dos rectas solo se cortan en un punto, y por tanto no existe p6
+  ***Rectas con circunferencias.
+  command(cut point of p1p1p2 and p3p4)
+  assertTrue(contains?(@dic, 'p1p1p2p3p4))
+  assertTrue(contains?(@dic, 'p3p4p1p1p2))
+  ***Dos circunferencias.
+  command(cut point of p1p1p2 and p2p1p2)
+  assertTrue(contains?(@dic, 'p1p1p2p2p1p2))
+  assertTrue(contains?(@dic, 'p2p1p2p1p1p2))
   
 endu)
 
