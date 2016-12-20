@@ -1,0 +1,90 @@
+load geoIO.maude
+load ../mUnit.maude
+
+(munit IOGEO2D is
+  loop(init-geom)
+  loop(init-geo)
+  ***Veamos para empezar las funciones que añaden figuras, 
+  ***y como lo hacen para cada una, comprobando ademas si se añaden bien.
+  ***Comencemos por los puntos
+  command(point 0.0 0.0 as p1)
+  assertTrue(contains?(@dic, 'p1))
+  command(point 1.0 1.0 as p2)
+  assertTrue(contains?(@dic, 'p2))
+  ***Continuemos por las rectas.
+  ***Primero introduciendo el nombre manualmente.
+  command(line r1 from p1 to p2)
+  assertTrue(contains?(@dic, 'r1))
+  ***Veamos ahora el renombramiento automatico, para ello introduciremos antes dos puntos.
+  command(point 1.0 0.0 as p3)
+  command(point 0.0 1.0 as p4)
+  command(line from p3 to p4)
+  ***Este nombre es mostrado por pantalla al dar la recta, en caso de ya estar no se muestra el nombre.
+  assertTrue(contains?(@dic, 'p3p4))
+  assertFalse(contains?(@dic, 'p4p3))
+  ***Comprobemos que no hay repetición de rectas.
+  command(line r2 from p4 to p3)
+  assertFalse(contains?(@dic, 'r2))
+  ***Esto se debe a que es la misma recta dada de dos formas distintas.
+  ***Continuemos ahora con las circunferencias. 
+  ***Primero introduciremos el nombre y los datos manualmente.
+  command(circumference c1 in p1 with radius 1.0)
+  assertTrue(contains?(@dic, 'c1))  
+  ***Veamos que funciona bien el filtro, para que circunferencias de radio 0.0 sean puntos.
+  command(circumference c2 in p1 with radius 0.0)
+  assertFalse(contains?(@dic, 'c2))  
+  ***Mismo patron, pero introduciendo el radio en base a la distancia entre dos puntos.
+  command(circumference c3 in p1 with radius distance from p1 to p3)
+  assertTrue(contains?(@dic, 'c3))  
+  ***De nuevo comprobamos para radio cero.
+  command(circumference c4 in p1 with radius distance from p1 to p1)
+  assertFalse(contains?(@dic, 'c4))  
+  ***Por ultimo, veamos el caso anterior pero con renombramiento automatico.
+  command(circumference in p2 with radius distance from p1 to p3)
+  assertTrue(contains?(@dic, 'p2p1p3))  
+  ***De nuevo comprobamos para radio cero.
+  command(circumference in p2 with radius distance from p3 to p3)
+  assertFalse(contains?(@dic, 'p1p3p3))  
+  ***Para continuar veremos que la funcion pto de corte funciona bien.
+  ***Primero introduciendo manualmente los nombres de los nuevos puntos.
+  
+endu)
+
+***(
+(munit IOGEO2D is
+  assertEqual(3, 3)
+  assertEqual(3, 5)
+  assertDifferent(3, 4)
+  assertTrue(3 == 3)
+  assertTrue(3 == 4)
+  assertTrueMsg(3 == 3, "Should work")
+  assertTrueMsg(3 == 4, "Should not work")
+  assertSort('a, Qid)
+  assertSort('a, Nat)
+  assertSort(0, NzNat)
+  loop(init-geom)
+  loop(init-geo)
+  command(point 3.0 4.0 as p1)
+  command(failure)
+  assertTrue(contains?(@dic, 'p1))
+  assertTrue(contains?(@dic, 'p2))
+  assertReachable(3,3)
+  assertReachable(3,4)
+  assertReachableBnd('a,'a,3)
+  assertReachableBnd('a,'b,4)
+  assertTrue(3 == 3)
+  assertTrue(3 == 4)
+  assertEqual(contains?(@dic, 'p1), contains?(@dic, 'p1))
+  assertEqual(false, contains?(@dic, 'p1))
+  assertSort(contains?(@dic, 'p1), Bool)
+  assertSort(contains?(@dic, 'p1), Nat)
+  assertReachable(contains?(@dic, 'p1),contains?(@dic, 'p1))
+  assertReachable(contains?(@dic, 'p1),contains?(@dic, 'p2))
+  assertReachableBnd(contains?(@dic, 'p1),contains?(@dic, 'p1), 10)
+  assertReachableBnd(contains?(@dic, 'p1),contains?(@dic, 'p2), 4)
+  assertTrueMsg(3 == 3, "Should work")
+  assertTrueMsg(3 == 4, "Should not work")
+  assertTrueMsg(contains?(@dic, 'p1), "Should work. From loop")
+  assertTrueMsg(contains?(@dic, 'p2), "Should not work. From loop")
+endu)
+)
