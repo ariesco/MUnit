@@ -1,25 +1,42 @@
 load geoIO.maude
-***(
-fmod TEST-AUX is
- pr DICC-FIGURAS .
-
- var Q : Qid .
- var P : Punto .
- var D : DicFiguras .
-
- op contains? : DicFiguras Qid -> Bool .
-*** eq contains?((Q -> P) . D, Q) = true .
- eq contains?(D, Q) = false [owise] .
-endfm
-)
-mod TEST-GEO2D is
- ***pr TEST-AUX .
- pr IOGEO2D .
-endm
-
 load ../mUnit.maude
 
-(munit TEST-GEO2D is
+(munit IOGEO2D is
+  loop(init-geom)
+  loop(init-geo)
+  ***Veamos para empezar las funciones que añaden figuras, 
+  ***y como lo hacen para cada una, comprobando ademas si se añaden bien.
+  ***Comencemos por los puntos
+  command(point 0.0 0.0 as p1)
+  assertTrue(contains?(@dic, 'p1))
+  command(point 1.0 0.0 as p2)
+  assertTrue(contains?(@dic, 'p2))
+  ***Continuemos por las rectas.
+  ***Primero introduciendo el nombre manualmente.
+  command(line r1 from p1 to p2)
+  assertTrue(contains?(@dic, 'r1))
+  ***Veamos ahora el renombramiento automatico, para ello introduciremos antes dos puntos.
+  command(point 1.0 1.0 as p3)
+  command(point 0.0 1.0 as p4)
+  command(line from p3 to p4)
+  ***Este nombre es mostrado por pantalla al dar la recta, en caso de ya estar no se muestra el nombre.
+  assertTrue(contains?(@dic, 'p3p4))
+  assertFalse(contains?(@dic, 'p4p3))
+  ***Comprobemos que no hay repetición de rectas.
+  command(line r2 from p4 to p3)
+  assertFalse(contains?(@dic, 'r2))
+  ***Esto se debe a que es la misma recta dada de dos formas distintas.
+  ***Continuemos ahora con las circunferencias. 
+  ***Primero introduciremos el nombre y los datos manualmente.
+  command(circumference c1 in p1 with radius 1.0)
+  assertTrue(constains?(@dic, 'c1))  
+  ***Veamos que funciona bien el filtro, para que circunferencias de radio 0.0 sean puntos.
+ 
+  
+endu)
+
+***(
+(munit IOGEO2D is
   assertEqual(3, 3)
   assertEqual(3, 5)
   assertDifferent(3, 4)
@@ -55,3 +72,4 @@ load ../mUnit.maude
   assertTrueMsg(contains?(@dic, 'p1), "Should work. From loop")
   assertTrueMsg(contains?(@dic, 'p2), "Should not work. From loop")
 endu)
+)

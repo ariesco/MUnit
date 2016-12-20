@@ -29,7 +29,7 @@ fmod DICC-FIGURAS is
   vars  Q Q' : Qid .
   vars F F' : Figura .
   var p1 : Punto .
-  var r1 : Recta .
+  vars r1 r2 : Recta .
   var c1 : Circunferencia .
   vars Lf1 Lf2 : ListaFiguras .
 
@@ -39,6 +39,8 @@ fmod DICC-FIGURAS is
   op _[_/_] : Dic Qid Figura -> Dic .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
   eq (D . Q -> F)[Q' / F] = D . Q -> F .
+  ceq (D . Q -> r1)[Q' / r2] = D . Q -> r1
+    if son-iguales(r1, r2) .   
   eq D[Q / F] = D . Q -> F [owise] .
 
   op _in_ : Figura Dic -> Bool .
