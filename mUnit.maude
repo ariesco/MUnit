@@ -401,7 +401,7 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, TIS') /\
      T1 := reduce(M, TIS1') /\
      QIL := '\! '\n 'assertEqual '`( downQidList(T) '`, downQidList(T') '`) '
-            '\g 'passed. '\o '\n [print TIS' " y " TIS1'] .
+            '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertEqual['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -482,7 +482,7 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, TIS') /\
      T1 := reduce(M, TIS1') /\
      QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
-            '\r 'failed. '\o '\n [print TIS' " y " TIS1'] .
+            '\r 'failed. '\o '\n .
  ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
