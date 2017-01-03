@@ -1,0 +1,21 @@
+load GEO2D.maude
+load ../mUnit.maude
+
+(munit GEO2D is
+		***Veremos como se comporta la funcion cut-point en los casos que implican puntos
+	assertEqual(cut-point(p(23.0 -46.0), p(23.0 -46.0)), p(23.0 -46.0))
+	assertEqual(cut-point(p(12.0 34.0), p(20.0 45.0)), mt)
+	assertEqual(cut-point(p(1.0 0.0), r(p(1.0 0.0) p(0.0 1.0))), p(1.0 0.0))
+	assertEqual(cut-point(p(0.0 0.0), r(p(1.0 0.0) p(0.0 1.0))), mt)
+	assertEqual(cut-point(p(0.0 3.0), c(p(0.0 1.0), 2.0)), p(0.0 3.0))
+	assertEqual(cut-point(p(4.0 4.0), c(p(4.0 4.0), 1.0)), mt)
+		*** Veamos ahora como se comporta en los demas casos
+	assertEqual(cut-point(r(p(2.0 0.0) p(0.0 2.0)), r(p(2.0 2.0) p(0.0 0.0))), p(1.0 1.0))
+	assertEqual(cut-point(r(p(1.0 0.0) p(0.0 1.0)), r(p(2.0 0.0) p(0.0 2.0))), mt)
+	assertEqual(cut-point(c(p(1.0 2.0), 3.0), r(p(4.0 2.0) p(-2.0 2.0))), p(4.0 2.0) p(-2.0 2.0))
+	assertEqual(cut-point(c(p(1.0 2.0), 3.0), r(p(4.0 2.0) p(4.0 3.0))), p(4.0 2.0) p(4.0 2.0))
+	assertEqual(cut-point(c(p(1.0 2.0), 3.0), r(p(6.0 -7.0) p(8.0 -7.0))), mt)
+	assertEqual(cut-point(c(p(0.0 0.0), 1.0), c(p(1.0 1.0), 1.0)), p(1.0 0.0) p(0.0 1.0))
+	assertEqual(cut-point(c(p(0.0 0.0), 1.0), c(p(2.0 0.0), 1.0)), p(1.0 0.0) p(1.0 0.0))
+	assertEqual(cut-point(c(p(0.0 0.0), 1.0), c(p(2.0 2.0), 1.0)), mt)
+endu)

@@ -1,56 +1,57 @@
 load GEO2D.maude
 load ../mUnit.maude
 
-(munit CIRCUNFERENCIA is 
+(munit CIRCUMFERENCE is 
 		***Funciones referidas a las circunferencias.
-		***Funcion centro-circunferencia.
-	assertEqual(centro-circunferencia(c(p(1.0 2.0), 3.0)), p(1.0 2.0))
-	assertEqual(centro-circunferencia(c(p(1.0 2.0), 3.0)), p(2.0 1.0))
-		***Funcion radio-circunferencia.
-	assertEqual(radio-circunferencia(c(p(0.0 0.0), 3.4)), 3.4)
-	assertEqual(radio-circunferencia(c(p(0.0 0.0), 3.4)), 1.0)
-		***Funcion esta-en-circunferencia.
-	assertTrue(esta-en-circunferencia(p(1.0 1.0), c(p(0.0 0.0), 1.0)))
-	assertTrue(esta-en-circunferencia(p(1.0 0.0), c(p(0.0 0.0), 1.0)))
-	assertTrue(esta-en-circunferencia(p(0.2 0.2), c(p(0.0 0.0), 1.0)))	
+		***Funcion circumference-center.
+	assertEqual(circumference-center(c(p(1.0 2.0), 3.0)), p(1.0 2.0))
+	assertDifferent(circumference-center(c(p(1.0 2.0), 3.0)), p(2.0 1.0))
+		***Funcion circumference-radius.
+	assertEqual(circumference-radius(c(p(0.0 0.0), 3.4)), 3.4)
+	assertDifferent(circumference-radius(c(p(0.0 0.0), 3.4)), 1.0)
+		***Funcion are-in-circumference.
+	assertFalse(are-in-circumference(p(1.0 1.0), c(p(0.0 0.0), 1.0)))
+	assertTrue(are-in-circumference(p(1.0 0.0), c(p(0.0 0.0), 1.0)))
+	assertFalse(are-in-circumference(p(0.2 0.2), c(p(0.0 0.0), 1.0)))	
 		***Veamos las funciones asociadas al punto de corte recta, circunferencia.
-		***Funcion se-cortan-r-c.
-	assertTrue(se-cortan-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 2.0)))
-	assertTrue(se-cortan-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 1.0)))
-		***Funcion pto-corte-r-c-vertical.
-	assertEqual(pto-corte-r-c-vertical(r(p(1.0 0.0) p(1.0 2.0)), c(p(0.0 0.0), 1.0)), p(1.0 0.0) p(1.0 0.0))
-	assertEqual(pto-corte-r-c-vertical(r(p(2.0 1.0) p(2.0 2.0)), c(p(2.0 0.0), 2.0)), p(2.0 1.0) p(2.0 -1.0))
-		***Funciones pto-corte-r-c-1 pto-corte-r-c-2.
-	assertEqual(pto-corte-r-c-1(r(p(0.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 1.0)), p(0.0 1.0))
-	assertEqual(pto-corte-r-c-1(r(p(0.0 1.0) p(1.0 0.0)), c(p(0.0 0.0), 0.5)), p(0.5 0.5))
-	assertEqual(pto-corte-r-c-2(r(p(0.0 2.0) p(2.0 3.0)), c(p(2.0 0.0), 2.0)), p(0.0 0.0))
-	assertEqual(pto-corte-r-c-2(r(p(1.0 1.0) p(4.0 -5.0)), c(p(9.0 0.0), 5.0)), p(0.0 0.0))
-		***Funcion pto-corte-r-c.
-	assertEqual(pto-corte-r-c(r(p(2.0 0.0) p(0.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(2.0 0.0))
-	assertEqual(pto-corte-r-c(r(p(2.0 0.0) p(0.0 2.0)), c(p(0.0 0.0), 2.0)), p(2.0 0.0) p(0.0 2.0))
-	assertEqual(pto-corte-r-c(r(p(4.0 0.0) p(4.0 -2.0)), c(p(1.0 2.0), 3.0)), mt)
-	assertEqual(pto-corte-r-c(r(p(2.0 8.0) p(4.0 8.0)), c(p(3.0 7.0), 1.0)), p(3.0 8.0) p(3.0 8.0))
+		***Funcion cut?-r-c.
+	assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 2.0)))
+	assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 1.0)))
+	assertFalse(cut?-r-c(r(p(2.0 2.0) p(-2.0 2.0)), c(p(0.0 0.0), 1.0)))
+		***Funcion cut-point-r-c-vertical.
+	assertEqual(cut-point-r-c-vertical(r(p(1.0 0.0) p(1.0 2.0)), c(p(0.0 0.0), 1.0)), p(1.0 0.0) p(1.0 0.0))
+	assertEqual(cut-point-r-c-vertical(r(p(2.0 1.0) p(2.0 2.0)), c(p(2.0 0.0), 2.0)), p(2.0 1.0) p(2.0 -1.0))
+		***Funciones cut-point-r-c-1 cut-point-r-c-2.
+	assertEqual(cut-point-r-c-1(r(p(0.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 1.0)), p(0.0 1.0))
+	assertEqual(cut-point-r-c-1(r(p(0.0 1.0) p(1.0 0.0)), c(p(0.0 0.0), 0.5)), p(0.5 0.5))
+	assertEqual(cut-point-r-c-2(r(p(0.0 2.0) p(2.0 3.0)), c(p(2.0 0.0), 2.0)), p(0.0 0.0))
+	assertEqual(cut-point-r-c-2(r(p(1.0 1.0) p(4.0 -5.0)), c(p(9.0 0.0), 5.0)), p(0.0 0.0))
+		***Funcion cut-point-r-c.
+	assertEqual(cut-point-r-c(r(p(2.0 0.0) p(0.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(2.0 0.0))
+	assertEqual(cut-point-r-c(r(p(2.0 0.0) p(0.0 2.0)), c(p(0.0 0.0), 2.0)), p(2.0 0.0) p(0.0 2.0))
+	assertEqual(cut-point-r-c(r(p(4.0 0.0) p(4.0 -2.0)), c(p(1.0 2.0), 3.0)), mt)
+	assertEqual(cut-point-r-c(r(p(2.0 8.0) p(4.0 8.0)), c(p(3.0 7.0), 1.0)), p(3.0 8.0) p(3.0 8.0))
 		***Veamos las funciones asociadas al punto de corte de dos circunferencias.
-		***Funcion se-cortan-c-c
-	assertTrue(se-cortan-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)))
-	assertTrue(se-cortan-c-c(c(p(0.0 0.0), 1.0), c(p(2.0 0.0), 1.0)))
-	assertTrue(se-cortan-c-c(c(p(0.0 0.0), 1.0), c(p(0.0 2.0), 1.0)))
-	assertTrue(se-cortan-c-c(c(p(1.0 2.0), 1.0), c(p(4.0 5.0), 0.9)))
-		***Funciones pto-corte-circunferencias-1 y pto-corte-circunferencias-2
- 	assertEqual(pto-corte-circunferencias-1(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0))
- 	assertEqual(pto-corte-circunferencias-2(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(2.0 0.0))	
- 	assertEqual(pto-corte-circunferencias-1(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
- 	assertEqual(pto-corte-circunferencias-2(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
- 	assertEqual(pto-corte-circunferencias-1(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
- 	assertEqual(pto-corte-circunferencias-2(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
-		***Funciones pto-corte-circunferencias-x-dis y pto-corte-circunferencias-y-dis
-	assertEqual(pto-corte-circunferencias-x-dis(c(p(2.0 1.0), 1.0), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
-	assertEqual(pto-corte-circunferencias-y-dis(c(p(2.0 1.0), 1.0), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
-	assertEqual(pto-corte-circunferencias-y-dis(c(p(2.0 1.0), 1.0), c(p(1.0 0.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
-	assertEqual(pto-corte-circunferencias-x-dis(c(p(2.0 1.0), 1.0), c(p(1.0 0.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
-		***Funcion pto-corte-c-c
-	assertEqual(pto-corte-c-c(c(p(5.0 1.0), 1.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(4.0 1.0))
-	assertEqual(pto-corte-c-c(c(p(2.0 4.0), 1.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(2.0 3.0))
-	assertEqual(pto-corte-c-c(c(p(4.0 3.0), 2.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(2.0 3.0))
-	assertEqual(pto-corte-c-c(c(p(4.0 3.0), 2.0), c(p(2.0 1.0), 2.0)), p(2.0 3.0) p(4.0 1.0))
+		***Funcion cut?-c-c
+	assertTrue(cut?-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)))
+	assertTrue(cut?-c-c(c(p(0.0 0.0), 1.0), c(p(2.0 0.0), 1.0)))
+	assertTrue(cut?-c-c(c(p(0.0 0.0), 1.0), c(p(0.0 2.0), 1.0)))
+	assertTrue(cut?-c-c(c(p(1.0 2.0), 1.0), c(p(4.0 5.0), 0.9)))
+		***Funciones cut-point-circumferences-1 y cut-point-circumferences-2
+ 	assertEqual(cut-point-circumferences-1(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0))
+ 	assertEqual(cut-point-circumferences-2(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(2.0 0.0))	
+ 	assertEqual(cut-point-circumferences-1(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
+ 	assertEqual(cut-point-circumferences-2(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
+ 	assertEqual(cut-point-circumferences-1(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
+ 	assertEqual(cut-point-circumferences-2(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
+		***Funciones cut-point-circumferences-x-dis y cut-point-circumferences-y-dis
+	assertEqual(cut-point-circumferences-x-dis(c(p(2.0 1.0), 1.0), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
+	assertEqual(cut-point-circumferences-y-dis(c(p(2.0 1.0), 1.0), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
+	assertEqual(cut-point-circumferences-y-dis(c(p(2.0 1.0), 1.0), c(p(1.0 0.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
+	assertEqual(cut-point-circumferences-x-dis(c(p(2.0 1.0), 1.0), c(p(1.0 0.0), 1.0)), p(1.0 1.0) p(1.0 1.0))
+		***Funcion cut-point-c-c
+	assertEqual(cut-point-c-c(c(p(5.0 1.0), 1.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(4.0 1.0))
+	assertEqual(cut-point-c-c(c(p(2.0 4.0), 1.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(2.0 3.0))
+	assertEqual(cut-point-c-c(c(p(4.0 3.0), 2.0), c(p(2.0 1.0), 2.0)), p(4.0 1.0) p(2.0 3.0))
+	assertEqual(cut-point-c-c(c(p(4.0 3.0), 2.0), c(p(2.0 1.0), 2.0)), p(2.0 3.0) p(4.0 1.0))
 endu)

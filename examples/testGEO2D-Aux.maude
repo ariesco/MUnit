@@ -1,14 +1,14 @@
 load GEO2D-Aux.maude
 load ../mUnit.maude
 
-(munit LISTA-FIGURAS is
+(munit FIGURES-LIST is
 		***Constructores de la lista
 	assertEqual(mtf & mtf, mtf)
 	assertEqual(mtf & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0))
 	assertEqual(p(0.0 0.0) & c(p(2.0 3.0), 1.0), c(p(2.0 3.0), 1.0) & p(0.0 0.0))
 endu)
 
-(munit DICC-FIGURAS is
+(munit DICC-FIGURES is
 		***Veamos las funciones referidas a los diccionarios simples para figuras
 		***Veamos el operador _[_]
 	assertEqual('p1 -> p(0.0 0.0) ['p1], p(0.0 0.0))
@@ -24,9 +24,9 @@ endu)
 	assertTrue(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'p1))
 	assertTrue(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'p2))
 	assertFalse(contains?(('p1 -> p(0.0 0.0)) . ('p2 -> p(1.0 1.0)), 'r1))
-		***Veamos la funcion nombre
-	assertEqual(nombre('p -> p(0.0 0.0), p(0.0 0.0)), 'p)
-	assertDifferent(nombre('p -> p(0.0 0.0), p(0.0 0.0)), 'r)
+		***Veamos la funcion name
+	assertEqual(name('p -> p(0.0 0.0), p(0.0 0.0)), 'p)
+	assertDifferent(name('p -> p(0.0 0.0), p(0.0 0.0)), 'r)
 		***Veamos las funciones referidas a los diccionarios para figuras
 		***Veamos el operador _[_]
 	assertEqual(([('p1 -> p(0.0 0.0)), mtD, mtD ] ['p1]), p(0.0 0.0))
@@ -50,9 +50,9 @@ endu)
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'r))
 	assertTrue(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 'c))
 	assertFalse(contains?([('p -> p(0.0 0.0)), ('r -> r(p(1.0 1.0) p(0.0 0.0))), ('c -> c(p(1.0 1.0), 1.0))], 's))
-		***Veamos la funcion nombre
-	assertEqual(nombre([('p -> p(0.0 0.0)), mtD, mtD], p(0.0 0.0)), 'p)
-	assertEqual(nombre([mtD, mtD, mtD], p(0.0 0.0)), nil)
-	assertEqual(nombre([('p -> p(0.0 0.0)), mtD, mtD], (p(1.0 1.0) & p(0.0 0.0))), 'p)
+		***Veamos la funcion name
+	assertEqual(name([('p -> p(0.0 0.0)), mtD, mtD], p(0.0 0.0)), 'p)
+	assertEqual(name([mtD, mtD, mtD], p(0.0 0.0)), nil)
+	assertEqual(name([('p -> p(0.0 0.0)), mtD, mtD], (p(1.0 1.0) & p(0.0 0.0))), 'p)
 endu)
 

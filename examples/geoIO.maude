@@ -30,35 +30,37 @@ endfm
 
 fmod GEO-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
- pr DICC-FIGURAS .
+ pr DICC-FIGURES .
  pr GEO2D .
 
  vars T T' T'' NP NC NR : Term .
  vars Q Q' Q'' name1 name2 : Qid .
  vars S S' : String .
  vars F F' : Float .
- vars P1 P2 p1 p2 p3 : Punto .
- vars r1 r2 : Recta .
- vars f1 f2 : Figura .
+ vars P1 P2 p1 p2 p3 : Point .
+ vars r1 r2 : Line .
+ vars f1 f2 : Figure .
  vars 1entrada 2entrada : Entry .
  vars D Dp Dr Dc : Dic .
+ var DF : DicFigures .
+ var z : Float .
 
  op processPoint : Term Term -> Entry .
  eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
 
- op processPointAux : Term -> Punto .
+ op processPointAux : Term -> Point .
  ceq processPointAux('__[T, T']) = qid2point(Q, Q')
   if Q := downQid(T) /\
      Q' := downQid(T') .
 
- op qid2point : Qid Qid -> Punto .
+ op qid2point : Qid Qid -> Point .
  ceq qid2point(Q, Q') = p(F F')
   if S := string(Q) /\
      S' := string(Q') /\
      F := float(S) /\
      F' := float(S') .
 
- op processCircumference-1 : Term Punto Term -> Entry .
+ op processCircumference-1 : Term Point Term -> Entry .
  ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
   if Q := downQid(T)
   /\ S := string(Q)
@@ -70,44 +72,51 @@ fmod GEO-COMMAND-PROCESSING is
   /\ F := float(S)
   /\ F == 0.0 .
 
- op processCircumference-2 : Term Term Punto Punto Punto -> Entry .
+ op processCircumference-2 : Term Term Point Point Point -> Entry .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NC) -> c(p1, F)
-  if F := distancia(p2, p3)
+  if F := distance(p2, p3)
   /\ not F == 0.0 .
  ceq processCircumference-2('token[NC], 'token[NP], p1, p2, p3) = downQid(NP) -> p1
-  if F := distancia(p2, p3)
+  if F := distance(p2, p3)
   /\ F == 0.0 .
 
- op processLine : Term Punto Punto -> Entry .
+ op processLine : Term Point Point -> Entry .
  eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
 
- op processCutPoint : Term Term Figura Figura -> Dic .
+ op processCutPoint : Term Term Figure Figure -> Dic .
  ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = processCutPointAux(p1, p2, f1, f2, 1entrada,2entrada)
-  if p1 := primer-elemento(pto-corte(f1 , f2))
-  /\ p2 := primer-elemento(quitar-primer-elemento(pto-corte(f1 , f2)))
+  if p1 := first-element(cut-point(f1 , f2))
+  /\ p2 := first-element(delete-first-element(cut-point(f1 , f2)))
   /\ 1entrada := downQid(T) -> p1
   /\ 2entrada := downQid(T') -> p2 .
 
- op processCutPointAux : Punto Punto Figura Figura Entry Entry -> Dic .
+ op processCutPointAux : Point Point Figure Figure Entry Entry -> Dic .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada . 2entrada
   if not p1 == p2
-  /\ long-lista(pto-corte(f1 , f2)) == 2.0 .
+  /\ length-list(cut-point(f1 , f2)) == 2.0 .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
   if p1 == p2
-  /\ long-lista(pto-corte(f1 , f2)) == 2.0 .
+  /\ length-list(cut-point(f1 , f2)) == 2.0 .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
-  if long-lista(pto-corte(f1 , f2)) == 1.0 .
+  if length-list(cut-point(f1 , f2)) == 1.0 .
  ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = mtD
-  if long-lista(pto-corte(f1 , f2)) == 0.0 .
+  if length-list(cut-point(f1 , f2)) == 0.0 .
 
- op processPerpendicular : Recta Recta -> Bool .
- eq processPerpendicular(r1, r2) = r-perpendiculares(r1, r2) .
+ op processPerpendicular :  Line Line -> Bool .
+ eq processPerpendicular(r1, r2) = are-perpendiculars(r1, r2) .
 
- op new-name : Qid Qid -> Qid .
- eq new-name(name1, name2) = qid(string(name1) + string(name2)) .
+ op new-name : Qid Qid Qid DicFigures -> Qid .
+ ceq new-name(name1, name2, Q, DF) = new-name(Q', qid(string(1.0)), Q, DF)
+   if Q' := qid(string(name1) + string(name2)) /\
+      Q' == Q  . 
+ ceq new-name(name1, name2, Q, DF) = new-name(Q', qid(string(1.0)), Q, DF)
+   if Q' := qid(string(name1) + string(name2)) /\
+      contains?(DF, Q') .
+ ceq new-name(name1, name2, Q, DF) = Q'
+   if Q' := qid(string(name1) + string(name2)) .
 
- op mod-elements : DicFiguras Dic -> QidList .
- eq mod-elements([Dp, Dr, Dc], D . Q -> f1) = mod-elements([Dp, Dr, Dc], D) nombre([Dp, Dr, Dc], f1) .
+ op mod-elements : DicFigures Dic -> QidList .
+ eq mod-elements([Dp, Dr, Dc], D . Q -> f1) = mod-elements([Dp, Dr, Dc], D) name([Dp, Dr, Dc], f1) .
  eq mod-elements([Dp, Dr, Dc], mtD) = nil .
 
 endfm
@@ -115,7 +124,7 @@ endfm
 mod GEO-DATABASE-HANDLING is
  pr GEO-COMMAND-PROCESSING .
  inc DATABASE-HANDLING .
- pr DICC-FIGURAS .
+ pr DICC-FIGURES .
 
  sort GEODatabaseClass .
  subsort GEODatabaseClass < DatabaseClass .
@@ -124,16 +133,16 @@ mod GEO-DATABASE-HANDLING is
  var  AtS : AttributeSet .
  var  DB : Database .
  vars T1 T2 T3 T4 : Term .
- var  F F' : Figura .
+ var  F F' : Figure .
  var  O : Oid .
- var  D : DicFiguras .
+ var  D : DicFigures .
  var  D' : Dic .
  var  D? : [Dic] .
  vars Q Q' name1 name2 : Qid .
  var names QIL : QidList .
  var b : Bool .
 
- op dic :_ : DicFiguras -> Attribute [ctor] .
+ op dic :_ : DicFigures -> Attribute [ctor] .
 
  crl [point] :
      < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
@@ -164,8 +173,8 @@ mod GEO-DATABASE-HANDLING is
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
                   output : ('Circunferencia 'almacenada names) , AtS >
-  if name1 := new-name(downQid(T1), downQid(T2)) /\
-     name2 := new-name(name1, downQid(T3)) /\
+  if name1 := new-name(downQid(T1), downQid(T2), 'None, D) /\
+     name2 := new-name(name1, downQid(T3), 'None, D) /\
      Q -> F := processCircumference-2('token[upTerm(name2)], 'token[T1], D[downQid(T1)], D[downQid(T2)], D[downQid(T3)]) /\
      names := mod-elements(D [Q / F], Q -> F) .
 
@@ -182,7 +191,7 @@ mod GEO-DATABASE-HANDLING is
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
                   output : ('Recta 'almacenada names) , AtS >
-  if name1 := new-name(downQid(T1), downQid(T2)) /\
+  if name1 := new-name(downQid(T1), downQid(T2), 'None, D) /\
      Q -> F := processLine('token[upTerm(name1)], D[downQid(T1)] , D[downQid(T2)])  /\
      names := mod-elements(D [Q / F], Q -> F) . ***[print " sdfds "]
 
@@ -202,8 +211,8 @@ mod GEO-DATABASE-HANDLING is
                   output : ('Puntos 'almacenados names) , AtS >
   if Q := downQid(T1) /\
      Q' := downQid(T2) /\
-     name1 := new-name(Q, Q') /\
-     name2 := new-name(Q', Q) /\
+     name1 := new-name(Q, Q', 'none, D) /\
+     name2 := new-name(Q', Q, name1, D) /\
      D' := processCutPoint('token[upTerm(name1)], 'token[upTerm(name2)], D[Q], D[Q']) /\
      names := mod-elements(D U [D' , mtD , mtD], D') .
 
@@ -218,17 +227,6 @@ mod GEO-DATABASE-HANDLING is
             then (Q Q' 'are 'perpendicular)
             else (Q Q' 'are 'not 'perpendicular)
             fi .
-
-***(
- crl [perpendicular2] :
-     < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
-                  output : nil, AtS >
-  => < O : MUDC | input : nilTermList, dic : D ,
-                  output : (Q Q' 'aren't 'perpendicular), AtS >
-  if Q := downQid(T1) /\
-     Q' := downQid(T2) /\
-     processPerpendicular(D[Q], D[Q']) == false .
-)
 
 endm
 
@@ -334,3 +332,26 @@ loop init-geo .
 (line r2 from p3 to p4)
 (are perpendicular r1 and r2 ?)
 )
+
+***(
+(point 0.0 0.0 as p1)
+(point 1.0 1.0 as p2)
+(point 1.0 0.0 as p3)
+(point 0.0 1.0 as p4)
+(line from p1 to p2)
+(line from p3 to p4)
+(cut point p1p3p2p4 and p2p4p1p3 of p1p2 and p3p4)
+(point 2.0 2.0 as p1p3)
+(point 3.0 2.0 as p2p4)
+(line from p1p3 to p2p4)
+(point 1.0 3.7 as p2p41.0)
+(line from p1p3 to p2p41.0)
+)
+
+(point 1.0 0.0 as p1)
+(point 0.0 1.0 as p2)
+(point 1.0 3.0 as p3)
+(point 3.0 1.0 as p4)
+(line r from p1 to p2)
+(circumference rr in p3 with radius distance from p3 to p4)
+(cut point of r and rr)
