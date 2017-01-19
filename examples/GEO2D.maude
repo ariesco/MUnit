@@ -12,6 +12,7 @@ fmod POINT is
 
 	vars p1 p2 p3 p4 : Point .
 	vars z11 z12 z21 z22 a b c : Float .
+	var t : Bool .
 	vars l l1 : List .
 
 	op empty-list : List -> Bool .
@@ -34,6 +35,15 @@ fmod POINT is
 	op distance : Point Point -> Float .
 	*** Calcula la distancia entre dos puntos mediante la metrica usual.
 	eq distance(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) + ((z22 - z12) ^ 2.0)) .
+
+	op equal-epsilon : Float Float Float -> Bool .
+	*** Comprueba si dos numeros reales son iguales en funcion de un epsilon.
+	ceq equal-epsilon(z11, z12, a) = true
+	if (z11 >= z12) /\ a > (z11 - z12) .
+	ceq equal-epsilon(z11, z12, a) = false
+	if (z11 >= z12) /\ a <= (z11 - z12) .
+	ceq equal-epsilon(z11, z12, a) = equal-epsilon(z12, z11, a)
+	if z11 < z12 .
 
 	op trans-point : Point -> Point .
 	*** Intercambia las coordenadas de un punto
@@ -89,6 +99,10 @@ fmod LINE is
 	op v-are-perpendicular? : Vector Vector -> Bool .
 	***Comprueba si dos vectores son perpendiculares
 	eq v-are-perpendicular?(v1 , v2) = (v-scalar-prod(v1 , v2) == 0.0) .
+
+	op v-angle : Vector Vector -> Float .
+	*** Da el angulo comprendido entre dos vectores
+	eq v-angle(v1, v2) = (v-scalar-prod(v1, v2)) / (v-norm(v1) * v-norm(v2)) .
 
 	op direction-vector-line : Line -> Vector .
 	*** Devuelve el vector director de una recta
@@ -175,6 +189,11 @@ fmod LINE is
 	   n1 := equ-line-n(r1) /\
 	   x := cut-point-x(r1, r2) .
 	eq cut-point-y(r(p(z11 z12) p(z21 z12)), r2) = z12 .
+
+	op angle : Line Line -> Float .
+	*** Da el angulo entre dos rectas.
+	eq angle(r1, r2) = v-angle(direction-vector-line(r1), direction-vector-line(r2)) .
+	**********************************************************************************************************************************
 
 endfm
 
