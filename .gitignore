@@ -2,3 +2,13 @@
 *.dvi
 
 memoria/tfg_fiesta.pdf
+
+*.toc
+
+*.out
+
+*.log
+
+*.aux
+
+*.gz
