@@ -8,7 +8,7 @@ fmod POINT is
 	*** Define un punto como un par de numeros reales
 
 	op mt : -> List [ctor] .
-	op __ : List List -> List [ctor assoc comm id: mt] . 
+	op __ : List List -> List [ctor assoc comm id: mt] .
 
 	vars p1 p2 p3 p4 : Point .
 	vars z11 z12 z21 z22 a b c : Float .
@@ -17,7 +17,7 @@ fmod POINT is
 
 	op empty-list : List -> Bool .
 	*** Comprueba si una lista es la lista vacia.
-	eq empty-list(mt) = true . 
+	eq empty-list(mt) = true .
 	eq empty-list(mt l1 p1) = false .
 
 	op delete-first-element : List -> List .
@@ -62,7 +62,7 @@ fmod POINT is
 	*** Devuelve el valor de una ecuacion de segundo grado en el caso +
 	*** Recibe los valores correspondientes a ax^2 + bx + c.
 	eq second-degree-equation-1(0.0 , b , c) = first-degree-equation(b, c) .
-	eq second-degree-equation-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
+	eq second-degree-equation-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) .
 
 	op second-degree-equation-2 : Float Float Float -> Float .
 	*** Devuelve el valor de una ecuacion de segundo grado en el caso -
@@ -72,7 +72,7 @@ fmod POINT is
 
 endfm
 
-fmod LINE is 
+fmod LINE is
 
 	pr POINT .
 	sorts Line Vector .
@@ -115,20 +115,20 @@ fmod LINE is
 	eq direction-vector-line(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
 
 	op equ-line-m : Line -> Float .
-	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
+	*** Dados los dos puntos que definen la recta, devuelve el valor de m,
 	*** para poder "construirla" de forma y = mx + n.
 	eq equ-line-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) .
 
 	op equ-line-n : Line -> Float .
-	*** Dados los dos puntos que definen la recta, devuelve el valor de n, 
-	*** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+	*** Dados los dos puntos que definen la recta, devuelve el valor de n,
+	*** para poder "construirla" de forma y = mx + n , teniendo cuidado
 	*** en las que son de la forma  x = n
 	eq equ-line-n(r(p(z11 z12) p(z21 z22)))= z12 - (z11 * equ-line-m(r(p(z11 z12) p(z21 z22)))) .
 
 	op are-equal : Line Line -> Bool .
-	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
+	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento,
 	*** pues una recta puede construirse mediante infinitos pares de puntos.
-	eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
+	eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true .
 	eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and (equ-line-n(r1) == equ-line-n(r2)) [owise] .
 
 	op line-from-vector : Vector Point -> Line .
@@ -136,7 +136,7 @@ fmod LINE is
 	eq line-from-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p((z11 + z21) (z12 + z22))) .
 
 	op perpendicular-line : Line Point -> Line .
-	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
+	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.
 	eq perpendicular-line(r1 , p1) = line-from-vector(perpendicular-vector(direction-vector-line(r1)) , p1) .
 
 	op are-perpendiculars : Line Line -> Bool .
@@ -150,20 +150,20 @@ fmod LINE is
 	op horizontal : Line -> Bool .
 	*** Comprueba si una recta es de la forma y = n .
 	eq horizontal(r(p(z11 z12) p(z21 z22))) = (z22 - z12) == 0.0 .
-	
+
 	op are-in-line : Point Line -> Bool .
 	*** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
-	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
+	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual
 	*** que la distancia entre estos el punto estara contenido en la recta.
-	eq are-in-line(p1,r(p2 p3)) = (distance(p1 , p2) + distance(p1 , p3)) == distance(p2 , p3) . 
-	
+	eq are-in-line(p1,r(p2 p3)) = (distance(p1 , p2) + distance(p1 , p3)) == distance(p2 , p3) .
+
 	op cut?-r-r : Line Line -> Bool .
 	*** comprueba si dos rectas se cortan a partir de la pendiente de estas
 	*** devolviendo el valor false si son paralelas y true en caso contrario.
 	*** El caso en que sean coincidentes debera verse de forma manual comparandolas.
-   	ceq cut?-r-r(r1, r2) = true 
+   	ceq cut?-r-r(r1, r2) = true
 	if vertical(r1) and horizontal(r2) .
-   	ceq cut?-r-r(r1, r2) = true 
+   	ceq cut?-r-r(r1, r2) = true
 	if vertical(r2) and horizontal(r1) .
 	eq cut?-r-r(r1, r2) = not (equ-line-m(r1) == equ-line-m(r2)) .
 
@@ -186,7 +186,7 @@ fmod LINE is
 	   n1 := equ-line-n(r1) /\
 	   n2 := equ-line-n(r2) .
 	eq cut-point-x(r1, r(p(z11 z12) p(z11 z22))) = z11 .
-	
+
 	op cut-point-y : Line Line -> Float .
 	*** Devuelve la coordenada Y del punto de corte de las dos rectas.
 	ceq cut-point-y(r1, r2) = m1 * x + n1
@@ -209,9 +209,9 @@ fmod CIRCUMFERENCE is
 	sorts Circumference .
 
 	op c : Point Float -> Circumference [ctor] .
-	*** Define una circunferencia como un par (punto, real), correspondiendo estos con el 
+	*** Define una circunferencia como un par (punto, real), correspondiendo estos con el
 	*** centro y el radio.
-	
+
 	vars p1 p2 p3 p4 : Point .
 	vars z11 z12 z21 z22 z31 z32 z41 z42 m n x y Aux-A Aux-B Aux-C Aux-D Aux-E Aux-F Aux-G : Float .
 	vars r1 r2 : Line .
@@ -219,7 +219,7 @@ fmod CIRCUMFERENCE is
 	vars c1 c2 c1' c2' : Circumference .
 	vars t : Bool .
 	vars l l1 : List .
-		
+
 	op circumference-center : Circumference -> Point .
 	*** Devuelve el centro de la circunferencia
 	eq circumference-center(c(p1 , z11)) = p1 .
@@ -229,7 +229,7 @@ fmod CIRCUMFERENCE is
 	eq circumference-radius(c(p1 , z11)) = z11 .
 
 	op are-in-circumference : Point Circumference -> Bool .
-	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
+	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia
 	*** al centro con el radio
 	eq are-in-circumference(p1 ,c(p2 , z11)) = distance(p1 , p2) == z11 .
 
@@ -242,14 +242,14 @@ fmod CIRCUMFERENCE is
 	*** Dados una circunferencia y un punto devuelve una lista con los dos puntos de corte
 	*** pudiendo ser estos iguales.
 	ceq cut-point-r-c(r(p(z11 z12) p(z11 z22)), c(p(z31 z32), z41)) = p(z11 Aux-A) p(z11 Aux-B)
-	*** caso vertical 
+	*** caso vertical
 	if Aux-A := second-degree-equation-1(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) /\
 	   Aux-B := second-degree-equation-2(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) .
 	ceq cut-point-r-c(r(p(z11 z12) p(z21 z12)), c(p(z31 z32), z41)) = p(Aux-A z12) p(Aux-B z12)
 	*** caso horizontal
 	if Aux-A := second-degree-equation-1(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) /\
 	   Aux-B := second-degree-equation-2(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) .
-	eq cut-point-r-c(r1, c1) = cut-point-r-c-1(r1, c1) cut-point-r-c-2(r1, c1) .
+	eq cut-point-r-c(r1, c1) = cut-point-r-c-1(r1, c1) cut-point-r-c-2(r1, c1) [owise] .
 
 	op cut-point-r-c-1 : Line Circumference -> Point .
 	*** Halla el primer punto de corte de la recta y la circunferencia
@@ -276,36 +276,36 @@ fmod CIRCUMFERENCE is
 	op cut?-c-c : Circumference Circumference -> Bool .
 	*** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
 	ceq cut?-c-c(c1, c2) = distance(circumference-center(c1) , circumference-center(c2)) <= (circumference-radius(c1) + circumference-radius(c2))
-	if not (circumference-center(c1) == circumference-center(c2)) . 
+	if not (circumference-center(c1) == circumference-center(c2)) .
 	ceq cut?-c-c(c1, c2) = circumference-radius(c1) == circumference-radius(c2)
 	if (circumference-center(c1) == circumference-center(c2)) .
 
 	op cut-point-c-c : Circumference Circumference -> List .
-	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
+	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
 	if not (z11 == z21) .
 	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
 	if not (z12 == z22) .
-	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
+	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt
 	if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
 
 	op cut-point-circumferences-x-dis : Circumference Circumference -> List .
 	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
 	*** solo funciona si los centros no tienen la misma X, habria que hacer caso contrario
 	ceq cut-point-circumferences-x-dis(c1 , c2) = p1 p2
-	if p1 := cut-point-circumferences-1(c1 , c2) 
+	if p1 := cut-point-circumferences-1(c1 , c2)
 	/\ p2 := cut-point-circumferences-2(c1 , c2) .
 
 	op cut-point-circumferences-y-dis : Circumference Circumference -> List .
 	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
 	ceq cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p1 p2
-	if p1 := trans-point(cut-point-circumferences-1(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) 
+	if p1 := trans-point(cut-point-circumferences-1(c(p(z12 z11) , z31) , c(p(z22 z21) , z32)))
 	/\ p2 := trans-point(cut-point-circumferences-2(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) .
 
 	op cut-point-circumferences-1 : Circumference Circumference -> Point .
 	*** halla el primer punto de corte de las dos circunferencias.
 	ceq cut-point-circumferences-1(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (second-degree-equation-1(Aux-C , Aux-D , Aux-E) * Aux-B))  second-degree-equation-1(Aux-C , Aux-D , Aux-E))
-	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
-	/\ Aux-B := (z22 - z12) / (z21 - z11) 
+	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11)
+	/\ Aux-B := (z22 - z12) / (z21 - z11)
 	/\ Aux-C := (Aux-B) ^ 2.0 + 1.0
 	/\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
 	/\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
@@ -313,8 +313,8 @@ fmod CIRCUMFERENCE is
 	op cut-point-circumferences-2 : Circumference Circumference -> Point .
 	*** halla el segundo punto de corte de las dos circumferences.
 	ceq cut-point-circumferences-2(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (second-degree-equation-2(Aux-C , Aux-D , Aux-E) * Aux-B))  second-degree-equation-2(Aux-C , Aux-D , Aux-E))
-	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
-	/\ Aux-B := (z22 - z12) / (z21 - z11) 
+	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11)
+	/\ Aux-B := (z22 - z12) / (z21 - z11)
 	/\ Aux-C := (Aux-B) ^ 2.0 + 1.0
 	/\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
 	/\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
@@ -350,10 +350,10 @@ fmod GEO2D is
 	ceq cut-point(c1 , c2) = cut-point-c-c(c1 , c2)
 	if cut?-c-c(c1 , c2) .
 	ceq cut-point(p1, p2) = mt
-	if not p1 == p2 .	
+	if not p1 == p2 .
 	ceq cut-point(p1 , r1) = mt
 	if not are-in-line(p1 , r1) .
-	ceq cut-point(r1 , r2) = mt 
+	ceq cut-point(r1 , r2) = mt
 	if not cut?-r-r(r1 , r2) .
 	ceq cut-point(p1 , c1) = mt
 	if not are-in-circumference(p1 , c1) .
@@ -362,7 +362,7 @@ fmod GEO2D is
 	ceq cut-point(c1 , c2) = mt
 	if not cut?-c-c(c1 , c2) .
 
-endfm	
+endfm
 ***(
 red cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.0 2.0) p(7.0 5.0)))  .
  red cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)) .

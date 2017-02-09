@@ -1,7 +1,12 @@
 load GEO2D.maude
 load ../mUnit.maude
 
-(munit CIRCUMFERENCE is 
+*** red in CIRCUMFERENCE : cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)) .
+
+*** red in CIRCUMFERENCE :
+*** cut-point-r-c-1(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)) .
+
+(munit CIRCUMFERENCE is
 ***(
 		***Funciones referidas a las circunferencias.
 		***Funcion circumference-center.
@@ -13,7 +18,7 @@ load ../mUnit.maude
 		***Funcion are-in-circumference.
 	assertFalse(are-in-circumference(p(1.0 1.0), c(p(0.0 0.0), 1.0)))
 	assertTrue(are-in-circumference(p(1.0 0.0), c(p(0.0 0.0), 1.0)))
-	assertFalse(are-in-circumference(p(0.2 0.2), c(p(0.0 0.0), 1.0)))	
+	assertFalse(are-in-circumference(p(0.2 0.2), c(p(0.0 0.0), 1.0)))
 		***Veamos las funciones asociadas al punto de corte recta, circunferencia.
 		***Funcion cut?-r-c.
 	assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 2.0)))
@@ -29,8 +34,8 @@ load ../mUnit.maude
 	assertDifferent(cut-point-r-c(r(p(4.0 0.0) p(4.0 -2.0)), c(p(0.0 0.0), 1.0)),p(0.0 0.0) p(0.0 0.0))
 	assertEqual(cut-point-r-c(r(p(0.0 2.0) p(2.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(0.0 2.0))
 	assertEqual(cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0)) ***
-	*** Deberia dar correcto, si se hace con el red que lo es.
 )
+	*** Deberia dar correcto, si se hace con el red que lo es.
 		***Veamos las funciones asociadas al punto de corte de dos circunferencias.
 		***Funcion cut?-c-c
 	assertTrue(cut?-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)))
@@ -40,8 +45,8 @@ load ../mUnit.maude
 		***Funciones cut-point-circumferences-1 y cut-point-circumferences-2
  	assertEqual(cut-point-circumferences-1(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0))
  	assertEqual(cut-point-circumferences-2(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(2.0 0.0))
- 	***assertDifferent(cut-point-circumferences-1(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0)) 
- 	***assertDifferent(cut-point-circumferences-2(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0)) 
+ 	***assertDifferent(cut-point-circumferences-1(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
+ 	***assertDifferent(cut-point-circumferences-2(c(p(2.0 4.0), 1.0), c(p(4.0 4.0), 1.0)), p(3.0 4.0))
  	***assertDifferent(cut-point-circumferences-1(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
  	***assertDifferent(cut-point-circumferences-2(c(p(4.0 2.0), 1.0), c(p(4.0 4.0), 1.0)), p(4.0 3.0))
 		***Funciones cut-point-circumferences-x-dis y cut-point-circumferences-y-dis
