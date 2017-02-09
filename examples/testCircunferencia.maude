@@ -2,6 +2,7 @@ load GEO2D.maude
 load ../mUnit.maude
 
 (munit CIRCUMFERENCE is 
+***(
 		***Funciones referidas a las circunferencias.
 		***Funcion circumference-center.
 	assertEqual(circumference-center(c(p(1.0 2.0), 3.0)), p(1.0 2.0))
@@ -29,6 +30,7 @@ load ../mUnit.maude
 	assertEqual(cut-point-r-c(r(p(0.0 2.0) p(2.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(0.0 2.0))
 	assertEqual(cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0)) ***
 	*** Deberia dar correcto, si se hace con el red que lo es.
+)
 		***Veamos las funciones asociadas al punto de corte de dos circunferencias.
 		***Funcion cut?-c-c
 	assertTrue(cut?-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)))
