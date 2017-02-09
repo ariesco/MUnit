@@ -1,7 +1,7 @@
 %!TEX root = tfg_fiesta.tex
 
-Para ilustrar lo comentado en la introducción en este primer capitulo definiremos unos primeros m\'odulos sencillos que nos serviran de ejemplo, y m\'as adelante extenderemos con los test de unidad. \par
-El primero de estos se corresponder\'a con los números naturales, los cuales ser\'an definidos de forma an\'aloga al m\'etodo de Peano. Posteriormente se le dar\'a distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el \'orden.\par
+Para ilustrar lo comentado en la introducción en este primer capitulo definiremos unos primeros módulos sencillos que nos serviran de ejemplo, y más adelante extenderemos con los test de unidad. \par
+El primero de estos se corresponderá con los números naturales, los cuales ser\'an definidos de forma análoga al método de Peano. Posteriormente se le dará distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el órden.\par
 
 Un módulo funcional en Maude empieza con la palabra reservada \texttt{fmod}...
 
@@ -11,9 +11,7 @@ fmod PEANO-NAT-EXTRA is
 \end{verbatim}
 }
 
-Es posible definir tipos de datos mediante \texttt{sort}. Por ejemplo, podemos definir
-los tipos \texttt{Nat}, \verb"_+_"
-
+Es posible definir tipos de datos mediante \texttt{sort}, y \texttt{sorts} en el caso en que sean varios.
 
 {\codesize
 \begin{verbatim}
@@ -21,33 +19,79 @@ los tipos \texttt{Nat}, \verb"_+_"
 \end{verbatim}
 }
 
+Dentro de los tipos se les puede dotar de órden, ya que Maude es un que permite el orden entre sus tipos. \par
+
 {\codesize
 \begin{verbatim}
    subsort NoZeroNat < Nat .
    subsort ZeroNat < Nat .
+\end{verbatim}
+}
+
+Antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con \texttt{[ctor]}. \par
+
+{\codesize
+\begin{verbatim}
    op 0 : -> ZeroNat [ctor] .
    op s : Nat -> NoZeroNat [ctor iter] .
+\end{verbatim}
+}
 
+Como se puede observar a los constructores, se les puede dotar de propiedades con algunos comandos como \texttt{iter}, que le permite tener una definición recursiva o iterativa. \\
+
+Continuando con la creación del módulo, antes de definir ninguna función sera necesario hacer una declaración de variables en base a sus tipos mediante el comando \texttt{var}, o \texttt{vars} terminando con el tipo correspondiente. 
+
+{\codesize
+\begin{verbatim}
    vars M N R : Nat .
+\end{verbatim}
+}
 
-   op _+_ : Nat Nat -> Nat .
-   eq 0 + N = N .
-   eq s(M) + N = s(M + N) .
+La creacion de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y tambien va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo tambien hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue: \par
 
+{\codesize
+\begin{verbatim}
+   op add : Nat Nat -> Nat .                   op _+_ : Nat Nat -> Nat .
+\end{verbatim}
+}
+
+Una vez definida la función habra que dotarla de ecuaciones para indicar su comportamiento. Estas comenzaran por \texttt{eq} e indicaran mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
+{\codesize
+\begin{verbatim}
+   eq add(0 , N) = N .                         eq 0 + N = N .
+   eq add(s(M) , N) = s(add(M , N)) .          eq s(M) + N = s(M + N) .
+\end{verbatim}
+}
+
+Por supuesto esta no es la unica forma que tenemos de dar las funciones, sino que en los casos de condicionales tendremos que usar el comando \texttt{ceq} asi como dar con \texttt{if} o \texttt{if not} las condiciones booleanas a las distintas ecuaciones. \par
+
+{\codesize
+\begin{verbatim}
    op _*_ : Nat Nat -> Nat .
-   eq 0 * M = 0 .
-   eq s(M) * N = (M * N) + N .
-	
-   op _==_ : Nat Nat -> Nat .
-   eq 0 == s(M) = false .
-   eq 0 == 0 = true .
-   eq s(M) == s(N) = M == N .
-	
-   op _<_ : Nat Nat -> Bool .
-   eq 0 < s(M) = true .
-   eq 0 < 0 = false .
-   eq s(M) < 0 = false .
-   eq s(M) < s(N) = M < N .
+   ceq M * N = 0 
+   if M == 0.
+   ceq s(M) * N = (M * N) + N
+   if not (s(M) == 0) .
+\end{verbatim}
+}
+
+Ejemplos de otras funciones pueden ser las dos siguientes, definidas de forma análoga a la suma. \par
+
+{\codesize
+\begin{verbatim}
+   op _==_ : Nat Nat -> Nat .                  op _<_ : Nat Nat -> Bool .
+   eq 0 == s(M) = false .                      eq 0 < s(M) = true .
+   eq 0 == 0 = true .                          eq 0 < 0 = false .
+   eq s(M) == s(N) = M == N .                  eq s(M) < 0 = false .
+                                               eq s(M) < s(N) = M < N .	
+
+\end{verbatim}
+}
+
+Una vez hayamos creado e incluido todas las funciones sera necesario indicar la terminación del módulo mediante: \par
+
+{\codesize
+\begin{verbatim}
 endfm
 \end{verbatim}
 }
@@ -146,823 +190,4 @@ Por supuestos estos primeros m\'odulos mostrados son tremendamente sencillos, y 
 
 Siguiendo el mismo camino extendemos los enteros con los racionales, incluyendo algunas funciones nuevas como el maximo comun divisor y el resto en los m\'dulos antiguos, ya que son operaciones que pueden vivir en los entornos anteriores, aunque sea con restricciones. Los modulos completos son Peano-Nat-Extra, Peano-Int-Extra y Peano-Rac-extra; sus modulos de test son test-Peano-Nat-Extra, test-Peano-Int-Extra y test-Peano-Rac-extra y las ejecuciones de estos ejec-Peano-Nat-Extra, ejec-Peano-Int-Extra y ejec-Peano-Rac-extra \par
 
-\chapter{Puntos y rectas}\label{cap.2}
 
-Una vez completados los modulos anteriores pasaremos a la construcci\'on de uno mayor. Al ser Maude un lenguaje algebraico la mayoria de m\'odulos, ejemplos y ejercicios que se pueden encontrar tienen que ver con esta caracteristica, siendo principalmente cosas como anillos y grupos. Debido a esto he intentado salirme de lo normal implementando el equivalente a la geometria con regla y compas, lo cual por supuesto tiene mucho que ver con el algebra, pero no se recurre a los modelos anteriores. \\
-
-Para la implementaci\'on de la idea partiremos por la división del modulo en tres, consistiendo el primero en la geometria basica en dos dimensiones con puntos, rectas y circumferencias, as\'i como todas las interacciones entre ellas, el tercero en reglas para la entrada y la salida de datos, haciendo que sea interactivo y que para utilizarlo no sean necesarios conocimientos previos del lenguaje, solo el nombre de las reglas, o comandos, que utilizaremos. El segundo ser\'a, al contrario que los otros dos, un m\'odulo puente, que cargar\'a con el peso de todas las funciones necesarias para la implementaci\'on del tercero pero que, por orden y claridad, no se incluiran en el m\'odulo de geometr\'ia dado que ah\'i no se utilizar\'an. \\
-
-Comencemos con la creaci\'on del primer modulo.  Como consta de tres objetos bien diferenciados lo deividiremos en tres fmod distintos, correspondiendose estos con los puntos, las rectas, y las circumfer\'encias. \\
-
-La definici\'on de los puntos sera sencilla, construyendose como un par consistente por dos numeros enteros, igual que se har\'ia en papel. Por otro lado, a los puntos no se les puede dotar de operaciones complicadas, m\'as all\'a del calculo de la distancia entre dos de ellos y el intercambio de sus coordenadas. Asi pues el fmod, quedaria como sigue.
-
-\begin{verbatim}
-fmod POINT is
-
-   pr FLOAT .
-   sorts Point .
-
-   op p(__) : Float Float -> Point [ctor] .
-   *** Define un punto como un par de numeros reales
-
-   vars p1 p2 p3 p4 : Point .
-   vars z11 z12 z21 z22 a b c : Float .
-   var t : Bool .
-
-   op distance : Point Point -> Float .
-   *** Calcula la distancia entre dos puntos mediante la metrica usual.
-   eq distance(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) + ((z22 - z12) ^ 2.0)) .
-
-   op trans-point : Point -> Point .
-   *** Intercambia las coordenadas de un punto
-   eq trans-point(p(z11 z12)) = p(z12 z11) .
-
-endfm
-\end{verbatim}
-
-Como el modulo queda tan sencillo, y sera necesario cargarlo para la creación de los otros dos, lo utilizaremos tambien para las funciones auxiliares que vayamos necesitando en los dos modulos siguientes, como por ejemplo la implementaci\'on de las ecuaciones de segundo grado, lo que se ver\'a a su tiempo. Siguiendo con el espiritu anterior el fmod contara con casos de test y se podr\'a consultar el resultado de estos, pero debido al caracter incompleto del m\'odulo se encontrar\'an en los apendices, y ser\'an una parte de los que m\'as adelante crearemos. \\
-
-Creaci\'on del fmod de las rectas. Las rectas se implementaran de forma analoga a los puntos, pero en este caso como un par de estos en vez de de Floats. por otro lado el numero de operaciones es bastante mayor, teniendo la creacci\'on de rectas perpendiculares a otras o a un punto, la comparaci\'on de rectas por su pendiente, hayar la distancia entre dos de estas y finalmente el punto de corte en caso de que exista. Debido a la posible complicaci\'on posterior de los calculos se ha decidido en este punto por añadir al fmod Line, ademas de las rectas, el tipo vector, que se utilizar\'a para todos los calculos de pendientes. \\
-
-Comenzaremos por las definici\'on de los tipos y las operaciones referidas a los vectores: \par
-
-\begin{verbatim}
-fmod LINE is 
-
-   pr POINT .
-   sorts Line Vector .
-
-   op r(__) : Point Point -> Line [ctor] .
-   *** Define una recta como un par de puntos, mas adelante la daremos ecuaciones.
-   op v(__) : Float Float -> Vector [ctor] .
-   *** Define un vector como un par de reales.
-   *** Extremo menos origen.
-
-   vars p1 p2 p3 p4 : Point .
-   vars z11 z12 z21 z22 z31 z32 z41 z42 m n a b c m1 m2 n1 n2 x y : Float .
-   vars r1 r2 : Line .
-   vars v1 v2 : Vector .
-   vars t : Bool .
-   vars l l1 : List .
-
-   op v-scalar-prod : Vector Vector -> Float .
-   ***Calcula el producto escalar de dos vectores
-   eq v-scalar-prod(v(z11 z12) , v(z21 z22)) = z11 * z21 + z12 * z22 .
-
-   op v-norm : Vector -> Float .
-   ***Calcula el modulo de un vector
-   eq v-norm(v1) = v-scalar-prod(v1 , v1) ^ (0.5) .
-
-   op perpendicular-vector : Vector -> Vector .
-   *** Devuelve el vector perpendicular a uno dado
-   eq perpendicular-vector(v(z11 z12)) = v(z12 (- z11)) .
-
-   op v-are-perpendicular? : Vector Vector -> Bool .
-   ***Comprueba si dos vectores son perpendiculares
-   eq v-are-perpendicular?(v1 , v2) = (v-scalar-prod(v1 , v2) == 0.0) .
-
-\end{verbatim}
-
-Como se puede ver las definiciones son sencillas, correspondiendose con las definiciones clasicas del algebra. 
-Por otro lados las operaciones que se considera que pueden ser necesarias son pocas, quedando reducidas al producto escalar, la norma de un vector, construir el vector perpendicular a uno dado y comprobar si dos lo son. \\
-
-Los casos de test correspondientes ser\'ian los siguientes: \par
-
-\begin{verbatim}
-
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit LINE is
-      ***Comenzaremos viendo como se comportan las funciones referidas a los vectores.
-      ***Función v-scalar-prod.
-   assertEqual(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 0.0)
-   assertDifferent(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 1.0)
-   assertEqual(v-scalar-prod(v(1.0 2.0), v(2.0 1.0)), 4.0)
-   assertEqual(v-scalar-prod(v(1.0 2.0), v(-2.0 1.0)), 0.0)		
-      ***Funcion v-norm.
-   assertDifferent(v-norm(v(2.0 0.0)), sqrt(8.0))
-   assertDifferent(v-norm(v(2.0 0.0)), 4.0)
-   assertEqual(v-norm(v(2.0 0.0)), 2.0)
-   assertEqual(v-norm(v(2.0 3.0)), sqrt(13.0))
-   assertEqual(v-norm(v(-2.0 3.0)), sqrt(13.0))
-      ***Funcion perpendicular-vector.
-   assertDifferent(perpendicular-vector(v(1.0 0.0)), v(0.0 1.0))
-   assertDifferent(perpendicular-vector(v(1.0 2.0)), v(2.0 1.0))
-   assertDifferent(perpendicular-vector(v(1.0 2.0)), v(-2.0 1.0))
-   assertEqual(perpendicular-vector(v(1.0 0.0)), v(0.0 -1.0))
-      ***Funcion v-are-perpendicular?.
-   assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 1.0)))
-   assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 -1.0)))
-   assertFalse(v-are-perpendicular?(v(1.0 2.0), v(2.0 1.0)))
-   assertTrue(v-are-perpendicular?(v(1.0 2.0), v(-2.0 1.0)))
-   assertTrue(v-are-perpendicular?(v(2.0 3.0), perpendicular-vector(v(2.0 3.0))))
-   assertTrue(v-are-perpendicular?(v(-72.0 96.0), perpendicular-vector(v(-72.0 96.0))))
-
-endu)
-\end{verbatim}
-
-La comprobaci\'on del test parecera en el apendice correspondiente junto al correspondite de las rectas aqu\'i. (Incluir hipervinculo) \\
-
-Volviendo al tema que nos acupaba continuamos con la definici\'on de las operaciones para rectas. La idea final es conseguir definir el punto de corte entre dos rectas, para lo cual necesitaremos expresar las rectas en forma implicita, para lo que haremos uso de las funciones equ-line-m y equ-line-n, que nos dar\'an los valores necesarios, vease, pendiente y desplazamiento. De forma analoga necesitaremos distinguir casos pues las rectas verticales pueden dar problemas debido a su pendiente, asi que creamos las funciones horizontal y vertical, que nos indican si la recta es de alguno de esos tipos. Finalmente se añaden tambien algunas funciones menores pero de utilidad como la de construir rectas perpendiculares dado o un punto, o una que compara dos rectas y dice cuando son iguales, usando eso si las variables m y n de cada, siendo as\'i mucho m\'as fiable que la comparaci\'on base de maude, ya que una recta puede estar definida de muchas maneras distintas, y eso no lo puede comparar. \par
-
-\begin{verbatim}
-
-   op direction-vector-line : Line -> Vector .
-   *** Devuelve el vector director de una recta
-   eq direction-vector-line(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
-
-   op equ-line-m : Line -> Float .
-   *** Dados los dos puntos que definen la recta, devuelve el valor de m, 
-   *** para poder "construirla" de forma y = mx + n.
-   eq equ-line-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) .
-
-   op equ-line-n : Line -> Float .
-   *** Dados los dos puntos que definen la recta, devuelve el valor de n, 
-   *** para poder "construirla" de forma y = mx + n , teniendo cuidado 
-   *** en las que son de la forma  x = n
-   eq equ-line-n(r(p(z11 z12) p(z21 z22)))= z12 - (z11 * equ-line-m(r(p(z11 z12) p(z21 z22)))) .
-
-   op are-equal : Line Line -> Bool .
-   *** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
-   *** pues una recta puede construirse mediante infinitos pares de puntos.
-   eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
-   eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and (equ-line-n(r1) == equ-line-n(r2)) [owise] .
-
-   op line-from-vector : Vector Point -> Line .
-   *** Construye una recta mediante un vector y un punto dados.
-   eq line-from-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p((z11 + z21) (z12 + z22))) .
-
-   op perpendicular-line : Line Point -> Line .
-   *** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
-   eq perpendicular-line(r1 , p1) = line-from-vector(perpendicular-vector(direction-vector-line(r1)) , p1) .
-
-   op are-perpendiculars : Line Line -> Bool .
-   ***Comprueba si dos rectas son perpendiculares
-   eq are-perpendiculars(r1 , r2) = v-are-perpendicular?(direction-vector-line(r1) , direction-vector-line(r2)) .
-
-   op vertical : Line -> Bool .
-   *** Comprueba si una recta es de la forma x = n .
-   eq vertical(r(p(z11 z12) p(z21 z22))) = (z21 - z11) == 0.0 .
-
-   op horizontal : Line -> Bool .
-   *** Comprueba si una recta es de la forma y = n .
-   eq horizontal(r(p(z11 z12) p(z21 z22))) = (z22 - z12) == 0.0 .
-	
-   op are-in-line : Point Line -> Bool .
-   *** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
-   *** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
-   *** que la distancia entre estos el punto estara contenido en la recta.
-   eq are-in-line(p1,r(p2 p3)) = (distance(p1 , p2) + distance(p1 , p3)) == distance(p2 , p3) . 
-
-\end{verbatim}
-
-Llegamos por f\'in a la parte que m\'as nos interesaba de este fmod, hayar los puntos de corte.
-Por comodidad lo primero que hacemos sera crear una funci\'on que nos indicara si dos rectas se cortan.
-Posteriormente creamos otra que nos devuelve ese punto. en caso de que las rectas no se corten devolvera error de algun tipo, pero eso sera algo que se arreglar\'a m\'as adelante. 
-
-\begin{verbatim}	
-
-   op cut?-r-r : Line Line -> Bool .
-   *** comprueba si dos rectas se cortan a partir de la pendiente de estas
-   *** devolviendo el valor false si son paralelas y true en caso contrario.
-   *** El caso en que sean coincidentes debera verse de forma manual comparandolas.
-   ceq cut?-r-r(r1, r2) = true 
-   if vertical(r1) and horizontal(r2) .
-   ceq cut?-r-r(r1, r2) = true 
-   if vertical(r2) and horizontal(r1) .
-   eq cut?-r-r(r1, r2) = not (equ-line-m(r1) == equ-line-m(r2)) .
-
-   op cut-point-r-r : Line Line -> Point .
-   *** Devuelve el punto de corte de dos rectas dadas.
-   ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
-   if vertical(r1) .
-   ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
-   if horizontal(r2) .
-   ceq cut-point-r-r(r1, r2) = p(x y)
-   if x := cut-point-x(r1, r2) /\
-      y := cut-point-y(r1, r2) .
-
-   op cut-point-x : Line Line -> Float .
-   *** Devuelve la coordenada X del punto de corte de las dos rectas.
-   ceq cut-point-x(r1, r2) = (n2 - n1) / (m1 - m2)
-   if not vertical(r2) /\
-      m1 := equ-line-m(r1) /\
-      m2 := equ-line-m(r2) /\
-      n1 := equ-line-n(r1) /\
-      n2 := equ-line-n(r2) .
-   eq cut-point-x(r1, r(p(z11 z12) p(z11 z22))) = z11 .
-	
-   op cut-point-y : Line Line -> Float .
-   *** Devuelve la coordenada Y del punto de corte de las dos rectas.
-   ceq cut-point-y(r1, r2) = m1 * x + n1
-   if not horizontal(r1) /\
-      m1 := equ-line-m(r1) /\
-      n1 := equ-line-n(r1) /\
-      x := cut-point-x(r1, r2) .
-   eq cut-point-y(r(p(z11 z12) p(z21 z12)), r2) = z12 .
-
-endfm
-
-\end{verbatim}
-
-Veamos ahora que todo funciona como queremos, para ello construimos el test de unidad correspondiente.
-
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit LINE is
-      ***Funciones referidas a las rectas.
-      ***Funcion direction-vector-line
-   assertEqual(direction-vector-line(r(p(0.0 0.0) p(1.0 1.0))), v(1.0 1.0))	
-   assertDifferent(direction-vector-line(r(p(2.0 3.0) p(1.0 1.0))), v(1.0 2.0))
-      ***Funciones equ-line-m y equ-line-n.
-   assertEqual(equ-line-m(r(p(0.0 0.0) p(1.0 1.0))), 1.0)
-   assertEqual(equ-line-m(r(p(0.0 1.0) p(1.0 0.0))), -1.0)
-   assertDifferent(equ-line-m(r(p(0.0 0.0) p(0.0 45.0))), 1.0)
-   assertEqual(equ-line-n(r(p(0.0 0.0) p(1.0 1.0))), 0.0)
-   assertEqual(equ-line-n(r(p(1.0 1.0) p(2.0 0.0))), 2.0)
-   assertEqual(equ-line-n(r(p(45.0 0.0) p(0.0 45.0))), 45.0)
-      ***Funcion are-equal.
-   assertTrue(are-equal(r(p(0.0 0.0) p(1.0 1.0)) , r(p(23.0 23.0) p(-1.0 -1.0))))
-   assertFalse(are-equal(r(p(0.0 0.0) p(1.0 0.0)) , r(p(0.0 0.0) p(0.0 1.0))))
-   assertTrue(are-equal(r(p(0.0 1.0) p(0.0 2.0)), r(p(0.0 3.0) p(0.0 4.0))))
-   assertFalse(are-equal(r(p(0.0 2.0) p(0.0 3.0)), r(p(1.0 2.0) p(1.0 3.0))))
-      ***Funcion line-from-vector.
-   assertEqual(line-from-vector(v(1.0 2.0), p(0.0 0.0)),r(p(0.0 0.0) p(1.0 2.0)))
-   assertDifferent(line-from-vector(v(1.0 2.0), p(0.0 0.0)),r(p(1.0 2.0) p(0.0 0.0)))
-   assertTrue(are-equal(line-from-vector(v(1.0 2.0), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 2.0))))
-   assertTrue(are-equal(line-from-vector(v(1.0 2.0), p(0.0 0.0)), r(p(1.0 2.0) p(0.0 0.0))))
-   assertTrue(are-equal(line-from-vector(v(2.0 3.0), p(1.0 1.0)), r(p(-1.0 -2.0) p(1.0 1.0))))
-      ***Funcion perpendicular-line.
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 0.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(1.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(0.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(1.0 1.0)), r(p(1.0 1.0) p(1.0 2.0))))
-   assertFalse(are-equal(perpendicular-line(r(p(3.0 -6.0) p(9.0 74.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 -4.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(1.0 0.0) p(0.0 1.0)), p(0.5 0.5)), r(p(0.5 0.5) p(1.0 1.0))))
-      ***Funcion are-perpendiculars.
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))))
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(1.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))))
-   assertFalse(are-perpendiculars(r(p(0.0 0.0) p(1.0 1.0)), r(p(1.0 1.0) p(1.0 2.0))))
-   assertFalse(are-perpendiculars(r(p(3.0 -6.0) p(9.0 74.0)), r(p(0.0 0.0) p(1.0 -4.0))))
-   assertFalse(are-perpendiculars(r(p(1.0 0.0) p(0.0 1.0)), r(p(1.5 0.5) p(1.0 1.0))))
-      ***Funciones vertical y horizontal.
-   assertTrue(vertical(r(p(13.0 -43.0) p(13.0 56.0))))
-   assertFalse(vertical(r(p(13.0 -43.0) p(-13.0 56.0))))
-   assertTrue(horizontal(r(p(57.0 12.0) p(24.0 12.0))))
-   assertFalse(horizontal(r(p(57.0 12.0) p(24.0 -12.0))))
-      ***Funcion are-in-line.
-   assertTrue(are-in-line(p(0.0 0.0), r(p(0.0 0.0) p(1.0 1.0))))
-   assertTrue(are-in-line(p(1.0 1.0), r(p(0.0 0.0) p(1.0 1.0))))
-   assertTrue(are-in-line(p(0.5 0.5), r(p(0.0 0.0) p(1.0 1.0))))
-   assertFalse(are-in-line(p(0.0 0.0), r(p(1.0 0.0) p(0.0 1.0))))
-   assertFalse(are-in-line(p(2.0 3.0), r(p(2.0 1.0) p(4.0 3.0))))
-   assertFalse(are-in-line(p(1.0 2.0), r(p(2.0 1.0) p(4.0 3.0))))
-endu)
-	
-\end{verbatim}
-
-Hasta aqui todos van bien, aqui su ejecuci\'on, el problema lo plantean los puntos de corte, veamos sus test y parte de la ejecuci\'on.
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit LINE is
-      ***Funcion cut?-r-r.
-   assertTrue(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(3.0 4.0))))
-   assertTrue(cut?-r-r(r(p(0.0 1.0) p(1.0 0.0)), r(p(0.0 0.0) p(1.0 1.0))))
-   assertFalse(cut?-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(1.0 1.0) p(0.0 1.0))))
-   assertFalse(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(6.0 4.0))))
-      ***Funcion cut-point-x
-   assertEqual(cut-point-x(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
-   assertEqual(cut-point-x(r(p(2.0 3.0) p(0.0 2.0)), r(p(0.0 1.0) p(0.0 2.0))), 0.0)
-      ***Funcion cut-point-y
-   assertEqual(cut-point-y(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
-   assertEqual(cut-point-y(r(p(2.0 3.0) p(0.0 3.0)), r(p(0.0 3.0) p(1.0 4.0))), 3.0)
-      ***Funcion cut-point-r-r
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 2.0)), r(p(0.0 0.0) p(2.0 1.0))), p(0.0 0.0))
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))), p(0.0 0.0))
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))), p(0.0 0.0))
-   assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0))
-end)
-\end{verbatim}
-
-Todos los test deber\'ian ir bien, se puede ver que se han construido con casos claros para evitar fallos humanos. Sin embargo el ultimo no funciona bien.
-
-\begin{verbatim}
-
-	    Full Maude 2.7 March 10th 2015
-
-
-	MUnit: a unit testing framework for Maude.
-		Version 1.0(November 23rd, 2016)
-
-
-4 test cases were executed.
-
-1 failures.
-
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(1.0 2.0)),r(p(0.0 0.0)p(2.0 1.0))),p(
-    0.0 0.0)) passed.
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(0.0 1.0)),r(p(0.0 0.0)p(1.0 0.0))),p(
-    0.0 0.0)) passed.
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(1.0 0.0)),r(p(0.0 0.0)p(0.0 1.0))),p(
-    0.0 0.0)) passed.
-assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
-    2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)) failed.
-
-\end{verbatim}
-
-Para ver el problema calcularemos el punto por separado, pues por como hemos construidos las rectas deber\'ia devolvernos el punto p(7.0 5.0)
-
-\begin{verbatim}
-
-Maude> red cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))) .
-reduce in GEO2D : cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(
-    9.3000000000000007 2.3999999999999999) p(7.0 5.0))) .
-rewrites: 88 in 0ms cpu (0ms real) (~ rewrites/second)
-result Point: p(7.0000000000000009 5.0000000000000009)
-
-\end{verbatim}
-
-Y aqui lo tenemos, maude no se comporta bien con los decimales, y aunque sea en una posicion tan baja, la dieciseis, esos n\'umeros no son ni siete ni cinco, asi que maude nos devuelve un fallo.
-Para corregir este tipo de errores incluiremos en el fmod point la primera funci\'on auxiliar, que dado dos numeros dira si son iguales en base a un epsilon que podremos elegir.
-
-\begin{verbatim}
-   op equal-epsilon : Float Float Float -> Bool .
-   *** Comprueba si dos numeros reales son iguales en funcion de un epsilon.
-   ceq equal-epsilon(z11, z12, a) = equal-epsilon(z12, z11, a)
-   if z11 < z12 .
-   ceq equal-epsilon(z11, z12, a) = true
-   if (z11 >= z12) 
-      /\ a > (z11 - z12) .
-   ceq equal-epsilon(z11, z12, a) = false
-   if (z11 >= z12) 
-      /\ a <= (z11 - z12) .
-
-\end{verbatim}   
-
-Sus casos de test:
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit POINT is
-      *** Veamos ahora la funcion equal-epsilon.
-   assertTrue(equal-epsilon(5.0 ,5.00001 , 10.0 ^ (-4.0)))
-   assertFalse(equal-epsilon(7.0 ,7.1 , 10.0 ^ (-2.0)))
-   assertEqual(equal-epsilon(1.01010, 1.01011, 10.0 ^ (-4.0)), equal-epsilon(1.01011, 1.01010, 10.0 ^ (-4.0)))
-endu)
-
-\end{verbatim}
-
-La ejecuci\'on de los casos de test es correcta y puede verse aqui, junto con los test anteriores y los de las funciones que se veran posteriormente. \\
-
-Veamos ahora, si haciendo un pequeño cambio, el test que antes fallaba ahora nos da un resultado correcto.
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit LINE is
-   assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0))
-   assertTrue(equal-epsilon(0.0, distance(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0)), 10.0 ^ (-5.0)))
-endu)
-\end{verbatim} 
-
-Y su ejecuci\'on:
-
-\begin{verbatim}
-
-	    Full Maude 2.7 March 10th 2015
-
-
-	MUnit: a unit testing framework for Maude.
-		Version 1.0(November 23rd, 2016)
-
-
-2 test cases were executed.
-
-1 failures.
-
-assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
-    2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)) failed.
-assertTrue(equal-epsilon(0.0,distance(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(
-    p(9.3000000000000007 2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)),1.0e+1 ^
-    -5.0)) passed.
-
-\end{verbatim} 
-
-Como podemos ver todo funciona ya bien, aunque para mi gusto la soluci\'on es muy artificial, acercandose a la teor\'ia del punto gordo m\'as que a otra cosa. Sin embargo la unica forma que habria de solucionarlo bien seria modificando la definici\'on de los numeros reales, en concreto el funcionamiento del igual con respecto a las operaciones, pero eso es algo que se sale totalmente de lo que queremos conseguir aqu\'i. \par
-
-\chapter{Circunferencias}\label{cap.3}
-
-Finalizado el m\'odulo referente a las rectas nos enfretamos ahora a las circunferencias, ultimo modulo de geometria que necesitamos para las construcciones con regla y compas. De manera an\'aloga a todas las construcciones anteriores la definici\'on de estas figuras se daran en base de los elementos de que se dispone para trazarlas. Para ello utilizaremos un punto, que funcionara como centro, y un n\'umero real que nos dara el radio. Debido a la naturaleza de las rectas hay muy pocas funciones que podamos usar con ellas m\'as alla de las basicas, que devuelven centro o radio, una que indica si un punto esta en ella, y las más importantes, las referidas a los puntos de corte. 
-
-Comencemos por la definici\'on y las m\'as sencillas:
-
-\begin{verbatim}
-
-fmod CIRCUMFERENCE is
-
-   pr LINE .
-   sorts Circumference .
-
-   op c : Point Float -> Circumference [ctor] .
-   *** Define una circunferencia como un par (punto, real), correspondiendo estos con el 
-   *** centro y el radio.
-	
-   vars p1 p2 p3 p4 : Point .
-   vars z11 z12 z21 z22 z31 z32 z41 z42 m n x y Aux-A Aux-B Aux-C Aux-D Aux-E Aux-F Aux-G : Float .
-   vars r1 r2 : Line .
-   vars v1 v2 : Vector .
-   vars c1 c2 c1' c2' : Circumference .
-   vars t : Bool .
-   vars l l1 : List .
-		
-   op circumference-center : Circumference -> Point .
-   *** Devuelve el centro de la circunferencia
-   eq circumference-center(c(p1 , z11)) = p1 .
-
-   op circumference-radius : Circumference -> Float .
-   *** Devuelve el radio de la circunferencia
-   eq circumference-radius(c(p1 , z11)) = z11 .
-
-   op are-in-circumference : Point Circumference -> Bool .
-   *** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
-   *** al centro con el radio
-   eq are-in-circumference(p1 ,c(p2 , z11)) = distance(p1 , p2) == z11 .
-
-\end{verbatim}  
-
-Ahora veamos sus test de unidad:
-
-\begin{verbatim}
-
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit CIRCUMFERENCE is 
-      ***Funciones referidas a las circunferencias.
-      ***Funcion circumference-center.
-   assertEqual(circumference-center(c(p(1.0 2.0), 3.0)), p(1.0 2.0))
-   assertDifferent(circumference-center(c(p(1.0 2.0), 3.0)), p(2.0 1.0))
-      ***Funcion circumference-radius.
-   assertEqual(circumference-radius(c(p(0.0 0.0), 3.4)), 3.4)
-   assertDifferent(circumference-radius(c(p(0.0 0.0), 3.4)), 1.0)
-      ***Funcion are-in-circumference.
-   assertFalse(are-in-circumference(p(1.0 1.0), c(p(0.0 0.0), 1.0)))
-   assertTrue(are-in-circumference(p(1.0 0.0), c(p(0.0 0.0), 1.0)))
-   assertFalse(are-in-circumference(p(0.2 0.2), c(p(0.0 0.0), 1.0)))	
-endu)
-\end{verbatim}
-
-Como se puede ver aqu\'i (incluir hiperv\'inculo) todo funciona bien, lo cual es natural teniendo en cuenta que son funciones muy sencillas. Lo siguiente que se implementara sera el punto de corte entre una circunferenc\'ia y una recta.
-
-Igual que hemos hecho antes con las rectas, antes de nada creamos una funci\'on que nos dice si existe el punto de corte. para ello trazamos la perpendicular de la recta que pasa por el centro de la circunferenc\'ia y hallamos el punto de corte. A continuaci\'on calculamos la distancia de ese punto al centro, si es menor o igual que el radio significara que la recta y la circunferencia se cortan, no habra corte en caso contrario.\\
-
-Introducir dibujo del proceso anteriro.\par
-\begin{verbatim}
-op cut?-r-c : Line Circumference -> Bool .
-*** Comprueba si una recta y una circunferencia se cortan mediante la comparacion 
-*** de la distancia de la recta al centro de la circunferencia.
-eq cut?-r-c(r1 , c(p1 , z11)) = distance(cut-point-r-r(r1 , 
-   perpendicular-line(r1 , p1)) , p1) <= z11 .
-\end{verbatim}
-
-Una vez hecho esto tenemos que ver como conseguir los puntos de corte. El primer problema que nos encontramos es el n\'umero, ya que pueden cortarse en uno o dos puntos. Para ello implementaremos en el fmod Point el tipo List:
-
-\begin{verbatim}
-   sorts Point List .
-   subsort Point < List .
-
-   op p(__) : Float Float -> Point [ctor] .
-   *** Define un punto como un par de numeros reales
-
-   op mt : -> List [ctor] .
-   op __ : List List -> List [ctor assoc comm id: mt] . 
-
-   vars p1 : Point .
-   var t : Bool .
-   vars l l1 : List .
-
-   op empty-list : List -> Bool .
-   *** Comprueba si una lista es la lista vacia.
-   eq empty-list(mt) = true . 
-   eq empty-list(mt l1 p1) = false .
-
-   op delete-first-element : List -> List .
-   *** Borra el primer elemento de una lista.
-   ceq delete-first-element(l1 p1) = l1
-   if not empty-list(mt l1 p1) .
-   ceq delete-first-element(mt) = mt
-   if empty-list(mt) .
-
-   op first-element : List -> Point .
-   *** Da el primer elemento de una lista.
-   eq first-element(mt l1 p1) = p1 .
-
-   op length-list : List -> Float .
-   *** Da la longitud de una lista.
-   eq length-list(mt) = 0.0 .
-   eq length-list(l p1) = 1.0 + length-list(l) .
-
-\end{verbatim}
-
-Sin embargo este nos es el \'unico cambio que deberemos realizar en este modulo, dada la forma de las ecuaciones tanto de la recta como de la circumferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. As\'i pues implementamos las funciones correspondientes. \par
-
-\begin{verbatim}
-   vars a b c : Float .
-
-   op first-degree-equation : Float Float -> Float .
-   *** Devuelve la solucion de una ecuacion de primer grado.
-   *** Recibe los valores correspondientes a ax + b.
-   eq first-degree-equation(a, b) = - b / a .
-
-   op second-degree-equation-1 : Float Float Float -> Float .
-   *** Devuelve el valor de una ecuacion de segundo grado en el caso +
-   *** Recibe los valores correspondientes a ax^2 + bx + c.
-   eq second-degree-equation-1(0.0 , b , c) = first-degree-equation(b, c) .
-   eq second-degree-equation-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
-
-   op second-degree-equation-2 : Float Float Float -> Float .
-   *** Devuelve el valor de una ecuacion de segundo grado en el caso -
-   *** Recibe los valores correspondientes a ax^2 + bx + c.
-   eq second-degree-equation-2(0.0 , b , c) = first-degree-equation(b, c) .
-   eq second-degree-equation-2(a , b , c) = (- b - sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) .
-
-\end{verbatim}
-
-Ahora ya s\'i hemos concluido con todas las funciones auxiliares que necesitaremos para el m\'odulo circunferencia, y de hecho tambien hemos terminado con el fmod POINT, pudiendo verse completo aqu\'i (incluir hipervinculo), siendo este(incluir hipervinculo) el test de unidad que incluye los casos de todas las funciones, y siendo el siguiente el de las funciones que acabamos de implementar. \par
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit POINT is
-      *** comenzaremos viendo como se comportan las funciones referidas a las listas.
-   assertEqual(mt p(1.0 1.0), p(1.0 1.0))
-   assertEqual(mt p(1.0 1.0) mt p(2.0 2.0), p(1.0 1.0) p(2.0 2.0))
-      *** Funcion empty-list.
-   assertTrue(empty-list(mt))
-   assertTrue(empty-list(mt mt mt))
-   assertFalse(empty-list(p(1.0 0.0)))
-   assertFalse(empty-list(mt p(1.0 0.0)))
-      *** Funcion delete-first-element
-   assertEqual(delete-first-element(mt), mt)
-   assertEqual(delete-first-element(p(1.0 1.0)), mt)
-   assertEqual(delete-first-element(p(1.0 1.0) mt), mt)
-   assertDifferent(delete-first-element(mt p(1.0 1.0) mt), mt p(1.0 1.0))
-      *** Funcion first-element.
-   assertDifferent(first-element(mt), mt)
-   assertEqual(first-element(mt p(1.0 1.0)), p(1.0 1.0))
-   assertDifferent(first-element(p(1.0 1.0) mt), mt)
-   assertEqual(first-element(mt p(1.0 1.0) mt), p(1.0 1.0))
-      *** Funcion length-list.
-   assertEqual(length-list(mt), 0.0)
-   assertEqual(length-list(mt p(1.0 1.0)), 1.0)
-   assertDifferent(length-list(p(1.0 1.0) mt), 2.0)
-   assertEqual(length-list(p(1.0 1.0) mt), 1.0)
-   assertDifferent(length-list(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 4.0)
-   assertEqual(length-list(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 3.0)
-      *** Veamos ahora las funciones referidas a las ecuaciones de primer grado.
-   assertEqual(first-degree-equation(2.0, 1.0), - 0.5)
-      *** Veamos ahora las funciones referidas a las ecuaciones de segundo grado.
-   assertEqual(second-degree-equation-1(-1.0, 2.0, 3.0), -1.0)
-   assertDifferent(second-degree-equation-1(-1.0, 2.0, 3.0), 3.0)
-   assertEqual(second-degree-equation-2(-3.0, 2.0, 1.0), 1.0)
-   assertDifferent(second-degree-equation-2(-3.0, 2.0, 1.0), -1.0 / 3.0)
-   assertEqual(second-degree-equation-1(0.0, 5.0, -2.0), second-degree-equation-2(0.0, 5.0, -2.0))
-   assertEqual(second-degree-equation-1(0.0, 5.0, -2.0), second-degree-equation-2(0.0, 1.0, -2.0 / 5.0))
-      *** Veamos ahora la funcion equal-epsilon.
-   assertTrue(equal-epsilon(5.0 ,5.00001 , 10.0 ^ (-4.0)))
-   assertFalse(equal-epsilon(7.0 ,7.1 , 10.0 ^ (-2.0)))
-   assertEqual(equal-epsilon(1.01010, 1.01011, 10.0 ^ (-4.0)), equal-epsilon(1.01011, 1.01010, 10.0 ^ (-4.0)))
-endu)
-\end{verbatim}
-
-Una vez visto que todo funciona solo queda implementar la funci\'on de corte. Para ello volveremos a hacer una distinci\'on de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales o horizontales, ya que eso nos da automaticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el fmod LINE, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que halla por separado los dos puntos de corte y los devulve en forma de lista. Podemos encontras los calculos referentes a estas funciones aqu\'i(incluir hipervinculo). Veamos las funciones:
-
-\begin{verbatim}
-   op cut-point-r-c : Line Circumference -> List .
-   *** Dados una circunferencia y un punto devuelve una lista con los dos puntos de corte
-   *** pudiendo ser estos iguales.
-   ceq cut-point-r-c(r(p(z11 z12) p(z11 z22)), c(p(z31 z32), z41)) = p(z11 Aux-A) p(z11 Aux-B)
-   *** caso vertical 
-   if Aux-A := second-degree-equation-1(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) /\
-      Aux-B := second-degree-equation-2(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) .
-   ceq cut-point-r-c(r(p(z11 z12) p(z21 z12)), c(p(z31 z32), z41)) = p(Aux-A z12) p(Aux-B z12)
-   *** caso horizontal
-   if Aux-A := second-degree-equation-1(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) /\
-      Aux-B := second-degree-equation-2(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) .
-   eq cut-point-r-c(r1, c1) = cut-point-r-c-1(r1, c1) cut-point-r-c-2(r1, c1) .
-
-   op cut-point-r-c-1 : Line Circumference -> Point .
-   *** Halla el primer punto de corte de la recta y la circunferencia
-   ceq cut-point-r-c-1(r1, c(p(z31 z32), z41)) = p(x y)
-   if m := equ-line-m(r1) /\
-      n := equ-line-n(r1) /\
-      Aux-A := 1.0 + (m ^ 2.0) /\
-      Aux-B := (2.0 * m * n) - (2.0 * z32 * m) - (2.0 * z31)  /\
-      Aux-C := (z31 ^ 2.0) + (z32 ^ 2.0) - (z41 ^ 2.0) - (2.0 * n * z32) + (n ^ 2.0)  /\
-      x := second-degree-equation-1(Aux-A, Aux-B, Aux-C) /\
-      y := m * x + n .
-
-   op cut-point-r-c-2 : Line Circumference -> Point .
-   *** Halla el segundo punto de corte de la recta y la circunferencia
-   ceq cut-point-r-c-2(r1, c(p(z31 z32), z41)) = p(x y)
-   if m := equ-line-m(r1) /\
-      n := equ-line-n(r1) /\
-      Aux-A := 1.0 + (m ^ 2.0) /\
-      Aux-B := (2.0 * m * n) - (2.0 * z32 * m) - (2.0 * z31)  /\
-      Aux-C := (z31 ^ 2.0) + (z32 ^ 2.0) - (z41 ^ 2.0) - (2.0 * n * z32) + (n ^ 2.0) /\
-      x := second-degree-equation-2(Aux-A, Aux-B, Aux-C) /\
-      y := m * x + n .
-
-\end{verbatim}
-
-Veamos ahora los casos de test referidos a esta parte:
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit CIRCUMFERENCE is 
-      ***Veamos las funciones asociadas al punto de corte recta, circunferencia.
-      ***Funcion cut?-r-c.
-   assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 2.0)))
-   assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 1.0)))
-   assertFalse(cut?-r-c(r(p(2.0 2.0) p(-2.0 2.0)), c(p(0.0 0.0), 1.0)))
-      ***Funciones cut-point-r-c-1 cut-point-r-c-2.
-   assertEqual(cut-point-r-c-1(r(p(0.0 0.0) p(1.0 1.0)), c(p(1.0 0.0), 1.0)), p(1.0 1.0))
-   assertDifferent(cut-point-r-c-1(r(p(0.0 1.0) p(1.0 0.0)), c(p(0.0 0.0), 0.5)), p(0.5 0.5))
-   assertEqual(cut-point-r-c-2(r(p(0.0 -2.0) p(1.0 0.0)), c(p(3.0 2.0), 1.0)), p(2.0 2.0))
-   assertDifferent(cut-point-r-c-2(r(p(0.0 0.0) p(2.0 2.0)), c(p(2.0 0.0), 2.0)), p(2.0 2.0))
-      ***Funcion cut-point-r-c.
-   assertEqual(cut-point-r-c(r(p(2.0 0.0) p(0.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(2.0 0.0))
-   assertDifferent(cut-point-r-c(r(p(4.0 0.0) p(4.0 -2.0)), c(p(0.0 0.0), 1.0)),p(0.0 0.0) p(0.0 0.0))
-   assertEqual(cut-point-r-c(r(p(0.0 2.0) p(2.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(0.0 2.0))
-   assertEqual(cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)), p(1.0 1.0) p(1.0 1.0)) *** 
-endu)
-\end{verbatim}
-
-En el \'ultimo caso podemos ver un fallo en la ejecuci\'on, sin embargo si lo hacemos manualmente en la consola de maude vemos que funciona correctamente y nos da lo que queriamos:
-
-\begin{verbatim}
-
-Maude> red cut-point-r-c(r(p(1.0 0.0)p(1.0 1.0)),c(p(0.0 1.0),1.0)) .
-reduce in GEO2D : cut-point-r-c(r(p(1.0 0.0) p(1.0 1.0)), c(p(0.0 1.0), 1.0)) .
-rewrites: 28 in 0ms cpu (0ms real) (~ rewrites/second)
-result List: p(1.0 1.0) p(1.0 1.0)
-
-\end{verbatim}
-
-As\'i que la funci\'on esta bien definida, tal y como queriamos. \\
-
-Concluida ya esta funci\'on nos ponemos con la \'ultima operaci\'on que necesitaremos, hallar el punto de corte de dos circunferencias. Lo primero que haremos sera la funci\'on que nos diga si las dos figuras se cortan, como ya hicimos en el los otros casos. Esta vez la idea de la funci\'on resulta mucho m\'as sencilla que antes, simplemente comprabamos la distancia entre los centros y vemos si es menos o igual que la suma de los radios. \par
-
-\begin{verbatim}
-   op cut?-c-c : Circumference Circumference -> Bool .
-   *** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
-   ceq cut?-c-c(c1, c2) = distance(circumference-center(c1) , circumference-center(c2)) <= (circumference-radius(c1) + circumference-radius(c2))
-   if not (circumference-center(c1) == circumference-center(c2)) . 
-   ceq cut?-c-c(c1, c2) = circumference-radius(c1) == circumference-radius(c2)
-   if (circumference-center(c1) == circumference-center(c2)) .
-
-\end{verbatim}
-
-Sin embargo hallar los puntos de corte s\'i se complica, y es que s\'i las dos circunferencias pos\'een centro con la coordenada x *** igual nos surgira m\'as adelante una divisi\'on entre cero, asi que en caso de que las coordenadas x *** sean iguales iremos por otro camino, que dependera de que sean distintas las coordenadas y ***, esto se debe a que haremos una simetria respecto de la recta y = x para hallar los puntos de corte, y luego los traspondremos, lo cual tambien corresponde con hacer una simetr\'ia. \\
-
-\begin{verbatim}
-   op cut-point-c-c : Circumference Circumference -> List .
-   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
-   if not (z11 == z21) .
-   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
-   if not (z12 == z22) .
-   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
-   if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
-
-   op cut-point-circumferences-x-dis : Circumference Circumference -> List .
-   *** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
-   *** solo funciona si los centros no tienen la misma X.
-   ceq cut-point-circumferences-x-dis(c1 , c2) = p1 p2
-   if p1 := cut-point-circumferences-1(c1 , c2) 
-   /\ p2 := cut-point-circumferences-2(c1 , c2) .
-
-   op cut-point-circumferences-y-dis : Circumference Circumference -> List .
-   *** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
-   *** solo funciona si los centros no tienen la misma X.
-   ceq cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p1 p2
-   if p1 := trans-point(cut-point-circumferences-1(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) 
-   /\ p2 := trans-point(cut-point-circumferences-2(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) .
-
-\end{verbatim}
-
-Ahora simplemente damos las funciones que nos devulven los puntos propiamente dichos y listo. Como ocurria con los demas puntos de corte estos calculos no son triviales, y provienen del aqu\'i(incluir hipervinculo). 
-
-\begin{verbatim}
-   op cut-point-circumferences-1 : Circumference Circumference -> Point .
-   *** halla el primer punto de corte de las dos circunferencias.
-   ceq cut-point-circumferences-1(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (second-degree-equation-1(Aux-C , Aux-D , Aux-E) * Aux-B))  second-degree-equation-1(Aux-C , Aux-D , Aux-E))
-   if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
-   /\ Aux-B := (z22 - z12) / (z21 - z11) 
-   /\ Aux-C := (Aux-B) ^ 2.0 + 1.0
-   /\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
-   /\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
-
-   op cut-point-circumferences-2 : Circumference Circumference -> Point .
-   *** halla el segundo punto de corte de las dos circumferences.
-   ceq cut-point-circumferences-2(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (second-degree-equation-2(Aux-C , Aux-D , Aux-E) * Aux-B))  second-degree-equation-2(Aux-C , Aux-D , Aux-E))
-   if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
-   /\ Aux-B := (z22 - z12) / (z21 - z11) 
-   /\ Aux-C := (Aux-B) ^ 2.0 + 1.0
-   /\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
-   /\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
-
-\end{verbatim}
-
-Ya solo quedar\'ia ver, mediante el test de unidad que todo funciona bien y habriamos acabado con este m\'odulo.\\
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit CIRCUMFERENCE is 
-      ***Veamos las funciones asociadas al punto de corte de dos circunferencias.
-      ***Funcion cut?-c-c
-   assertTrue(cut?-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)))
-   assertTrue(cut?-c-c(c(p(0.0 0.0), 1.0), c(p(2.0 0.0), 1.0)))
-   assertTrue(cut?-c-c(c(p(0.0 0.0), 1.0), c(p(0.0 2.0), 1.0)))
-   assertFalse(cut?-c-c(c(p(1.0 2.0), 1.0), c(p(4.0 5.0), 1.0)))
-      ***Funciones cut-point-circumferences-1 y cut-point-circumferences-2
-   assertEqual(cut-point-circumferences-1(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0))
-   assertEqual(cut-point-circumferences-2(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(2.0 0.0))
-      ***Funciones cut-point-circumferences-x-dis y cut-point-circumferences-y-dis
-   assertDifferent(cut-point-circumferences-x-dis(c(p(2.0 0.0), 1.0), c(p(2.0 2.0), 1.0)), p(2.0 1.0) p(2.0 1.0))
-   assertEqual(cut-point-circumferences-y-dis(c(p(2.0 0.0), 1.0), c(p(2.0 2.0), 1.0)), p(2.0 1.0) p(2.0 1.0))
-   assertEqual(cut-point-circumferences-x-dis(c(p(0.0 2.0), 1.0), c(p(2.0 2.0), 1.0)), p(1.0 2.0) p(1.0 2.0))
-   assertDifferent(cut-point-circumferences-y-dis(c(p(0.0 2.0), 1.0), c(p(2.0 2.0), 1.0)), p(1.0 2.0) p(1.0 2.0))
-      ***Funcion cut-point-c-c
-   assertEqual(cut-point-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0) p(2.0 0.0))
-   assertEqual(cut-point-c-c(c(p(2.0 0.0), 1.0), c(p(2.0 2.0), 1.0)), p(2.0 1.0) p(2.0 1.0))
-   assertEqual(cut-point-c-c(c(p(0.0 2.0), 1.0), c(p(2.0 2.0), 1.0)), p(1.0 2.0) p(1.0 2.0))
-
-endu)
-
-\end{verbatim}
-
-Con esto damos f\'in al m\'odulo de circunferencias, sin embargo nos quedamos con la sensaci\'on de ser todo muy inconexo, hay puntos de corte entre muchos tipos de figuras, pero segun sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un ultimo m\'odulo llamado GEO2D, que solo incluira una funci\'on llamada cut-point, que dadas dos figuras cuales quiera, de sus puntos de corte. \\
-
-Para ello empezaremos por crear un nuevo tipo de funciones, llamado Figure, que simplemente contendra a los demas tipos, haciendo asi que nos sea totalmente indiferente trabajar con una u otra figura llegado el momento.\par
-
-\begin{verbatim}
-fmod GEO2D is
-
-   pr CIRCUMFERENCE .
-
-   sort Figure .
-   subsort Point < Figure .
-   subsort Line < Figure .
-   subsort Circumference < Figure .
-
-   vars p1 p2 : Point .
-   vars r1 r2 : Line .
-   vars c1 c2 : Circumference .
-
-   op cut-point : Figure Figure -> List [comm] .
-   *** Comprueba si dos figuras se cortan, y devuelve una lista con los puntos de corte
-   ceq cut-point(p1, p2) = p1
-   if p1 == p2 .
-   ceq cut-point(p1 , r1) = p1
-   if are-in-line(p1 , r1) .
-   ceq cut-point(r1 , r2) = cut-point-r-r(r1 , r2)
-   if cut?-r-r(r1 , r2) .
-   ceq cut-point(p1 , c1) = p1
-   if are-in-circumference(p1 , c1) .
-   ceq cut-point(r1 , c1) = cut-point-r-c(r1 , c1)
-   if cut?-r-c(r1 , c1) .
-   ceq cut-point(c1 , c2) = cut-point-c-c(c1 , c2)
-   if cut?-c-c(c1 , c2) .
-   ceq cut-point(p1, p2) = mt
-   if not p1 == p2 .	
-   ceq cut-point(p1 , r1) = mt
-   if not are-in-line(p1 , r1) .
-   ceq cut-point(r1 , r2) = mt 
-   if not cut?-r-r(r1 , r2) .
-   ceq cut-point(p1 , c1) = mt
-   if not are-in-circumference(p1 , c1) .
-   ceq cut-point(r1 , c1) = mt
-   if not cut?-r-c(r1 , c1) .
-   ceq cut-point(c1 , c2) = mt
-   if not cut?-c-c(c1 , c2) .
-
-endfm	
-\end{verbatim}
-
-Como se puede ver se han incluido tambien algunas combinaciones un poco raras, como el punto de corte entre dos puntos, pero esto es solo para evitar que el programa de problemas en el futuro al no poder usar ninguna equaci\'on.
