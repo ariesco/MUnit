@@ -10,11 +10,15 @@
 \title{Trabajo de f\'in de carrera}
 \begin{document}
 
+\newcommand{\codesize}{\small}
+
 \tableofcontents
 
-\chapter{Primeros modulos en maude}\label{cap.1}
-Para ilustrar lo comentado en la introducci\'onm en este primer capitulo definiremos unos primeros m\'odulos sencillos que nos serviran de ejemplo, y m\'as adelante extenderemos con los test de unidad. \par
-El primero de estos se corresponder\'a con los numeros naturales, los cuales ser\'an definidos de forma an\'aloga al m\'etodo de Peano. Posteriormente se le dar\'a distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el \'orden.\par
+\chapter{Primeros modulos en Maude}\label{cap.1}
+Para ilustrar lo comentado en la introducción en este primer capitulo definiremos unos primeros m\'odulos sencillos que nos serviran de ejemplo, y m\'as adelante extenderemos con los test de unidad. \par
+El primero de estos se corresponder\'a con los números naturales, los cuales ser\'an definidos de forma an\'aloga al m\'etodo de Peano. Posteriormente se le dar\'a distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el \'orden.\par
+
+{\codesize
 \begin{verbatim}
 fmod PEANO-NAT-EXTRA is
 
@@ -44,9 +48,9 @@ fmod PEANO-NAT-EXTRA is
    eq 0 < 0 = false .
    eq s(M) < 0 = false .
    eq s(M) < s(N) = M < N .
-
 endfm
 \end{verbatim}
+}
 
 Este pequeño m\'odulo ilustra la sintaxis b\'asica de Maude. De forma an\'aloga definimos uno paralelo para listas, que adem\'as har\'a uso del anterior. \par
 
