@@ -206,14 +206,12 @@ Un ejemplo de test de unidad completo sería el siguiente: \par
    assertTrue(s(s(0)) == s(s(0)))
 endu)
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 \end{verbatim}
 }
 
-Aun as\' i el m\'odulo en este estado no nos proporciona ninguna informaci\'on, sino que deberemos ir a su ejecuci\'on para comprobar que todo ha ido tal y como quer\'iamos. \par
+Es en la ejecución de estos test en los que vemos que todo funciona tal y como queremos, ya sea por que hemos terminado correctamente los módulos incompletos y estos funcionan tal y como deberían, o por que el test es debil y no cubre todos los casos. Veamos ahora un ejemplo de ejecución. \par
 
 \begin{verbatim}
-
 15 test cases were executed.
 
 0 failures.
@@ -235,27 +233,23 @@ assertFalse(s(0)== s(s(0))) passed.
 assertTrue(s(s(0))== s(s(0))) passed.
 \end{verbatim}
 
-Ahora ya si vemos que el test funciona correctamente, que es precisamente lo que quer\'iamos. De la misma manera realizamos el test para las listas y comprobamos su ejecuci\'on. \par
+El test funciona correctamente, y cubre todos los casos, así que podemos dar por supuesto que el módulo es correcto. De manera analoga podemos crear un test para listas: \par
 
 \begin{verbatim}
-load Lista.maude
-load ../mUnit.maude
-
 (munit Lista is
    assertEqual(mt, mt mt)
-   assertEqual(1.0, mt 1.0)
-   assertEqual(1.0 2.0, 2.0 1.0)
-
+   assertEqual(s(0), mt s(0))
+   assertEqual(s(0) s(s(0)), s(s(0)) s(0))
+   assertTrue(empty-list(mt))
+   assertFalse(empty-list(s(0)))
+   assertEqual(length-list(mt), 0)
+   assertEqual(length-list(s(s(0))), s(0))
+   assertDifferenct(length-list(s(s(0))), s(s(0)))
 endu)
-
 \end{verbatim}
 
-\begin{verbatim}
-   Aqui ejecucion del test de listas.
-\end{verbatim}
+Esto no solo sirve para ilustrar el buen funcionamiento de un programa, sino que ayuda a completar los huecos dejados anteriormente, mostrando el caso que habiamos dejado vacio en \texttt{empty-list} y el tipo de salida de \texttt{length-list}. \par
 
-Por supuestos estos primeros m\'odulos mostrados son tremendamente sencillos, y mientras el de las listas permanecer\'a as\'i por comodidad, sera extendido en un cap\'tulo posterior, el referente a los n\'umeros naturales se completa c\'omodamente incluyendo el resto de operaciones b\'asicas como la divisi\'on entera restringida a los naturales, y una pseudo resta que solo funciona cuando al mayor le restas el menor. Sin embargo, los numeros naturales no son suficientes para resolver la mayoria de los problemas que nos encontramos, as\'i pues decidimos construir un modulo mayor llamado peano-int, que genera los enteros a partir de naturales dotandoles de signo. Por supuesto este no es el unico cambio a realizar, sino que debemos construir una nueva resta en los naturales, que dado cualquier par de numeros nos de el resultado del mayor menos el menor, y que ya en Peano-Int le doten de signo segun los valores iniciales. \\
-
-Siguiendo el mismo camino extendemos los enteros con los racionales, incluyendo algunas funciones nuevas como el maximo comun divisor y el resto en los m\'dulos antiguos, ya que son operaciones que pueden vivir en los entornos anteriores, aunque sea con restricciones. Los modulos completos son Peano-Nat-Extra, Peano-Int-Extra y Peano-Rac-extra; sus modulos de test son test-Peano-Nat-Extra, test-Peano-Int-Extra y test-Peano-Rac-extra y las ejecuciones de estos ejec-Peano-Nat-Extra, ejec-Peano-Int-Extra y ejec-Peano-Rac-extra \par
+Y con esto cubrimos los primeros módulos funcionales en Maude, más adelanta hablaremos de los módulos en los que se puedan dar reglas, pero antes abordaremos uno funcional más complejo de lo visto aqui. Aun asi los módulos anteriores así como sus test de unidad se pueden encontrar aquí(hiper) en el apendice correspondiente.\par 
 
 
