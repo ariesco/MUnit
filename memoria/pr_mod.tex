@@ -1,7 +1,15 @@
 %!TEX root = tfg_fiesta.tex
 
+\fixme{Ojo a las tildes en todo el trabajo}
+
 Para ilustrar lo comentado en la introducción en este primer capitulo definiremos unos primeros módulos sencillos que nos serviran de ejemplo, y más adelante extenderemos con los test de unidad. \par
-El primero de estos se corresponderá con los números naturales, los cuales ser\'an definidos de forma análoga al método de Peano. Posteriormente se le dará distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el órden.\par
+El primero de estos se corresponderá con los números naturales, los cuales ser\'an definidos de forma análoga al método de Peano. Posteriormente se le dará distintas operaciones sencillas como la suma, y al mismo tiempo algunas basadas en el orden.\par
+
+\fixme{No es que se definan de manera análoga, sino que se definen siguiendo los axiomas de
+Peano. Para las explicaciones pon más cosas. Por ejemplo, en el siguiente párrafo
+tienes que dar explicaciones de qué son los módulos funcionales, algo del estilo: las teorías
+ecuacionales se especifican en Maude mediante módulos funcionales, que empiezan con la palabra
+reservada \texttt{fmod} seguida del nombre del módulo y de la palabra reservada \texttt{is}:}
 
 Un módulo funcional en Maude empieza con la palabra reservada \texttt{fmod}. \par
 
@@ -19,7 +27,7 @@ Es posible definir tipos de datos mediante \texttt{sort}, y \texttt{sorts} en el
 \end{verbatim}
 }
 
-Dentro de los tipos se les puede dotar de órden, ya que Maude es un lenguaje con órden. \par
+Dentro de los tipos se les puede dotar de orden\fixme{Explicar a qué te refieres con orden, si no se ha explicado antes}, ya que Maude es un lenguaje con orden. \par
 
 {\codesize
 \begin{verbatim}
@@ -28,7 +36,7 @@ Dentro de los tipos se les puede dotar de órden, ya que Maude es un lenguaje co
 \end{verbatim}
 }
 
-Antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con \texttt{[ctor]}. \par
+Antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con \fixme{el atributo} \texttt{ctor}. \par
 
 {\codesize
 \begin{verbatim}
@@ -37,9 +45,10 @@ Antes de utilizar un tipo suele ser necesario darle un constructor para poder tr
 \end{verbatim}
 }
 
-Como se puede observar a los constructores, se les puede dotar de propiedades con algunos comandos como \texttt{iter}, que le permite tener una definición recursiva o iterativa. \par
+Como se puede observar a los constructores, se les puede dotar de propiedades con algunos comandos como \texttt{iter}, que le permite tener una definición recursiva o iterativa.\fixme{La definición es puramente recursiva, iter lo que te permite es acortar los términos construidos con ese operador (s(s(s(0)))) vs s^3(0)}
+ \par
 
-Continuando con la creación del módulo, antes de definir ninguna función sera necesario hacer una declaración de variables en base a sus tipos mediante el comando \texttt{var}, o \texttt{vars} terminando con el tipo correspondiente. \par
+Continuando con la creación del módulo, antes de definir ninguna función sera necesario hacer una declaración de variables en base a sus tipos mediante el comando \texttt{var}, o \texttt{vars} terminando con el tipo correspondiente.\fixme{Esto no es estrictamente cierto, se pueden definir variables on-the-fly o usar constantes} \par
 
 {\codesize
 \begin{verbatim}
@@ -47,7 +56,7 @@ Continuando con la creación del módulo, antes de definir ninguna función sera
 \end{verbatim}
 }
 
-La creacion de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y tambien va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo tambien hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue: \par
+La creacion de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y tambien va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo tambien hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue:\fixme{Es sorprendente que la suma no sea conmutativa/asociativa} \par
 
 {\codesize
 \begin{verbatim}
@@ -55,7 +64,9 @@ La creacion de la funciones comienza de forma similar a la de los constructores,
 \end{verbatim}
 }
 
-Una vez definida la función habra que dotarla de ecuaciones para indicar su comportamiento. Estas comenzaran por \texttt{eq} e indicaran mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
+Una vez definida la función habra que dotarla de ecuaciones para indicar su comportamiento\fixme{Más bien la dotas de comportamiento mediante ecuaciones, que aunque desde el punto de vista
+ecuacional indican igualdades desde el punto de vista operacional se ejecutan de izquierda a
+derecha}. Estas comenzaran por \texttt{eq} e indicaran mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
 {\codesize
 \begin{verbatim}
    eq add(0 , N) = N .                         eq 0 + N = N .
@@ -63,7 +74,8 @@ Una vez definida la función habra que dotarla de ecuaciones para indicar su com
 \end{verbatim}
 }
 
-Por supuesto esta no es la unica forma que tenemos de dar las funciones, sino que en los casos de condicionales tendremos que usar el comando \texttt{ceq} asi como dar con \texttt{if} o \texttt{if not} las condiciones booleanas a las distintas ecuaciones. \par
+Por supuesto esta no es la unica forma que tenemos de dar las funciones, sino que en los casos de condicionales tendremos que usar el comando \texttt{ceq} asi como dar con \texttt{if} o \texttt{if not}\fixme{No existe if not como tal, lo que ocurre es que el if admite Booleanos y una expresión
+Booleana puede tener not} las condiciones booleanas\fixme{Booleano es con mayúsculas} a las distintas ecuaciones. \par
 
 {\codesize
 \begin{verbatim}
@@ -75,7 +87,7 @@ Por supuesto esta no es la unica forma que tenemos de dar las funciones, sino qu
 \end{verbatim}
 }
 
-Ejemplos de otras funciones pueden ser las dos siguientes, definidas de forma análoga a la suma. \par
+Ejemplos de otras funciones pueden ser las dos siguientes, definidas de forma análoga a la suma.\fixme{como == está predefinido sería mejor cambiarlo por un solo =} \par
 
 {\codesize
 \begin{verbatim}
@@ -127,9 +139,10 @@ endfm
 \end{verbatim}
 }
 
-Una de las cosas que debe llamarnos la atención es \verb"[ctor assoc comm id: mt] ." pues ademas de indicar que \verb"__" es un constructor, \texttt{ctor}, nos da otra información vease, \texttt{assoc comm id:mt}. Las tres nos dan propiedades sobre el operador, asociatividad, commutatividad, pero el más importante seria el ultimo, que nos proporciona un elemento neutro para la operación, en este caso \texttt{mt}, que identificaremos como la lista vacia. \par
+Una de las cosas que debe llamarnos la atención es \verb"[ctor assoc comm id: mt] ." pues ademas de indicar que \verb"__" es un constructor, \texttt{ctor}, nos da otra información vease, \texttt{assoc comm id: mt}. Las tres nos dan propiedades sobre el operador, asociatividad, commutatividad, pero el más importante seria el ultimo, que nos proporciona un elemento neutro para la operación, en este caso \texttt{mt}, que identificaremos como la lista vacia. \par
 
-Por supuesto el módulo tal cual queda muy pobre, y no seria demasiado complicado completarlo con nuevas funciones como aquellas que nos indiquen si una lista es vacía o su longitud. Estas operaciones se dejan a continuación con huecos para que sean completadas. \par
+Por supuesto el módulo tal cual queda muy pobre, y no seria demasiado complicado completarlo con nuevas funciones como aquellas que nos indiquen si una lista es vacía o su longitud. Estas operaciones se dejan a continuación con huecos para que sean completadas.\fixme{Queda raro que los
+tests y los huecos empiecen en el segundo ejemplo, yo pondría algo para el primero con explicaciones} \par
 
 {\codesize
 \begin{verbatim}
@@ -137,7 +150,6 @@ op empty-list : Lista -> Bool .                   op length-list : List -> *** .
 *** Comprueba si una lista es la lista vacia.     *** Da la longitud de una lista.
 eq empty-list(mt) = true .                        eq length-list(mt) = 0 .
 eq empty-list(L M) = *** .                        eq length-list(L M) = s(length-list(L)) .
- 
 \end{verbatim}
 }
 
@@ -244,7 +256,7 @@ El test funciona correctamente, y cubre todos los casos, así que podemos dar po
    assertFalse(empty-list(s(0)))
    assertEqual(length-list(mt), 0)
    assertEqual(length-list(s(s(0))), s(0))
-   assertDifferenct(length-list(s(s(0))), s(s(0)))
+   assertDifferent(length-list(s(s(0))), s(s(0)))
 endu)
 \end{verbatim}
 
