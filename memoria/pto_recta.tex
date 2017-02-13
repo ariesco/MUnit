@@ -1,0 +1,155 @@
+%!TEX root = tfg_fiesta.tex
+
+\begin{verbatim}
+\chapter{Puntos y rectas}\label{cap.2}
+\end{verbatim}
+
+Una vez completados los modulos anteriores pasaremos a la construcción de uno mayor. Al ser Maude un lenguaje algebraíco la mayoría de módulos, ejemplos y ejercicios que se pueden encontrar tienen que ver con esta caracteristica, siendo principalmente anillos y grupos. Debido a esto he intentado salirme de lo normal implementando el equivalente a la geometría con regla y compas, lo cual por supuesto tiene mucho que ver con el álgebra, pero no se recurre a los modelos anteriores. \par
+
+Para la implementaci\'on de la idea partiremos por la división del modulo en tres, consistiendo el primero en la geometría básica en dos dimensiones con puntos, rectas y circunferencias, así como todas las interacciones entre ellas; el tercero consistirá en reglas para la entrada y la salida de datos, haciendo que sea interactivo y que para utilizarlo no sean necesarios conocimientos previos del lenguaje, solo el nombre de las reglas, o comandos, que utilizaremos. El segundo sería, al contrario que los otros dos, un módulo puente, que cargará con el peso de todas las funciones necesarias para la implementación del tercero pero que, por orden y claridad, no se incluirán en el módulo de geometría dado que ahí no serán necesarias. \par
+
+Comencemos con la creación del primer modulo.  Como consta de tres objetos bien diferenciados lo dividiremos en tres fmod distintos, correspondiendo estos con los puntos, las rectas, y las circumferencias. \par
+
+La definición de los puntos sera sencilla, construyendose como un par consistente por dos numeros reales, igual que se haría en papel. Por otro lado, a los puntos no se les puede dotar de operaciones complicadas, más allá del calculo de la distancia entre dos de ellos y el intercambio de sus coordenadas. Asi pues el fmod, quedaria como sigue.
+{\codesize
+\begin{verbatim}
+fmod POINT is
+
+   pr FLOAT .
+   sorts Point .
+
+   op p(__) : Float Float -> Point [ctor] .
+   *** Define un punto como un par de numeros reales
+
+   vars z11 z12 z21 z22 : Float .
+
+   op distance : Point Point -> Float .
+   *** Calcula la distancia entre dos puntos mediante la metrica usual.
+   eq distance(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) + ((z22 - z12) ^ 2.0)) .
+
+   op trans-point : Point -> Point .
+   *** Intercambia las coordenadas de un punto
+   eq trans-point(p(z11 z12)) = p(z12 z11) .
+
+endfm
+\end{verbatim}
+}
+Como el módulo queda tan sencillo, y sera necesario cargarlo para la creación de los otros dos, lo utilizaremos tambien para las funciones auxiliares que vayamos necesitando en los siguientes, como por ejemplo la implementación de las ecuaciones de segundo grado, lo que se verá a su tiempo. Siguiendo con el espiritu anterior el fmod contara con casos de test, que serán los que en este caso se encuentren incompletos y sera necesario rellenarlos. \par
+
+{\codesize
+\begin{verbatim}
+(munit POINT is
+*** Funcion distance.
+assertEqual(distance(p(1.0 0.0), p(0.0 1.0)), ***)
+assertEqual(distance(p(0.0 0.0), p(4.0 3.0)), ***)
+assertEqual(distance(p(1.0 0.0), p(2.0 0.0)), ***)
+assertEqual(distance(p(1.0 1.0), p(1.0 3.0)), ***)
+*** Funcion pto-trans.
+assert***(trans-point(p(1.0 0.0)), p(1.0 0.0))
+assertEqual(trans-point(p(1.0 0.0)), ***)
+endu)
+\end{verbatim}
+}
+
+Por supuesto tanto el módulo completo como el test íntegro podrá encontrarse en el apendice correspondiente.\par
+
+Dando por finalizada la creación del \texttt{fmod POINT}, comenzaremos con el de las rectas. Estas se implementarán de forma análoga a los puntos, pero en este caso como un par de estos. Como estamos intentando seguir un camino similar al de la geometría básica, inplementaremos ademas de las rectas el tipo vector, que se utilizará en varias operaciones de las primeras. Estos se construiran de nuevo como un par, que sera el correspondiente a extremo menos origen de los puntos que las definen. Ahora ya si comencemos con la definición de los tipos.\par 
+
+{\codesize
+\begin{verbatim}
+fmod LINE is 
+
+   pr POINT .
+   sorts Line Vector .
+
+   op r(__) : Point Point -> Line [ctor] .
+   *** Define una recta como un par de puntos, mas adelante la daremos ecuaciones.
+   op v(__) : Float Float -> Vector [ctor] .
+   *** Define un vector como un par de reales.
+   *** Extremo menos origen.
+
+   vars p1 p2 p3 p4 : Point .
+   vars z11 z12 z21 z22 z31 z32 z41 z42 m n : Float .
+   vars r1 r2 : Line .
+   vars v1 v2 : Vector .
+   vars t : Bool .
+\end{verbatim}
+}
+
+Las primeras funciones que crearemos para los vectores servirán para obtener información de ellos o la construcción de otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y practicamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí que se mostrara es su test de unidad, logicamente ejecutado sobre el módulo completo.\par
+
+{\codesize
+\begin{verbatim}
+(munit LINE is
+      ***Comenzaremos viendo como se comportan las funciones referidas a los vectores.
+      ***Función v-scalar-prod.
+   assertEqual(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 0.0)
+   assertDifferent(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 1.0)
+   assertEqual(v-scalar-prod(v(1.0 2.0), v(2.0 1.0)), 4.0)
+   assertEqual(v-scalar-prod(v(1.0 2.0), v(-2.0 1.0)), 0.0)		
+      ***Funcion v-norm.
+   assertDifferent(v-norm(v(2.0 0.0)), sqrt(8.0))
+   assertDifferent(v-norm(v(2.0 0.0)), 4.0)
+   assertEqual(v-norm(v(2.0 0.0)), 2.0)
+   assertEqual(v-norm(v(2.0 3.0)), sqrt(13.0))
+   assertEqual(v-norm(v(-2.0 3.0)), sqrt(13.0))
+      ***Funcion perpendicular-vector.
+   assertDifferent(perpendicular-vector(v(1.0 0.0)), v(0.0 1.0))
+   assertDifferent(perpendicular-vector(v(1.0 2.0)), v(2.0 1.0))
+   assertDifferent(perpendicular-vector(v(1.0 2.0)), v(-2.0 1.0))
+   assertEqual(perpendicular-vector(v(1.0 0.0)), v(0.0 -1.0))
+      ***Funcion v-are-perpendicular?.
+   assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 1.0)))
+   assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 -1.0)))
+   assertFalse(v-are-perpendicular?(v(1.0 2.0), v(2.0 1.0)))
+   assertTrue(v-are-perpendicular?(v(1.0 2.0), v(-2.0 1.0)))
+   assertTrue(v-are-perpendicular?(v(2.0 3.0), perpendicular-vector(v(2.0 3.0))))
+   assertTrue(v-are-perpendicular?(v(-72.0 96.0), perpendicular-vector(v(-72.0 96.0))))
+
+endu)
+\end{verbatim}
+}
+
+Antes de continuar con las operaciones para rectas construiremos dos funciones opuestas, \texttt{direction-vector-line} que nos devuelve el vector director de una recta, y \texttt{line-from-vector}, que recibe un vector, un punto y devuelde una recta. \par
+{\codesize
+\begin{verbatim}
+   op direction-vector-line : Line -> Vector .
+   *** Devuelve el vector director de una recta
+   eq direction-vector-line(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
+
+   op line-from-vector : Vector Point -> Line .
+   *** Construye una recta mediante un vector y un punto dados.
+   eq line-from-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p((z11 + z21) (z12 + z22))) .
+\end{verbatim}
+}
+
+Estas funciones nos ayudaran a a comprobar si dos rectas son perpendiculares o a calcular una perpendicular a otra en función a un punto dado, ya que simplemente convertiremos las rectas a vectores, y con las funciones anteriores se realizará todo el proceso para despues simplemente devolverlas a rectas. Estas funciones son \texttt{perpendicular-line} y \texttt{are-perpendiculars} respectivamente.\par
+
+Volviendo a la idea original del módulo total, conseguir la geometría suficiente para imitar las construcciones con regla y compas, lo que necesitamos es hallar el punto de corte entre dos rectas. Para esto pondremos las ecuaciones en su forma implicita y resolveremos el sistema correspondiente. Comencemos entonces por encontrar los valores m y n, pendiente y desplazamiento, de las rectas. \par
+
+{\codesize
+\begin{verbatim}
+   op equ-line-m : Line -> Float .
+   *** Dados los dos puntos que definen la recta, devuelve el valor de m, 
+   *** para poder "construirla" de forma y = mx + n.
+   eq equ-line-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) .
+
+   op equ-line-n : Line -> Float .
+   *** Dados los dos puntos que definen la recta, devuelve el valor de n, 
+   *** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+   *** en las que son de la forma  x = n
+   eq equ-line-n(r(p(z11 z12) p(z21 z22)))= z12 - 
+      (z11 * equ-line-m(r(p(z11 z12) p(z21 z22)))) .
+
+   op are-equal : Line Line -> Bool .
+   *** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
+   *** pues una recta puede construirse mediante infinitos pares de puntos.
+   eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
+   eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and 
+      (equ-line-n(r1) == equ-line-n(r2)) [owise] .
+\end{verbatim}
+}
+
+Como se puede ver, ademas de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, y es que no es dificil ver que la igual básica en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, vease: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo n natural, pero no son identicamente iguales, que es lo que Maude pide, así que para el son distintas. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicaran respectivamente si la recta que les demos es horizontal o vertical. Como ya sucedio más arriba la definición de estas funciones es practicamente trivial, simplemente comprobamos las coordenadas de los puntos, así que no se incluiran aquí. Aprovechando estas funciones construiremos la última función menor, \texttt{are-in-line} que comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que definen la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecera aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción de lo que acabo de contar.\par
+
+
