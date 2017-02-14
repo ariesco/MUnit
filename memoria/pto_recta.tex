@@ -4,7 +4,7 @@ Al ser Maude un lenguaje algebraíco la mayoría de módulos, ejemplos y ejercic
 
 Para la implementación de la idea partiremos por la división del modulo en tres, consistiendo el primero en la geometría básica en dos dimensiones con puntos, rectas y circunferencias, así como todas las interacciones entre ellas, el tercero consistirá en reglas para la entrada y la salida de datos, haciendo que sea interactivo y que para utilizarlo no sean necesarios conocimientos previos del lenguaje, solo el nombre de las reglas, o comandos, que utilizaremos. El segundo sería, al contrario que los otros dos, un módulo puente, que cargará con el peso de todas las funciones necesarias para la implementación del tercero pero que, por orden y claridad, no se incluirán en el módulo de geometría dado que ahí no serán necesarias. \par
 
-Comencemos con la creación del primer módulo. Como consta de tres objetos bien diferenciados lo dividiremos en tres fmod distintos, correspondiendo estos con los puntos, las rectas, y las circumferencias. La definición de los puntos sera sencilla, construyendose como un par consistente por dos numeros reales, igual que se haría en papel. Por otro lado, a los puntos no se les puede dotar de operaciones complicadas, más allá del calculo de la distancia entre dos de ellos y el intercambio de sus coordenadas. Asi pues el fmod, quedaria como sigue.
+Comencemos con la creación del primer módulo, como consta de tres objetos bien diferenciados lo dividiremos en tres fmod distintos, correspondiendo estos con los puntos, las rectas, y las circumferencias. La definición de los puntos sera sencilla, construyéndose como un par consistente por dos números reales, igual que se haría en papel. Por otro lado, a los puntos no se les puede dotar de operaciones complicadas, más allá del cálculo de la distancia entre dos de ellos y el intercambio de sus coordenadas. Asi pues el fmod, quedaria como sigue.
 {\codesize
 \begin{verbatim}
 fmod POINT is
@@ -28,7 +28,7 @@ fmod POINT is
 endfm
 \end{verbatim}
 }
-Como el módulo queda tan sencillo, y sera necesario cargarlo para la creación de los otros dos, lo utilizaremos tambien para las funciones auxiliares que vayamos necesitando en los siguientes, como por ejemplo la implementación de las ecuaciones de segundo grado, lo que se verá a su tiempo. Siguiendo con el espiritu anterior el fmod contara con casos de test, que serán los que en este caso se encuentren incompletos y sera necesario rellenarlos. \par
+Como el módulo queda tan sencillo, y sera necesario importarlo para la creación de los otros dos, lo utilizaremos tambien para las funciones auxiliares que vayamos necesitando en los siguientes, como por ejemplo la implementación de las ecuaciones de segundo grado, lo que se verá a su tiempo. Siguiendo con el espíritu anterior el fmod contará con casos de test, que serán los que en este caso se encuentren incompletos y sera necesario rellenarlos. \par
 
 {\codesize
 \begin{verbatim}
@@ -45,9 +45,9 @@ endu)
 \end{verbatim}
 }
 
-Por supuesto tanto el módulo completo como el test íntegro podrá encontrarse en el apendice correspondiente.\par
+Por supuesto tanto el módulo como el test completos podrán encontrarse en el apendice correspondiente.\par
 
-Dando por finalizada la creación del \texttt{fmod POINT}, comenzaremos con el de las rectas. Estas se implementarán de forma análoga a los puntos, pero en este caso como un par de estos. Como estamos intentando seguir un camino similar al de la geometría básica, inplementaremos ademas de las rectas el tipo vector, que se utilizará en varias operaciones de las primeras. Estos se construiran de nuevo como un par, que sera el correspondiente a extremo menos origen de los puntos que las definen. Ahora ya si comencemos con la definición de los tipos.\par 
+Dando por finalizada la creación del \texttt{fmod POINT}, comenzaremos con el de las rectas. Estas se implementarán de forma análoga a los puntos, pero en este caso como un par de estos. Como estamos intentando seguir un camino similar al de la geometría básica, inplementaremos además de las rectas el tipo vector, que se utilizará en varias operaciones de las primeras. Estos se construirán de nuevo como un par, que será el correspondiente a extremo menos origen de los puntos que las definen. Ahora ya sí comencemos con la definición de los tipos.\par 
 
 {\codesize
 \begin{verbatim}
@@ -70,12 +70,11 @@ fmod LINE is
 \end{verbatim}
 }
 
-Las primeras funciones que crearemos para los vectores servirán para obtener información de ellos o la construcción de otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y practicamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí que se mostrara es su test de unidad, logicamente ejecutado sobre el módulo completo.\par
+Las primeras funciones que crearemos para los vectores servirán para obtener información de ellos o la construcción de otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y practicamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí que se mostrará es su test de unidad, logicamente ejecutado sobre el módulo completo.\par
 
 {\codesize
 \begin{verbatim}
 (munit LINE is
-      ***Comenzaremos viendo como se comportan las funciones referidas a los vectores.
       ***Función v-scalar-prod.
    assertEqual(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 0.0)
    assertDifferent(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 1.0)
@@ -117,9 +116,7 @@ Antes de continuar con las operaciones para rectas construiremos dos funciones o
 \end{verbatim}
 }
 
-Estas funciones nos ayudaran a a comprobar si dos rectas son perpendiculares o a calcular una perpendicular a otra en función a un punto dado, ya que simplemente convertiremos las rectas a vectores, y con las funciones anteriores se realizará todo el proceso para despues simplemente devolverlas a rectas. Estas funciones son \texttt{perpendicular-line} y \texttt{are-perpendiculars} respectivamente.\par
-
-Volviendo a la idea original del módulo total, conseguir la geometría suficiente para imitar las construcciones con regla y compas, lo que necesitamos es hallar el punto de corte entre dos rectas. Para esto pondremos las ecuaciones en su forma implicita y resolveremos el sistema correspondiente. Comencemos entonces por encontrar los valores m y n, pendiente y desplazamiento, de las rectas. \par
+Estas funciones nos ayudaran a a comprobar si dos rectas son perpendiculares o a calcular una perpendicular a otra en función a un punto dado, ya que simplemente convertiremos las rectas a vectores, y con las funciones anteriores se realizará todo el proceso para después simplemente devolverlas a rectas. Estas funciones son \texttt{perpendicular-line} y \texttt{are-perpendiculars} respectivamente. Volviendo a la idea original del módulo total, conseguir la geometría suficiente para imitar las construcciones con regla y compás, lo que necesitamos es hallar el punto de corte entre dos rectas. Para esto pondremos las ecuaciones en su forma implicita y resolveremos el sistema correspondiente. Comencemos entonces por encontrar los valores m y n, pendiente y desplazamiento, de las rectas. \par
 
 {\codesize
 \begin{verbatim}
@@ -144,10 +141,13 @@ Volviendo a la idea original del módulo total, conseguir la geometría suficien
 \end{verbatim}
 }
 
-Como se puede ver, ademas de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, y es que no es dificil ver que la igual básica en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, vease: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo n natural, pero no son identicamente iguales, que es lo que Maude pide, así que para el son distintas. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicaran respectivamente si la recta que les demos es horizontal o vertical. Como ya sucedio más arriba la definición de estas funciones es practicamente trivial, simplemente comprobamos las coordenadas de los puntos, así que no se incluiran aquí. Aprovechando estas funciones construiremos la última función menor, \texttt{are-in-line} que comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que definen la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecera aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción de lo que acabo de contar.\par
+Como se puede ver, ademas de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, y es que no es dificil ver que la igualdad básica, \verb"_==_", en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, vease: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo n natural, pero no son identicamente iguales, que es lo que Maude pide, así que para él son distintas. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicaran respectivamente si la recta que les demos es horizontal o vertical. Como ya sucedio más arriba la definición de estas funciones es practicamente trivial, simplemente comprobamos las coordenadas de los puntos, así que no se incluiran aquí. Aprovechando estas funciones construiremos la última función menor, \texttt{are-in-line} que comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que definen la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecera aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción de lo que acabo de contar.\par
 
 {\codesize
 \begin{verbatim}
+
+Hasta aquí versión revisada.
+
 (munit LINE is
       ***Funciones referidas a las rectas.
       ***Funcion direction-vector-line
@@ -202,8 +202,8 @@ endu)
 }
 
 
-Llegamos por f\'in a la parte que m\'as nos interesaba de este fmod, hayar los puntos de corte.
-Por comodidad lo primero que hacemos sera crear una funci\'on que nos indicara si dos rectas se cortan.
+Llegamos por fín a la parte que más nos interesaba de este fmod, hallar los puntos de corte.
+Por comodidad lo primero que hacemos sera crear una función que nos indicara si dos rectas se cortan.
 Posteriormente creamos otra que nos devuelve ese punto. en caso de que las rectas no se corten devolvera error de algun tipo, pero eso sera algo que se arreglar\'a m\'as adelante. 
 
 \begin{verbatim}	
