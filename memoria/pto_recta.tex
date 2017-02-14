@@ -143,11 +143,10 @@ Estas funciones nos ayudaran a a comprobar si dos rectas son perpendiculares o a
 
 Como se puede ver, ademas de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, y es que no es dificil ver que la igualdad básica, \verb"_==_", en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, vease: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo n natural, pero no son identicamente iguales, que es lo que Maude pide, así que para él son distintas. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicaran respectivamente si la recta que les demos es horizontal o vertical. Como ya sucedio más arriba la definición de estas funciones es practicamente trivial, simplemente comprobamos las coordenadas de los puntos, así que no se incluiran aquí. Aprovechando estas funciones construiremos la última función menor, \texttt{are-in-line} que comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que definen la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecera aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción de lo que acabo de contar.\par
 
+NOTA: LLegados a este punto no se si incluir el test de unidad para todas las funciones definidas para rectas, ya que son muchisimas. \par
+
 {\codesize
 \begin{verbatim}
-
-Hasta aquí versión revisada.
-
 (munit LINE is
       ***Funciones referidas a las rectas.
       ***Funcion direction-vector-line
@@ -201,13 +200,12 @@ endu)
 \end{verbatim}
 }
 
+Llegamos por fín a la parte que más nos interesaba de este fmod, el punto de corte de dos rectas.
+Por comodidad lo primero que se hará será crear una función que nos indicará si dos rectas se cortan y
+posteriormente crearemos otra que nos devuelva ese punto. En caso de que las rectas no se corten, la función que nos da el punto de corte nos devolvera un error de algun tipo, pero eso será algo que se arreglará más adelante. \par
 
-Llegamos por fín a la parte que más nos interesaba de este fmod, hallar los puntos de corte.
-Por comodidad lo primero que hacemos sera crear una función que nos indicara si dos rectas se cortan.
-Posteriormente creamos otra que nos devuelve ese punto. en caso de que las rectas no se corten devolvera error de algun tipo, pero eso sera algo que se arreglar\'a m\'as adelante. 
-
+{\codesize
 \begin{verbatim}	
-
    op cut?-r-r : Line Line -> Bool .
    *** comprueba si dos rectas se cortan a partir de la pendiente de estas
    *** devolviendo el valor false si son paralelas y true en caso contrario.
@@ -217,7 +215,13 @@ Posteriormente creamos otra que nos devuelve ese punto. en caso de que las recta
    ceq cut?-r-r(r1, r2) = true 
    if vertical(r2) and horizontal(r1) .
    eq cut?-r-r(r1, r2) = not (equ-line-m(r1) == equ-line-m(r2)) .
+\end{verbatim}
+}
 
+Para hallar el punto de corte haremos lo mencionado anteriormente, con las dos rectas en implícitas devolvemos la solución del sistema correspondiente. El método es trivial, salvo los cálculos, pero al encontrarnos en un caso general debemos hacer una distinción de casos que se corresponden con las rectas horizontales y verticales, ya que la pendiente cero o infinito da bastante problemas. \par
+
+{\codesize
+\begin{verbatim}	
    op cut-point-r-r : Line Line -> Point .
    *** Devuelve el punto de corte de dos rectas dadas.
    ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
@@ -246,138 +250,46 @@ Posteriormente creamos otra que nos devuelve ese punto. en caso de que las recta
       n1 := equ-line-n(r1) /\
       x := cut-point-x(r1, r2) .
    eq cut-point-y(r(p(z11 z12) p(z21 z12)), r2) = z12 .
-
-endfm
-
 \end{verbatim}
+}
 
-Veamos ahora que todo funciona como queremos, para ello construimos el test de unidad correspondiente.
+Los cálculos de las funciones \texttt{cut-point-x} y \texttt{cut-point-y} se pueden encontrar en el apendice correspondiente junto con el de otras funciones que veremos más adelante. Al igual que hemos hecho en el resto de casos comprobamos que todo funciona correctamente antes de comenzar a "dejar huecos". A la hora de la ejecución de los test nos encontramos con un único caso que no pasa, lo cual resulta extraño, que es el siguiente: \par
 
-
+{\codesize
 \begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
 (munit LINE is
-      ***Funciones referidas a las rectas.
-      ***Funcion direction-vector-line
-   assertEqual(direction-vector-line(r(p(0.0 0.0) p(1.0 1.0))), v(1.0 1.0))	
-   assertDifferent(direction-vector-line(r(p(2.0 3.0) p(1.0 1.0))), v(1.0 2.0))
-      ***Funciones equ-line-m y equ-line-n.
-   assertEqual(equ-line-m(r(p(0.0 0.0) p(1.0 1.0))), 1.0)
-   assertEqual(equ-line-m(r(p(0.0 1.0) p(1.0 0.0))), -1.0)
-   assertDifferent(equ-line-m(r(p(0.0 0.0) p(0.0 45.0))), 1.0)
-   assertEqual(equ-line-n(r(p(0.0 0.0) p(1.0 1.0))), 0.0)
-   assertEqual(equ-line-n(r(p(1.0 1.0) p(2.0 0.0))), 2.0)
-   assertEqual(equ-line-n(r(p(45.0 0.0) p(0.0 45.0))), 45.0)
-      ***Funcion are-equal.
-   assertTrue(are-equal(r(p(0.0 0.0) p(1.0 1.0)) , r(p(23.0 23.0) p(-1.0 -1.0))))
-   assertFalse(are-equal(r(p(0.0 0.0) p(1.0 0.0)) , r(p(0.0 0.0) p(0.0 1.0))))
-   assertTrue(are-equal(r(p(0.0 1.0) p(0.0 2.0)), r(p(0.0 3.0) p(0.0 4.0))))
-   assertFalse(are-equal(r(p(0.0 2.0) p(0.0 3.0)), r(p(1.0 2.0) p(1.0 3.0))))
-      ***Funcion line-from-vector.
-   assertEqual(line-from-vector(v(1.0 2.0), p(0.0 0.0)),r(p(0.0 0.0) p(1.0 2.0)))
-   assertDifferent(line-from-vector(v(1.0 2.0), p(0.0 0.0)),r(p(1.0 2.0) p(0.0 0.0)))
-   assertTrue(are-equal(line-from-vector(v(1.0 2.0), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 2.0))))
-   assertTrue(are-equal(line-from-vector(v(1.0 2.0), p(0.0 0.0)), r(p(1.0 2.0) p(0.0 0.0))))
-   assertTrue(are-equal(line-from-vector(v(2.0 3.0), p(1.0 1.0)), r(p(-1.0 -2.0) p(1.0 1.0))))
-      ***Funcion perpendicular-line.
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 0.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(1.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(0.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(1.0 1.0)), r(p(1.0 1.0) p(1.0 2.0))))
-   assertFalse(are-equal(perpendicular-line(r(p(3.0 -6.0) p(9.0 74.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 -4.0))))
-   assertTrue(are-equal(perpendicular-line(r(p(1.0 0.0) p(0.0 1.0)), p(0.5 0.5)), r(p(0.5 0.5) p(1.0 1.0))))
-      ***Funcion are-perpendiculars.
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))))
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
-   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(1.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))))
-   assertFalse(are-perpendiculars(r(p(0.0 0.0) p(1.0 1.0)), r(p(1.0 1.0) p(1.0 2.0))))
-   assertFalse(are-perpendiculars(r(p(3.0 -6.0) p(9.0 74.0)), r(p(0.0 0.0) p(1.0 -4.0))))
-   assertFalse(are-perpendiculars(r(p(1.0 0.0) p(0.0 1.0)), r(p(1.5 0.5) p(1.0 1.0))))
-      ***Funciones vertical y horizontal.
-   assertTrue(vertical(r(p(13.0 -43.0) p(13.0 56.0))))
-   assertFalse(vertical(r(p(13.0 -43.0) p(-13.0 56.0))))
-   assertTrue(horizontal(r(p(57.0 12.0) p(24.0 12.0))))
-   assertFalse(horizontal(r(p(57.0 12.0) p(24.0 -12.0))))
-      ***Funcion are-in-line.
-   assertTrue(are-in-line(p(0.0 0.0), r(p(0.0 0.0) p(1.0 1.0))))
-   assertTrue(are-in-line(p(1.0 1.0), r(p(0.0 0.0) p(1.0 1.0))))
-   assertTrue(are-in-line(p(0.5 0.5), r(p(0.0 0.0) p(1.0 1.0))))
-   assertFalse(are-in-line(p(0.0 0.0), r(p(1.0 0.0) p(0.0 1.0))))
-   assertFalse(are-in-line(p(2.0 3.0), r(p(2.0 1.0) p(4.0 3.0))))
-   assertFalse(are-in-line(p(1.0 2.0), r(p(2.0 1.0) p(4.0 3.0))))
-endu)
-	
-\end{verbatim}
-
-Hasta aqui todos van bien, aqui su ejecuci\'on, el problema lo plantean los puntos de corte, veamos sus test y parte de la ejecuci\'on.
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit LINE is
-      ***Funcion cut?-r-r.
-   assertTrue(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(3.0 4.0))))
-   assertTrue(cut?-r-r(r(p(0.0 1.0) p(1.0 0.0)), r(p(0.0 0.0) p(1.0 1.0))))
-   assertFalse(cut?-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(1.0 1.0) p(0.0 1.0))))
-   assertFalse(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(6.0 4.0))))
-      ***Funcion cut-point-x
-   assertEqual(cut-point-x(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
-   assertEqual(cut-point-x(r(p(2.0 3.0) p(0.0 2.0)), r(p(0.0 1.0) p(0.0 2.0))), 0.0)
-      ***Funcion cut-point-y
-   assertEqual(cut-point-y(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
-   assertEqual(cut-point-y(r(p(2.0 3.0) p(0.0 3.0)), r(p(0.0 3.0) p(1.0 4.0))), 3.0)
-      ***Funcion cut-point-r-r
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 2.0)), r(p(0.0 0.0) p(2.0 1.0))), p(0.0 0.0))
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))), p(0.0 0.0))
-   assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))), p(0.0 0.0))
    assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0))
 end)
 \end{verbatim}
+}
 
-Todos los test deber\'ian ir bien, se puede ver que se han construido con casos claros para evitar fallos humanos. Sin embargo el ultimo no funciona bien.
+Cuya ejecución, que como se puede ver esta forzada para dar \texttt{true}, es la siguiente
 
+{\codesize
 \begin{verbatim}
-
-	    Full Maude 2.7 March 10th 2015
-
-
-	MUnit: a unit testing framework for Maude.
-		Version 1.0(November 23rd, 2016)
-
-
-4 test cases were executed.
+1 test cases were executed.
 
 1 failures.
 
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(1.0 2.0)),r(p(0.0 0.0)p(2.0 1.0))),p(
-    0.0 0.0)) passed.
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(0.0 1.0)),r(p(0.0 0.0)p(1.0 0.0))),p(
-    0.0 0.0)) passed.
-assertEqual(cut-point-r-r(r(p(0.0 0.0)p(1.0 0.0)),r(p(0.0 0.0)p(0.0 1.0))),p(
-    0.0 0.0)) passed.
 assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
     2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)) failed.
 
 \end{verbatim}
+}
 
-Para ver el problema calcularemos el punto por separado, pues por como hemos construidos las rectas deber\'ia devolvernos el punto p(7.0 5.0)
-
+Para ver el problema calcularemos el punto por separado, pues por como estan construidas las rectas debería devolvernos el punto \texttt{p(7.0 5.0)} .\par
+{\codesize
 \begin{verbatim}
-
 Maude> red cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))) .
 reduce in GEO2D : cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(
     9.3000000000000007 2.3999999999999999) p(7.0 5.0))) .
 rewrites: 88 in 0ms cpu (0ms real) (~ rewrites/second)
 result Point: p(7.0000000000000009 5.0000000000000009)
-
 \end{verbatim}
-
-Y aqui lo tenemos, maude no se comporta bien con los decimales, y aunque sea en una posicion tan baja, la dieciseis, esos n\'umeros no son ni siete ni cinco, asi que maude nos devuelve un fallo.
-Para corregir este tipo de errores incluiremos en el fmod point la primera funci\'on auxiliar, que dado dos numeros dira si son iguales en base a un epsilon que podremos elegir.
-
+}
+Aquí vemos el error, Maude no se comporta bién con los decimales, y aunque sea en una posicion tan baja, la dieciseis, esos números no son ni siete ni cinco, así que Maude nos devuelve un fallo.
+Para corregir este tipo de errores incluiremos en el \verb"fmod POINT" la primera función auxiliar, que dado dos números dirá si son iguales en base a un Epsilon que podremos elegir.\par
+{\codesize
 \begin{verbatim}
    op equal-epsilon : Float Float Float -> Bool .
    *** Comprueba si dos numeros reales son iguales en funcion de un epsilon.
@@ -389,48 +301,16 @@ Para corregir este tipo de errores incluiremos en el fmod point la primera funci
    ceq equal-epsilon(z11, z12, a) = false
    if (z11 >= z12) 
       /\ a <= (z11 - z12) .
-
 \end{verbatim}   
+}
 
-Sus casos de test:
-
+Veamos ahora si, haciendo un pequeño cambio, el test que antes fallaba ahora nos da un resultado correcto.
+{\codesize
 \begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
-(munit POINT is
-      *** Veamos ahora la funcion equal-epsilon.
-   assertTrue(equal-epsilon(5.0 ,5.00001 , 10.0 ^ (-4.0)))
-   assertFalse(equal-epsilon(7.0 ,7.1 , 10.0 ^ (-2.0)))
-   assertEqual(equal-epsilon(1.01010, 1.01011, 10.0 ^ (-4.0)), equal-epsilon(1.01011, 1.01010, 10.0 ^ (-4.0)))
-endu)
-
-\end{verbatim}
-
-La ejecuci\'on de los casos de test es correcta y puede verse aqui, junto con los test anteriores y los de las funciones que se veran posteriormente. \\
-
-Veamos ahora, si haciendo un pequeño cambio, el test que antes fallaba ahora nos da un resultado correcto.
-
-\begin{verbatim}
-load GEO2D.maude
-load ../mUnit.maude
-
 (munit LINE is
    assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0))
    assertTrue(equal-epsilon(0.0, distance(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0)), 10.0 ^ (-5.0)))
 endu)
-\end{verbatim} 
-
-Y su ejecuci\'on:
-
-\begin{verbatim}
-
-	    Full Maude 2.7 March 10th 2015
-
-
-	MUnit: a unit testing framework for Maude.
-		Version 1.0(November 23rd, 2016)
-
 
 2 test cases were executed.
 
@@ -443,6 +323,5 @@ assertTrue(equal-epsilon(0.0,distance(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(
     -5.0)) passed.
 
 \end{verbatim} 
-
-Como podemos ver todo funciona ya bien, aunque para mi gusto la soluci\'on es muy artificial, acercandose a la teor\'ia del punto gordo m\'as que a otra cosa. Sin embargo la unica forma que habria de solucionarlo bien seria modificando la definici\'on de los numeros reales, en concreto el funcionamiento del igual con respecto a las operaciones, pero eso es algo que se sale totalmente de lo que queremos conseguir aqu\'i. \par
-
+}
+Como podemos ver todo ha pasado a funcionar correctamente, aunque el punto de corte de dos rectas pueda no pertenecer a ninguna de ella. Ahora sí, aunque de forma irregular ponemos fin al \texttt{fmod LINE}. \par
