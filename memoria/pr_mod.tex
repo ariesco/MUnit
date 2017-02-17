@@ -28,7 +28,7 @@ Dentro de los tipos se les puede dotar de orden, esto se debe a que el lenguaje 
 \end{verbatim}
 }
 
-En este caso por ejemplo, solo definiremos los \texttt{ZeroNat} y \texttt{NoZeroNat}, sin embargo en las funciones el dominio serán siempre los \texttt{Nat}, siendo Maude quien distinga dentro de que subtipo nos encontramos en cada momento para saber que ecuación debe elegir. Esto se vera claramente más adelante. Continuando con lo que nos ocupaba, antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con el atributo \texttt{ctor}. \par
+En este caso por ejemplo, solo definiremos los \texttt{ZeroNat} y \texttt{NoZeroNat}, sin embargo en las funciones el dominio serán siempre los \texttt{Nat}, siendo Maude quien distinga dentro de que subtipo nos encontramos en cada momento para saber que ecuación debe elegir. Esto se verá claramente más adelante. Continuando con lo que nos ocupaba, antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con el atributo \texttt{ctor}. \par
 
 {\codesize
 \begin{verbatim}
@@ -45,7 +45,7 @@ Como se puede observar, a los constructores se les puede dotar de propiedades co
 \end{verbatim}
 }
 
-La creación de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y tambien va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo tambien hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue: \par
+La creación de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y también va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo también hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue: \par
 
 {\codesize
 \begin{verbatim}
@@ -53,7 +53,7 @@ La creación de la funciones comienza de forma similar a la de los constructores
 \end{verbatim}
 }
 
-Una vez definida la función habra que dotarla comportamiento mediante ecuaciones, las cuales como ya se ha comentado antes, se leeran de izquierda a derecha. Estas comenzaran por \texttt{eq} e indicaran mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
+Una vez definida la función habrá que dotarla comportamiento mediante ecuaciones, las cuales como ya se ha comentado antes, se leeran de izquierda a derecha. Estas comenzaran por \texttt{eq} e indicarán mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
 {\codesize
 \begin{verbatim}
    eq add(0 , N) = N .                        eq 0 + N = N .
@@ -69,7 +69,7 @@ Para ilustrar lo comentado lo anteriormente realizaremos en \verb"_+_" una decla
 \end{verbatim}
 }
  
-El método utilizado para dar las variables dependerá de cada uno, o del las veces que se vaya a usar la esta a lo largo del módulo, pero por comodidad seguiré utilizando la declaración normal. Volviendo con las funciones, por supuesto esta no es la unica forma que tenemos de darlas, sino que en los casos de condicionales tendremos que usar el comando \texttt{ceq} asi como dar con \texttt{if} las condiciones Booleanas, pudiendo añadir operaciones lógicas como \texttt{not} o \verb"/\" a las distintas ecuaciones.\par
+El método utilizado para dar las variables dependerá de cada uno, o de las veces que se vaya a usar esta a lo largo del módulo, pero por comodidad seguiré utilizando la declaración normal. Volviendo con las funciones, por supuesto esta no es la única forma que tenemos de darlas, sinó que en los casos de condicionales tendremos que usar el comando \texttt{ceq} así como dar con \texttt{if} las condiciones Booleanas, pudiendo añadir operaciones lógicas como \texttt{not} o \verb"/\" a las distintas ecuaciones.\par
 {\codesize
 \begin{verbatim}
    op _*_ : Nat Nat -> Nat .
@@ -93,7 +93,7 @@ Ejemplos de otras funciones pueden ser las dos siguientes, definidas de forma an
 \end{verbatim}
 }
 
-Una vez hayamos creado e incluido todas las funciones sera necesario indicar la terminación del módulo mediante: \par
+Una vez hayamos creado e incluido todas las funciones será necesario indicar la terminación del módulo mediante: \par
 
 {\codesize
 \begin{verbatim}
@@ -101,7 +101,7 @@ endfm
 \end{verbatim}
 }
 
-Si bien todo lo anterior ha resultado util para comprender la sintaxis básica de Maude, en operaciones de mayor complejidad necesitaremos mayor información sobre estas, para lo que haremos uso de los test de unidad. Como ya se ha comentado anteriormente para esto haremos uso del módulo \texttt{mUnit.maude}, que nos proporciona distintos funciones segun lo que queramos comprobar.\par
+Si bien todo lo anterior ha resultado util para comprender la sintaxis básica de Maude, en operaciones de mayor complejidad necesitaremos mayor información sobre estas, para lo que haremos uso de los test de unidad. Como ya se ha comentado anteriormente para esto haremos uso del módulo \texttt{mUnit.maude}, que nos proporciona distintos funciones según lo que queramos comprobar.\par
 
 Los test deben comenzar indicando el módulo sobre el que vamos a trabajar, en nuestro caso \texttt{PEANO-NAT-EXTRA}. \par
 
@@ -111,7 +111,7 @@ Los test deben comenzar indicando el módulo sobre el que vamos a trabajar, en n
 \end{verbatim}
 }
 
-El primer caso de test con que nos encontraremos será \verb"assertEqual(_, _)", que evaluará las dos expresiones que recibe como datos y devolvera \texttt{true} en el caso de que seán iguales, o \texttt{false} en el caso de que o bien no evaluen a lo mismo, o una no se evalue correctamente. \par
+El primer caso de test con que nos encontraremos será \verb"assertEqual(_, _)", que evaluará las dos expresiones que recibe como datos y devolverá \texttt{true} en el caso de que seán iguales, o \texttt{false} en el caso de que o bien no evaluen a lo mismo, o una no se evalue correctamente. \par
 
 {\codesize
 \begin{verbatim}
@@ -127,7 +127,7 @@ De forma opuesta nos encontramos con \verb"assertDifferent(_, _)", que evaluará
 \end{verbatim}
 }
 
-Sin embargo no todas las operaciones evaluan a una expresión, sino que es muy común que lo hagan a un booleano. Debido a esto utilizaremos tambien otras dos funciones, \verb"assertTrue(_)" y \verb"assertFalse(_)". Devolviendonos la primera \texttt{true} en caso de que evalue a \texttt{true} o \texttt{false} en otro caso. La segunda función se comporta al contrario, devolviendonos \texttt{true} si la expresión evalua a \texttt{false}, o \texttt{false} en caso contrario.\par
+Sin embargo no todas las operaciones evaluan a una expresión, sinó que es muy común que lo hagan a un Booleano. Debido a esto utilizaremos también otras dos funciones, \verb"assertTrue(_)" y \verb"assertFalse(_)". Devolviéndonos la primera \texttt{true} en caso de que evalue a \texttt{true} o \texttt{false} en otro caso. La segunda función se comporta al contrario, devolviendonos \texttt{true} si la expresión evalua a \texttt{false}, o \texttt{false} en caso contrario.\par
 
 {\codesize
 \begin{verbatim}
@@ -171,6 +171,7 @@ endu)
 
 Es en la ejecución de estos test en los que vemos que todo funciona tal y como queremos. Veamos pues una de estas. \par
 
+{\codesize
 \begin{verbatim}
 15 test cases were executed.
 
@@ -192,10 +193,11 @@ assertTrue(0 == 0) passed.
 assertFalse(s(0)== s(s(0))) passed.
 assertTrue(s(s(0))== s(s(0))) passed.
 \end{verbatim}
+}
 
 El test funciona correctamente, y cubre todos los casos, así que podemos dar por supuesto que el módulo es correcto. \par
 
-Sin embargo nosotros no utilizaremos los test de unidad simplemente como forma de comprobar que todo funciona tal y como queremos, sino que nos serviran para mostrar el resultado final de diversas operaciones que esten parcialmente definidas, dejando diversos huecos en ellas. Para ello crearemos un nuevo módulo funcional, tambien muy sencillo, que en este caso nos dara una estructura de datos básica, las listas: \par
+Sin embargo nosotros no utilizaremos los test de unidad simplemente como forma de comprobar que todo funciona tal y como queremos, sino que nos servirán para mostrar el resultado final de diversas operaciones que estén parcialmente definidas, dejando diversos huecos en ellas. Para ello crearemos un nuevo módulo funcional, tambien muy sencillo, que en este caso nos dará una estructura de datos básica, las listas: \par
 
 {\codesize
 \begin{verbatim}
@@ -226,9 +228,9 @@ endfm
 \end{verbatim}
 }
 
-Una de las cosas que debe llamarnos la atención es \verb"[ctor assoc comm id: mt] ." pues ademas de indicar que \verb"__" es un constructor, \texttt{ctor}, nos da otra información vease, \texttt{assoc comm id: mt}. Las tres nos dan propiedades sobre el operador, asociatividad, commutatividad, pero el más importante seria el ultimo, que nos proporciona un elemento neutro para la operación, en este caso \texttt{mt}, que identificaremos como la lista vacia. \par
+Una de las cosas que debe llamarnos la atención es \verb"[ctor assoc comm id: mt] ." pues además de indicar que \verb"__" es un constructor, \texttt{ctor}, nos da otra información veasé, \texttt{assoc comm id: mt}. Las tres nos dan propiedades sobre el operador, asociatividad, commutatividad, pero el más importante sería el último, que nos proporciona un elemento neutro para la operación, en este caso \texttt{mt}, que identificaremos como la lista vacía. \par
 
-Por supuesto el módulo tal cual queda muy pobre, y no seria demasiado complicado completarlo con nuevas funciones como aquellas que nos indiquen si una lista es vacía o su longitud. Estas operaciones se dejan a continuación con huecos para que sean completadas, los cuales estaran complementadas con su test correspondiente, así que solo será necesario comprobar lo que falta en lo que se podría considerar un ejemplo. \par
+Por supuesto el módulo tal cual queda muy pobre, y no seria demasiado complicado completarlo con nuevas funciones como aquellas que nos indiquen si una lista es vacía o su longitud. Estas operaciones se dejan a continuación con huecos para que sean completadas, los cuales estarán complementadas con su test correspondiente, así que solo será necesario comprobar lo que falta en lo que se podría considerar un ejemplo. \par
 
 {\codesize
 \begin{verbatim}
@@ -256,6 +258,6 @@ endu)
 
 Ahora sí podemos ver que \verb"empty-list(s(0))" debe darnos \texttt{false}, de la misma manera que el tipo de salida de \verb"length-list" debe ser naturalmente \texttt{Nat}.\par 
 
-Y con esto cubrimos los primeros módulos funcionales en Maude, más adelanta hablaremos de los módulos de sistema, que funcionan mediante reglas, pero antes abordaremos uno funcional más complejo de lo visto aquí. Aun así los módulos anteriores así como sus test de unidad se pueden encontrar aquí(hiper) en el apendice correspondiente.\par 
+Y con esto cubrimos los primeros módulos funcionales en Maude, más adelante hablaremos de los módulos de sistema, que funcionan mediante reglas, pero antes abordaremos uno funcional más complejo de lo visto aquí. Aun así los módulos anteriores así como sus test de unidad se pueden encontrar aquí(hiper) en el apendice correspondiente.\par 
 
 

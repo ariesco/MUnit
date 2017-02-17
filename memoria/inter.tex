@@ -1,0 +1,106 @@
+%!TEX root = tfg_fiesta.tex
+
+Una vez completadas todas las funciones necesarias para imitar la geometría en dos dimensiones y antes de pasar a los siguientes módulos es necesario continar con los casos para el proyecto de aprendizaje, que desde el primer capítulo  han estado bastante abandonados. Así pues dividiremos los casos en tres, uno para cada módulo, y los huecos ahora se encontrarán unicamente en los módulos funcionales, dejando los test de unidad intactos para su comprobación. Por motivos de espacio aquí solo incluiremos algunas de estas funciones, que podrán encontrarse integras más adelante en su apéndice correspondiente.\par
+
+Veamos algunos casos del \texttt{fmod POINT}: \par
+
+{\codesize
+\begin{verbatim}
+   op equal-epsilon : Float Float Float -> Bool .
+   ceq equal-epsilon(z11, z12, a) = equal-epsilon(z12, z11, a)
+   if z11 < z12 .
+   ceq equal-epsilon(z11, z12, a) = true
+   if (z11 >= z12) /\ a *** (z11 - z12) .
+   ceq equal-epsilon(z11, z12, a) = false
+   if (z11 >= z12) /\ a *** (z11 - z12) .
+
+   op trans-point : Point -> Point .
+   eq trans-point(p(z11 z12)) = p(*** ***) .
+
+   op second-degree-equation-1 : Float Float Float -> Float .
+   eq second-degree-equation-1(0.0 , b , c) = *** .
+   eq second-degree-equation-1(a , b , c) = 
+      (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
+\end{verbatim}
+}
+
+Veamos algunos casos del \texttt{fmod LINE}: \par
+
+{\codesize
+\begin{verbatim}
+   op perpendicular-vector : Vector -> Vector .
+   eq perpendicular-vector(v(z11 z12)) = *** .
+
+   op v-are-perpendicular? : Vector Vector -> Bool .
+   eq v-are-perpendicular?(v1 , v2) = (v-scalar-prod(v1 , v2) == *** ) .
+
+   op are-equal : Line Line -> Bool .
+   eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
+   eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and *** [owise] .
+
+   op are-in-line : *** *** -> *** .
+   eq are-in-line(p1,r(p2 p3)) = (distance(p1 , p2) + distance(p1 , p3)) ==
+      distance(p2 , p3) . 
+	
+   op cut?-r-r : Line Line -> Bool .
+   ceq cut?-r-r(r1, r2) = *** 
+   if vertical(r1) and horizontal(r2) .
+   ceq cut?-r-r(r1, r2) = *** 
+   if vertical(r2) and horizontal(r1) .
+   eq cut?-r-r(r1, r2) = not (equ-line-m(r1) *** equ-line-m(r2)) .
+\end{verbatim}
+}
+
+Veamos algunos casos del \texttt{fmod CIRCUNFERENCE}: \par
+
+{\codesize
+\begin{verbatim}
+   op circumference-center : Circumference -> Point .
+   eq circumference-center(c(p1 , z11)) = *** .
+
+   op circumference-radius : Circumference -> Float .
+   eq circumference-radius(c(p1 , z11)) = *** .
+
+   op are-in-circumference : Point Circumference -> Bool .
+   eq are-in-circumference(p1 ,c(p2 , z11)) = *** == z11 .
+
+   op cut?-r-c : Line Circumference -> Bool .
+   eq cut?-r-c(*** , ***) = distance
+      (cut-point-r-r(r1 , perpendicular-line(r1 , p1)) , p1) <= z11 .
+
+   op cut?-c-c : Circumference Circumference -> Bool .
+   ceq cut?-c-c(c1, c2) = distance
+       (circumference-center(c1) , circumference-center(c2)) <=  *** + ***
+   if not (circumference-center(c1) == circumference-center(c2)) . 
+   ceq cut?-c-c(c1, c2) = circumference-radius(c1) == circumference-radius(c2)
+   if (*** == ***) .
+\end{verbatim}
+}
+
+Veamos finalmente los casos del \texttt{fmod GEO2D}: \par
+
+{\codesize
+\begin{verbatim}
+   op cut-point : Figure Figure -> List [comm] .
+   ceq cut-point(p1, p2) = p1
+   if *** .
+   ceq cut-point(p1 , r1) = ***
+   if are-in-line(p1 , r1) .
+   ceq cut-point(r1 , r2) = cut-point-r-r(r1 , r2)
+   if *** .
+   ceq cut-point(p1 , c1) = ***
+   if are-in-circumference(p1 , c1) .
+   ceq cut-point(r1 , c1) = ***
+   if cut?-r-c(r1 , c1) .
+   ceq cut-point(p1, p2) = mt
+   if *** .	
+   ceq cut-point(p1 , r1) = ***
+   if not are-in-line(p1 , r1) .
+   ceq cut-point(r1 , r2) = mt 
+   if *** .
+   ceq cut-point(p1 , c1) = ***
+   if not are-in-circumference(p1 , c1) .
+\end{verbatim}
+}
+
+Como se puede ver son en su mayoría sencillos si se dispone de los test de unidad correspondientes, pues tampoco sería coherente pedir para rellenar los huecos unas funciones larguisimas, como las que se pueden tener en las funciones que hallan los puntos de corte. Este es el principal motivo por el cual las funciones \texttt{cut-point-r-r}, \texttt{cut-point-c-c}, \texttt{cut-point-r-c} y \texttt{cut-point-r-r} así como las calculan sus casos concretos no se presenten en la lista de casos a completar, pues no se puede pedir a nadie que adivine los métodos utilizados para calcular los puntos. \par
