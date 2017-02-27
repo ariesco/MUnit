@@ -1,0 +1,6 @@
+load VASIJAS.maude
+load ../mUnit.maude
+
+(munit VASIJAS is
+   assertReachable(vasija(0, 3), vasija(3, 3) ) 
+)

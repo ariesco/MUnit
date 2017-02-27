@@ -1,0 +1,31 @@
+mod VASIJAS is
+
+   protecting NAT .
+   sort Vasija CjVasija .
+   subsort Vasija < CjVasija .
+
+   op vasija : Nat Nat -> Vasija [ctor] .
+   *** El primer numero se corresponde con la cantidad de liquido que contiene la vasija, y el segundo con su capacidad maxima.
+   op _,_ : Vasija Vasija -> CjVasija [ctor comm assoc] .
+
+   vars C1 C2 N1 N2 : Nat .
+
+   op inicial : -> CjVasija .
+   *** Da un conjunto inicial de vasijas vacias con distintas capacidades.
+   eq inicial = vasija(0, 3) , vasija(0, 5) , vasija(0, 8) .
+
+   rl[vacia] : vasija(N1, C1) => vasija(0, C1) .
+   ***Esta regla nos vacia la vasija.
+
+   rl[llena] : vasija(N1, C1) => vasija(C1, C1) .
+   *** Esta regla nos llena la vasija al maximo.
+
+   crl[transferir1] : vasija(N1, C1) , vasija(N2, C2) => vasija(0, C1) , vasija((N1 + N2), C2) 
+   if (N1 + N2) <= C2 .
+   *** Nos transfiere el contenido de una tinaja a otra si la suma de los contenidos no se pasa de la capacidad de la segunda.
+
+   crl[transferir2] : vasija(N1, C1) , vasija(N2, C2) => vasija(sd((N1 + N2) , C2), C1) , vasija(C2, C2)
+   if (N1 + N2) > C2 .
+   *** Nos transfiere el contenido de una tinaja a otra si la suma de los contenidos se pasa de la capacidad de la segunda.
+
+endm
