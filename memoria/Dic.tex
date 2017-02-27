@@ -1,5 +1,7 @@
 %!TEX root = tfg_fiesta.tex
 
+\section{Diccionarios}
+
 Completado ya el primer módulo con sus respectivos casos de test así como los de aprendizaje, damos comienzo a los de entrada salida. Sin embargo antes siquiera de ponernos con ellos hemos de plantearnos como funcionará a nivel interno. Nuestro objetivo es que todas las instrucciones esten ahí, así pues necesitaremos almacenar toda la información en algun sitio, para lo que necesitaremos algun tipo de estructura de datos. De forma paralela tendremos que ver el trato que le damos a las figuras, podemos tenerlas simplemente almacenadas tal cual son y llamarlas utilizando su definición. Sin embargo esto no es para nada cómodo y siguiendo el orden natural de las cosas consideraremos que las figuras tienen nombre, ya decidiremos cuando llegue el momento cual y como se le dá. \par
 
 Continuando con la definición de las estructuras de datos, podriamos simplemente implementar una lista de pares nombre figura, pero para esto es mucho más util crear un diccionario. Los elementos del diccionario serán las entradas, \texttt{entry}, compuestas por un \texttt{Qid}, un identificador, que es un tipo ya definido en Maude, y la figura correspondiente, del tipo \{Figure}.\
@@ -62,6 +64,8 @@ Como se puede ver el único caso un poco distinto se corresponde con las rectas,
    eq F in D = false [owise] .                eq name(D , F) = nil [owise] . 
 \end{verbatim}
 }
+
+\section{Diccionario de figuras}
 
 Y con esto ponemos fín a los diccionarios para figuras. Estos, aunque funcionales a la hora de trabajar con ellos, carecen totalmente de órden, ya que los puntos, rectas y circunferencias se encuentran totalmente mezclados, lo cual teniendo tres clases bien diferenciadas resulta extraño. Así pues construiremos un nuevo tipo \texttt{DicFigures} que se corresponde con un conjunto de tres diccionarios, estando cada uno de ellos destinado a un tipo de figura comcreta. Para comenzar extendemos los tipos del módulo y le dotamos de un constructor para este nuevo tipo: \par
 
@@ -151,7 +155,7 @@ Unas vez finalizado el módulo tendremos que implementar los casos de test corre
 {\codesize
 \begin{verbatim}
 
-Aquí irian los casos con huecos.
+Aquí irían los casos con huecos.
 
 \end{verbatim}
 }

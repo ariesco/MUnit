@@ -1,0 +1,59 @@
+%!TEX root = tfg_fiesta.tex
+
+\section{Maude}
+
+Maude es un lenguaje declarativo, vease, cualquier programa en Maude constituye una teoría lógica, y cualquier computación suya una deducción basada en la utilización de los distintos axiomas presentes en el programa. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
+
+El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y todos los operadores. Posteriormente nos encontraremos con una colección de ecuaciones y relaciones que se encargaran de darnos, leidas de izquierda a derecha, una conclusión, o deducción. Por ultimo nos encontraremos tanto en los operadores como en las definiciones de tipos distintas propiedades como la commutatividad o la asociatividad. De esta manera cuando Maude compila estos modulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
+
+Por otro lado nos encontramos con los módulos de sistema. Estos funcionan con cinco tipos de elementos distintos, correspondiendose los tres primero con los vistos en el módulo funcional. El primero de los nuevos elementos se corresponde con con la especificación de los argumentos para cada uno de los tipos u operadores, y el segundo se correspondería con las reglas de reescritura. La computación de este tipo de módulos sería entonces una mezcla de los anteriores con los argumentos dados, con las nuevas reglas.\par
+
+Un hecho importante de Maude a comentar sería que sus modulos no constituyen unicamaente una teoría, funcionando los elementos anteriores como axiomas, sino que representan un modelo matemático. En el caso de los módulos funcionales, estos con sus distintos operadores y funciones definen un algebra. Esto se puede ver claramente en \verb"PEANO-NAT-EXTRA" donde construimos los números naturales a partir de los axiomas de Peáno y los dotamos de distintas operaciones como la suma.\par
+
+Por otro lado los módulos de sistema nos dan una teoría de reescritura, la cual tiene asociada un algebra inicial, dada por un módulo funcional por ejemplo, y que es en esencia un sistema de transiciones algebraico. Los estados y datos de este sistema seran los elementos del algebra inicial, mientras que los estados de transición serán las reescrituras posibles en el sistema gracias a la aplicación de las distintas reglas \cite{ref1}.\par
+
+
+\section{Los test de unidad}
+
+Un test de unidad es un trozo de código que llama a un módulo, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
+
+Un test de unidad debe cumplir las siguiente condiciones: \par
+
+\begin{itemize}
+\item Debe estar automatizado.
+\item Debe ser facil de implementar.
+\item No debe quedar obsoleto.
+\item Ejecutarlo debe ser tan sencillo como pulsar un botón.
+\item Debe tener una ejecución rapida.
+\item Debe ser consistente con sus resultados. 
+\item Debe tener control total sobre el módulo donde se ejecuta el test, vease, ejecutar todos los casos posibles en todas las funciones con que se encuentre.
+\item Debe ser independiente de la ejecución de otros test.
+\item En caso de que falle, debe ser sencillo encontrar donde se originó el error.
+\end{itemize}.
+
+\cite{ref2}
+
+
+\section{Método de aprendizaje}
+
+Aunque el proyecto en si estaría completo con la implementación de los distintos módulos y sus test de unidad se construiran de forma paralalea unos modulos de aprendizaje, los cuales se encargaran de mostrar a traves de distintos casos como ir definiendo los distintos tipos, sub-tipos y operadores que se utilizan en Maude.\par
+
+Estos módulos de aprendizaje se construirán una vez finalizados el módulo, ya sea funcional o de sistema, y el test de unidad correspondiente. Seran similares a los módulos completos, con la salvedad de que presentaran huecos, que deberán rellenarse. Sin embargo una vez las funciones avancen, nos encontraremos con algunas que llevaran detras unos cálculos que, aun siendo relativamente elementales, no se puede pedir al que lea que los adivine, así pues, en estos casos los huecos apareceran en los propios test de unidad donde se deberá indicar que se ha comprendido correctamente el funcionamiento de las distintas funciones. \par
+
+Como es natural estos módulos irán apareciendo según se completen aquellos en que se basan, y se podrán encontrar en su apendice correspondiente.\par 
+
+
+\section{mUnit y MaudeKoan}
+
+Para trabajar con los test utilizaremos un módulo ya creado llamado mUnit, que nos proporciona distintas herramientas para verificar el funcionamiento de las funciones. Estas, aunque se explicarán en detalle más adelante, son: \verb"assertEqual", \verb"assertDifferent", \verb"assertTrue"y \verb"assertFalse" y realizarán las pruebas lógicas según sus nombres.\par
+
+Por supuesto esta idea no es nueva, sino que se inspira claramente en el proyecto ScalaKoans, que nos ayuda a aprender Scala con un método muy similar, aunque no igual, y que podemos ver para otros muchos lenguajes como puede ser Python. Las diferencias entre nuestro proyecto y ScalaKoans son las siguientes:\par
+\begin{itemize}
+\item Los casos no serań completados desde un programa externo, sino que deberemos modificar los módulos \texttt{.maude} manualmente.
+\item De manera análoga, no utilizaremos un programa externo para comprobar la vericidad de nuestros programas, sino que se tendrán que ejecutar los test de unidad desde la propia consola de Maude hasta conseguir que todas las funciones los pasen.
+\end{itemize}
+
+\section{Sobre los módulos implementados}
+
+Con motivo de mostrar todo lo anteriormente nombrado se recurrirá a implementar la geometría con regla y compás en Maude, para ello se crearán módulos de los dos tipos, uno funcional encargado de toda la parte matemática, y uno de sistema encargado de la entrada y la salida. Estos dos módulos irán por supuesto acompañados por sus respectivos Test y sus módulos de aprendizaje. Sin embargo, y por razones de espacio, no se irán dando todas las funciones a lo largo del trabajo, sino que los módulos completos apareceran en los apendices, y se podran descargar de un repositorio de GitHub, y es que, aunque lo verdaderamente interesante puedan ser los modulos en si, no nos podemos alargar tanto como nos gustaría.\par
+

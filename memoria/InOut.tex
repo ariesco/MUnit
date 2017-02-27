@@ -1,0 +1,143 @@
+%!TEX root = tfg_fiesta.tex
+
+Una vez hemos terminado de explicar en que consisten los módulos de sistema procedemos por fin a la creación del módulo de entrada y salida. Sin embargo este no es un único módulo, sino cinco diferentes, de los cuales solo comentaré en profundidad tres de ellos, que son los que he desarrollado yo. \par
+
+Lo primero que tenemos que ver es que queremos poder hacer. Logicamente lo primero será crear las distintas figuras, como puntos, rectas y circunferencias, lo cual consistira en el equivalente a trazarlas. Como es una primera versión consideraremos que toda la información se introduce manualmente en la consola. Así pues el módulo quedaría como sigue: \par
+
+{\codesize
+\begin{verbatim}
+fmod GEO-SIGNATURE is
+  inc FULL-MAUDE-SIGN .
+
+  sorts @GeoCommand@ .
+  subsort @GeoCommand@ < @Input@ .
+
+  op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
+  op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ 
+                                     -> @GeoCommand@ [ctor] .
+  op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+
+endfm
+\end{verbatim}
+}
+
+Los puntos se escribirían \verb"point p(0.0 0.0) as p1", las circunferencias\\ \verb"circumference c1 in p1 with radius 1.0", y finalmente las rectas como\\ \verb"line r1 from p1 to p2". Logicamente p1, c1, r1 y p2 son nombres de distintas figuras, y como se puede ver tanto en las rectas como en las circunferencias para "introducirlas" necesitaremos tener figuras ya implementadas. Esta es la representación que damos al hecho de que, por ejemplo, para construir una recta necesitamos conocer dos puntos que pasen por ella.\par
+
+Sin embargo este módulo así construido unicamente nos da la forma de los comandos, necesitaremos ver entonces como se comportan, lo cual nos lleva a otro módulo, en este caso, de sistema del cual oostrare a continuación unicamente las reglas que iremos utilizando, para no saturar de codigo el capitulo. Comenzare por las de los puntos.\par
+{\codesize
+\begin{verbatim}
+ crl [point] :
+     < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Punto 'almacenado Q) , AtS >
+  if Q -> F := processPoint(T1 , T2) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+\end{verbatim}
+}
+Empecemos explicando que es todo esto, la regla nos da una transición entre dos estados del sistema, de los cuales los elementos que nos interesan son los tres centrales, vease, el input, el dic, y el output. El input se corresponde con los comandos puesto arriba, donde T1 y T2 son el punto y su nombre respectivamente. El dic es logicamente el diccionario que llevamos en todo momento como estructura de datos donde almacenamos todas las figuras. Se correspondería con un diccionarío de figuras, \texttt{DicFigures}. Y finalmente el output sera la información que nos devuelve. \par
+
+La regla comieza calculando \texttt{processPoint(T1, T2)} y almacenandolo en \texttt{Q -> F} que es una entrada del diccionario. Una vez hecho esto el diccionario que llevamos cambia al añadirle la nueva entrada de la siguiente forma \verb"dic : (D [Q / F])" para evitar volver a almacenar dos figuras con nombres distintos. Finalmente indica mediante un output que el punto ha sido almacenado, indicando eso sí solamente el nombre. Para esto ultimo se realizara un llamamiento a la función \texttt{mod-elements} que nos dara los nombres de las figuras, en este caso puntos, añadidos en el ultimo paso. La función sería la siguiente: \par
+
+{\codesize
+\begin{verbatim}
+op mod-elements : DicFigures Dic -> QidList .
+eq mod-elements([Dp, Dr, Dc], D . Q -> f1) = 
+   mod-elements([Dp, Dr, Dc], D) name([Dp, Dr, Dc], f1) .
+eq mod-elements([Dp, Dr, Dc], mtD) = nil .
+\end{verbatim}
+}
+
+Una vez visto esto, y antes de continuar, he de hacer mención a algo importante, mientras a lo largo de los distintos módulos se ha trabajado con números y ecuaciones matematicas, no me refiero a las propias de los \texttt{fmod}, en geometría euclidea con regla y compas estos son datos que se desconocen, así que no se mostraran por pantalla ya que no será necesario conocerlos, y lo mismo pasara con las rectas y circunferencias. Veamos ahora si cuales son las reglas que definen a estas últimas.\par 
+
+{\codesize
+\begin{verbatim}
+ crl [circumference1] :
+     < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]),
+                  dic : D, output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Circunferencia 'almacenada names) , AtS >
+  if Q -> F := processCircumference-1(T1 , D[downQid(T2)] , T3) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+
+ crl [line1] :
+     < O : MUDC | input : ('line_from_to_[T1 , 'token[T2] , 'token[T3]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Recta 'almacenada names) , AtS >
+  if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+\end{verbatim}
+}
+
+Como se puede ver estas funcionan de manera análoga a la de los puntos, reciben la información mediante un input con el comando correspondiente, la transforman en una entrada con una función auxiliar, e indican por pantalla que la figura correspondiente ha sido almacenada. \par
+
+Sin embargo aun no he mostrado como son las funciones auxiliares, estas como es lógico se encuentran en un módulo "auxiliar" que se encarga de procesar los datos del input para poder devolvernos una entrada al diccionario, compuesta por un \texttt{Qid} y una figura.\par
+
+{\codesize
+\begin{verbatim}
+ op processPoint : Term Term -> Entry .
+ eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
+
+ op processPointAux : Term -> Point .
+ ceq processPointAux('__[T, T']) = qid2point(Q, Q')
+  if Q := downQid(T) /\
+     Q' := downQid(T') .
+
+ op qid2point : Qid Qid -> Point .
+ ceq qid2point(Q, Q') = p(F F')
+  if S := string(Q) /\
+     S' := string(Q') /\
+     F := float(S) /\
+     F' := float(S') .
+\end{verbatim}
+}
+
+Expliquemos las funciones anteriores. \texttt{processPoint} lo que hace es extraer el nombre de uno de los terminos, en este caso \verb"'token[NP]", y dar la entrada al diccionario utilizando la funcion \texttt{processPointAux} que dado el termino \verb"p(_ _)" lo descompone, y a través de \texttt{qid2point} lo convierte en un punto como los que definimos atras, para que así la entrada este bien definida. Estas tres funciones pueden parece un caos, pero esencialmente lo que hacen es transformar la información que nos han dado en algo con lo que podremos trabajar, ya que, al igual que en otros lenguajes, al hacer el input de un número no almacenamos un número, sino otra que luego deberemos convertir, como un \verb"string" o en este caso un \verb"Term". \par
+
+Por suerte esta es con diferencia la función de este estilo más complicada, ya que las rectas y las circunferencias reciben directamente los elementos de que estan compuestas, vease, los puntos y el radio. Las funciones quedarían entonces como sigue:\par
+
+{\codesize
+\begin{verbatim}
+ op processCircumference-1 : Term Point Term -> Entry .
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
+  if Q := downQid(T)
+  /\ S := string(Q)
+  /\ F := float(S)
+  /\ not F == 0.0 .
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> P1
+  if Q := downQid(T)
+  /\ S := string(Q)
+  /\ F := float(S)
+  /\ F == 0.0 .
+
+ op processLine : Term Point Point -> Entry .
+ eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
+\end{verbatim}
+}
+
+Como se puede ver la función \texttt{processLine} es muy sencilla, pues ya recibe los puntos que forman la recta y solo tiene que convertir el nombre a \texttt{qid} para tener el \texttt{entry}. La función para las circunferencias \texttt{processCircumference} es un poco más complicada por que hay que convertir el radio a un número real, pero es análoga a las demas. Lo que sí se la ha añadido es el condicional, considerando entonces las circunferencias de radio 0 como puntos para evitar problemas con la siguiente función que implementaremos.\par
+
+Si ya tenemos las figuras geometricas en el "papel", solo necesitamos una cosa más, los puntos de corte. Lo primero que debemos hacer entonces es añadir el comando correspondiente en el módulo: \par
+
+{\codesize
+\begin{verbatim}
+ op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+\end{verbatim}
+}
+
+Como se puede ver la función recibe cuatro elementos, los dos primeros corresponden con los nombres de los posibles puntos de corte, recordemos que dos circunferencias se pueden cortar en dos puntos, mientras que los dos ultimos son los nombres de las figuras cuyos puntos de corte estamos calculando. La regla correspondiente sería la siguiente: \par
+ 
+{\codesize
+\begin{verbatim}
+ crl [cut1] :
+     < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
+                  output : ('Puntos 'almacenados names) , AtS >
+  if D' := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) /\
+     names := mod-elements(D U [D' , mtD , mtD], D').
+\end{verbatim}
+}
+
+Aunque la regla es similar a las ya vistas lo primero que debe llamarnos la atencion es \verb"D U [D' , mtD , mtD]" dado que no tenemos ninguna función de los diccionarios que sea así. Esta es simplemente una unión de estos, y se puede ver en el modulo correspondiente. Lo verdaderamente importante es el motivo de que este ahí, en todas las reglas anteriores sabiamos que solo se añadia una figura al diccionario, y por tanto podiamos hacerlo manualmente, el problema es que ahora no sabemos cuantas serán, ya que las figuras pueden no cortarse, ser dos rectas, o dos circunferencias. 

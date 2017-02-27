@@ -7,17 +7,25 @@
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{fixme}
+\usepackage{apalike}
+\bibliographystyle{apalike}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Jos\'e Ignacio P\'erez}
-\title{Trabajo de f\'in de carrera}
+\title{Trabajo de fin de carrera}
 \begin{document}
 
 \newcommand{\codesize}{\small}
 
-\tableofcontents
-
+%\pagenumbering{roman}
+\frontmatter
 \input{introduccion}
+\tableofcontents
+\chapter{Preliminares}\label{cap.0}
+\input{preliminares}
+%\setcounter{page}{1}
+%\pagenumbering{arabic}
 
+\mainmatter
 \chapter{Primeros módulos en Maude}\label{cap.1}
 \input{pr_mod}
 \chapter{Puntos y rectas}\label{cap.2}
@@ -28,5 +36,12 @@
 \input{inter}
 \chapter{Diccionarios}\label{cap.5}
 \input{Dic}
-
+\chapter{Módulos de sistema}\label{cap.6}
+\input{sis_mod}
+\chapter{Módulo interactivo}\label{cap.7}
+\input{InOut}
+\chapter{Conclusiones finales y trabajo futuro}\label{cap.10}
+\input{conclusiones}
+\backmatter
+\bibliography{./references}
 \end{document}

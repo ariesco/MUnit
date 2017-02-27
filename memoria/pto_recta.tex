@@ -4,6 +4,8 @@ Al ser Maude un lenguaje algebraico la mayoría de módulos, ejemplos y ejercici
 
 Para la implementación de la idea partiremos por la división del módulo en tres, consistiendo el primero en la geometría básica en dos dimensiones con puntos, rectas y circunferencias, así como todas las interacciones entre ellas, el tercero consistirá en reglas para la entrada y la salida de datos, haciendo que sea interactivo y que para utilizarlo no sean necesarios conocimientos previos del lenguaje, solo el nombre de las reglas, o comandos, que utilizaremos. El segundo sería, al contrario que los otros dos, un módulo puente, que cargará con el peso de todas las funciones necesarias para la implementación del tercero pero que, por orden y claridad, no se incluirán en el módulo de geometría dado que ahí no serán necesarias. \par
 
+\section{POINT}
+
 Comencemos con la creación del primer módulo, como consta de tres objetos bien diferenciados lo dividiremos en tres fmod distintos, correspondiendo estos con los puntos, las rectas, y las circumferencias. La definición de los puntos será sencilla, construyéndose como un par consistente por dos números reales, igual que se haría en papel. Por otro lado, a los puntos no se les puede dotar de operaciones complicadas, más allá del cálculo de la distancia entre dos de ellos y el intercambio de sus coordenadas. Así pués el fmod, quedaría como sigue.
 {\codesize
 \begin{verbatim}
@@ -46,6 +48,8 @@ endu)
 }
 
 Por supuesto tanto el módulo como el test completos podrán encontrarse en el apéndice correspondiente.\par
+
+\section{LINE}
 
 Dando por finalizada la creación del \texttt{fmod POINT}, comenzaremos con el de las rectas. Estas se implementarán de forma análoga a los puntos, pero en este caso como un par de estos. Como estamos intentando seguir un camino similar al de la geometría básica, implementaremos además de las rectas el tipo vector, que se utilizará en varias operaciones de las rectas. Estos se construirán de nuevo como un par, que será el correspondiente a extremo menos origen de los puntos que las definen. Ahora ya sí comencemos con la definición de los tipos.\par 
 

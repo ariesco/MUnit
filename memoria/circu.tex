@@ -1,5 +1,7 @@
 %!TEX root = tfg_fiesta.tex
 
+\section{CIRCUMFERENCE}
+
 Llegamos ya al último módulo funcional para geometría en dos dimensiones, el \texttt{fmod} \\ \texttt{CIRCUNFERENCE}, y es que una vez hayamos conseguido las funciones que nos den los puntos de corte entre dos circunferencias, o entre una de estas y una recta, tendremos todos las funciones necesarias para implementar las construcciones con regla y compas. \par
 
 Comenzaremos con la definición de las circunferencias, consistiendo estas en un par formado por su centro y su radio. \par
@@ -71,7 +73,7 @@ Una vez hecho esto tenemos que ver como conseguir los puntos de corte. El primer
 \end{verbatim}
 }
 
-La definición que hacemos aqui de las listas es identica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son de puntos. Las funciones definidas son entonces la mismas que la otra vez, teniendo solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
+La definición que hacemos aqui de las listas es identica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son de puntos. Las funciones definidas son entonces la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
 
 {\codesize
 \begin{verbatim}
@@ -222,6 +224,8 @@ Ahora simplemente damos las funciones que nos devuelven los puntos propiamente d
    /\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
 \end{verbatim}
 }
+
+\section{GEO2D}
 
 Con esto damos fín al módulo de circunferencias, sin embargo nos quedamos con la sensación de ser todo muy inconexo, hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada cut-point, que dadas dos figuras cuales quiera, devuelve sus puntos de corte. \par
 

@@ -1,33 +1,5 @@
 %!TEX root = tfg_fiesta.tex
 
-Introducción: \\
+Aunque a lo largo del Grado se nos han presentado distintos lenguajes de programación, como pueden ser Python o C++, en general todos ellos estan orientados a objetos con la salvedad de Prolog y Haskell, a los que apenas se les dedica tiempo. Así pues, es necesarío aprender a trabajar con una mayor variedad de lenguajes, para lo cual Maude, con sus distintos tipos de módulos y aplicaciones, resulta perfecto. De forma paralela se introducen los test de unidad, importantes a la hora de desarrollar un software complejo, y sin embargo muy olvidados. Finalmente, dado que yo tuve que hacerme con el lenguaje, resulta interesante la creación de unos módulos de aprendizaje, que aunque sencillos, ayuden a aquellos interesados en Maude a Comenzar con él. \\
 
-Aunque a lo largo del Grado se nos han presentado distintos lenguajes de programación, como pueden ser Python o C++, en general todos ellos están orientados a objetos con la salvedad de Prolog y Haskell, a los que apenas se les dedica tiempo. Así pues, es necesario aprender a trabajar con una mayor variedad de lenguajes, para lo cual Maude, con sus distintos tipos de módulos y aplicaciones, resulta perfecto. De forma paralela se introducen los test de unidad, importantes a la hora de desarrollar un software complejo, y sin embargo muy olvidados. Finalmente, dado que yo tuve que hacerme con el lenguaje, resulta interesante la creación de unos módulos de aprendizaje, que aunque sencillos, ayuden a aquellos interesados en Maude a Comenzar con él. \\
 
-Preliminares: \\
-
--Maude. \\
-
-Maude es un lenguaje algebraico con dos tipos diferenciados de programación, los módulos funcionales, cuyas funciones se ejecutan a través de unas ecuaciones, y los módulos de sistema, que por el contrario funcionarán a través de distintas reglas que se irán ejecutando según distintas condiciones. Mientras los primeros módulos funcionan de forma similar a como lo haría un lenguaje lógico como Prolog, los segundos nos permiten un trabajo más elevado, implementando cosas como los propios test de unidad.\\
-
--Los test de unidad.\\
-
-Un test de unidad es, tanto para Maude como para el resto de lenguajes de programación, una herramienta que sirve para verificar el funcionamiento de, o bien una función, o de un un conjunto de estas. Para ello el test debe cubrir al menos todas las ramas posibles de los condicionales que se encuentre, así como entrar en los distintos bucles y cubrir todas sus condiciones de parada. Por supuesto el uso de los test en programación no es obligatorio, es un método que de hecho no se utiliza en ninguna asignatura de programación a lo largo de la carrera, pero sí muy recomendable a la hora de abordar problemas grandes para ir comprobando el funcionamiento de todas las funciones menores.\\
-
-A lo largo de la presente memoria se mostrarán diversos módulos, de carácter funcional y de sistema, cuyo funcionamiento sera comprobado de forma simultanea mediante test de unidad, que se encargarán de cubrir todos los casos posibles para verificar que todo funciona correctamente. De manera paralela utilizaremos los test de unidad ya creados como herramienta para el aprendizaje de Maude. \\
-
--Método de aprendizaje. \\
-
-Una vez construidos y probados, los distintos test de unidad se utilizarán para ayudar al aprendizaje del lenguaje. Esto se hará a través de distintos huecos que se irán dejando en el código para que la persona que lo desee los vaya rellenando. Posteriormente, en funciones más complejas, los huecos serán dejados en los propios test siendo necesaria la comprensión de las funciones para poder completarlos. En cualquiera de los dos casos serán estos, ademas del propio compilador, los indicados de decirnos sí se está haciendo bien, pues será necesario que una vez se haya terminado de llenar los huecos, que los test den positivo en todos sus casos.\\
-
--mUnit y MaudeKoan. \\
-
-Para trabajar con los test utilizaremos un módulo ya creado llamado mUnit, que nos proporciona distintas herramientas para verificar el funcionamiento de las funciones. Este funciona como sustituto del utilizado en ScaleKoans, un método que, al igual que el nuestro, utiliza distintos test como método de aprendizaje, con la salvedad de que nosotros no utilizamos una consola para completarlos, se debe hacer sobre el propio archivo.
-
--Sobre los módulos implementados.\\
-
-Con motivo de mostrar todo lo anteriormente nombrado se recurrirá a implementar la geometría con regla y compás en Maude, para ello se crearán módulos de los dos tipos, uno funcional encargado de toda la parte matemática, y uno de sistema encargado de la entrada y la salida. Estos dos módulos irán por supuesto acompañados por sus respectivos Test y sus módulos de aprendizaje. Sin embargo, y por razones de espacio, no se irán dando todas las funciones a lo largo del trabajo, sino que los módulos completos apareceran en los apendices, y se podran descargar de un repositorio de GitHub, y es que, aunque lo verdaderamente interesante puedan ser los modulos en si, no nos podemos alargar tanto como nos gustaría.\\
-
-Conclusiones y trabajo futuro.\\
-
-El presente trabajo da numerosos y diferentes casos sobre los programas que se pueden desrrollar en Maude mientras se encarga de instruir al lector en una sintaxis nueva. El trabajo por supuesto no queda cerrado en todos sus ambitos, como se podra apreciar tras la lectura de este, no debería ser complicado demostrar la corrección y completitud de los módulos, en particular del de geometría, y asi poder utilizar el de entrada y salida como una verdadera sustitución de la regla y el compas. Una vez hecho esto se podría aprovechar el comportamiento de Maude con los módulos de sistema para conseguir que nos realice las construcciones de forma automática con algunas restricciones como el número de pasos, para conseguir así construcciones complejas con regla y compás que sabemos son correctas.\par

@@ -1,0 +1,85 @@
+%!TEX root = tfg_fiesta.tex
+
+Antes de meternos en faena con el Módulo de entrada y salida que es bastante complejo, crearemos uno más pequeño para que, emulando el trabajo realizado en el primer capítulo, nos hagamos con los módulos de sistemas así como con las reglas. Para esto procederemos a crear el caso más sencillo y que mejor ilustra todo el proceso, el problema de las vasijas. \par
+
+Este problema consiste, para aquellos que nos lo conozcan, en dadas tres tinajas con distintas capacidades, las cuales podemos llenar del todo y vaciar cuando queramos, conseguir que en una de ellas nos quede una capacidad de liquido concreta. El caso más común es aquel en que los recipientes tienen una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. Una vez entendido lo que se va a implementar, comencemos. \par
+
+Los módulos de sistema comienzan con \verb"mod _ is"
+
+{\codesize
+\begin{verbatim}
+mod VASIJAS is
+\end{verbatim}
+}
+
+Los comandos básicos, como importar, dar los tipos, constructores y variables mantienen la misma sintaxis que en los módulos funcionales. \par
+
+{\codesize
+\begin{verbatim}
+   protecting NAT .
+   sort Vasija CjVasija .
+   subsort Vasija < CjVasija .
+
+   op vasija : Nat Nat -> Vasija [ctor] .
+   *** El primer numero se corresponde con la cantidad de liquido que contiene 
+       la vasija y el segundo con su capacidad maxima.
+   op _,_ : Vasija Vasija -> CjVasija [ctor comm assoc] .
+
+   vars C1 C2 N1 N2 : Nat .
+\end{verbatim}
+}
+Como se puede ver las vasijas están definidas como un par, en el que el primer elemento se corresponde con la cantidad de liquido que tiene y el segundo con la capacidad total de esta. A parte del tipo \texttt{Vasija} creamos tambien el conjunto de estas \texttt{CjVasijas} en el que almacemaremos todas la información a la vez.\par 
+
+Una vez completados los constructores, y la declaración de variables si se desea, procedemos a construir el módulo en si. Para ello a parte de las reglas que veremos más adelante podemos crear funciones mediante ecuaciones al igual que haciamos antes en los módulos funcionales. En nuestro caso la única que definiremos será el caso base sobre el que queremos que funcionen las reglas, vease, las tres vasijas antes comentadas vacías.\par
+
+{\codesize
+\begin{verbatim}
+   op inicial : -> CjVasija .
+   *** Da un conjunto inicial de vasijas vacias con distintas capacidades.
+   eq inicial = vasija(0, 3) , vasija(0, 5) , vasija(0, 8) .
+\end{verbatim}
+}
+
+Hecho esto podemos ponernos por fin con las reglas en si. Estas deben comenzar por \verb"rl[_]" donde \verb"_" es el nombre que damos a la regla. Despues esta se construye como una transición de izquierda a derecha dada por \verb"=>".\par
+
+{\codesize
+\begin{verbatim}
+   rl[vacia] : vasija(N1, C1) => vasija(0, C1) .
+   ***Esta regla nos vacia la vasija.
+\end{verbatim}
+}
+La notación es muy similar a la ya vista en las ecuaciones, con la salvedad de que no se utiliza el nombre de la regla, ya que solo se aplica. De manera analoga a la anterior creamos la regla llena, que nos llena la vasija hasta su capacidad maxima.\par
+{\codesize
+\begin{verbatim}
+   rl[llena] : vasija(N1, C1) => vasija(C1, C1) .
+   *** Esta regla nos llena la vasija al maximo.
+\end{verbatim}
+}
+Por supuesto, al igual que ocurría con las ecuaciones podemos construir reglas condicionales, en este caso comenzarían por \verb"crl[_]" y se construyen igual que las anteriores, indicando eso sí mediante un \texttt{if} la condición que deben cumplir.\par
+
+En nuestro caso crearemos las funciones que nos transfieren el liquido de una vasija a la siguiente.\par 
+{\codesize
+\begin{verbatim}
+   crl[transferir1] : vasija(N1, C1) , vasija(N2, C2) 
+                    => vasija(0, C1) , vasija((N1 + N2), C2) 
+   if (N1 + N2) <= C2 .
+   *** Nos transfiere el contenido de una tinaja a otra si la suma de 
+       los contenidos no se pasa de la capacidad de la segunda.
+
+   crl[transferir2] : vasija(N1, C1) , vasija(N2, C2) 
+                    => vasija(sd((N1 + N2) , C2), C1) , vasija(C2, C2)
+   if (N1 + N2) > C2 .
+   *** Nos transfiere el contenido de una tinaja a otra si la suma de 
+       los contenidos se pasa de la capacidad de la segunda.
+\end{verbatim}
+}
+Aunque las dos reglas se refieren a la misma acción cubren casos distintos, siendo la primera aquella en que el contenido de las dos vasijas cabe en la segunda, a la que se quiere transferir, y la segunda aquella en la que no, quedando la primera entonces con el liquido sobrante.\par
+
+El módulo finalmente se cierra con \texttt{endm}.
+{\codesize
+\begin{verbatim}
+endm
+\end{verbatim}
+}
+
+Ahora ya sí podemos comenzar con el módulo referido a entrada y salida.\par

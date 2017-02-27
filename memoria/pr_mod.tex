@@ -1,5 +1,7 @@
 %!TEX root = tfg_fiesta.tex
 
+\section{PEANO-NAT-EXTRA}
+
 Para ilustrar lo comentado en la introducción en este primer capítulo definiremos unos primeros módulos sencillos que nos servirán de ejemplo, y más adelante extenderemos con los test de unidad.
 El primero de estos se corresponderá con los números naturales, los cuales serán definidos siguiendo los axiomas de Peano. Posteriormente se le dará distintas operaciones sencillas como la suma, y algunas basadas en el orden.\par
 
@@ -196,6 +198,8 @@ assertTrue(s(s(0))== s(s(0))) passed.
 }
 
 El test funciona correctamente, y cubre todos los casos, así que podemos dar por supuesto que el módulo es correcto. \par
+
+\section{Listas}
 
 Sin embargo nosotros no utilizaremos los test de unidad simplemente como forma de comprobar que todo funciona tal y como queremos, sino que nos servirán para mostrar el resultado final de diversas operaciones que estén parcialmente definidas, dejando diversos huecos en ellas. Para ello crearemos un nuevo módulo funcional, tambien muy sencillo, que en este caso nos dará una estructura de datos básica, las listas: \par
 
