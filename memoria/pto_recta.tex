@@ -276,7 +276,7 @@ assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
 \end{verbatim}
 }
 
-Para ver el problema calcularemos el punto por separado, pues por como estan construidas las rectas debería devolvernos el punto \texttt{p(7.0 5.0)} .\par
+Para ver el problema calcularemos el punto por separado, pues por como están construidas las rectas debería devolvernos el punto \texttt{p(7.0 5.0)} .\par
 {\codesize
 \begin{verbatim}
 Maude> red cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))) .
@@ -286,7 +286,7 @@ rewrites: 88 in 0ms cpu (0ms real) (~ rewrites/second)
 result Point: p(7.0000000000000009 5.0000000000000009)
 \end{verbatim}
 }
-Aquí vemos el error, Maude no se comporta bién con los decimales, y aunque sea en una posición tan baja, la dieciseis, esos números no son ni siete ni cinco, así que Maude nos devuelve un fallo.
+Aquí vemos el error, Maude no se comporta bien con los decimales, y aunque sea en una posición tan baja, la dieciséis, esos números no son ni siete ni cinco, así que Maude nos devuelve un fallo.
 Para corregir este tipo de errores incluiremos en el \verb"fmod POINT" la primera función auxiliar, que dado dos números dirá si son iguales en base a un Epsilon que podremos elegir.\par
 {\codesize
 \begin{verbatim}
