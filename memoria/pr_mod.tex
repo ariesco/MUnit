@@ -5,7 +5,7 @@
 Para ilustrar lo comentado en la introducción en este primer capítulo definiremos unos primeros módulos sencillos que nos servirán de ejemplo, y más adelante extenderemos con los test de unidad.
 El primero de estos se corresponderá con los números naturales, los cuales serán definidos siguiendo los axiomas de Peano. Posteriormente se le dará distintas operaciones sencillas como la suma, y algunas basadas en el orden.\par
 
-En Maude los módulos pueden ser de dos tipos, funcionales, y de sistema. Los primeros se crearán a partir de distintas ecuaciones que nos daran, leidas de izquierda a derecha, las propiedades de la función. Estos módulos funcionales, que serán los primeros que veamos en Maude se crean siguiendo el siguiente esquema: \texttt{fmod} \verb"<"Nombre del Módulo\verb">" \texttt{is} \verb"<"Definiciones y Declaraciones\verb">" \texttt{endfm}.\par
+En Maude los módulos pueden ser de dos tipos, funcionales, y de sistema. Los primeros se crearán a partir de distintas ecuaciones que nos daran, leidas de izquierda a derecha, las propiedades de la función. Estos módulos funcionales, que serán los primeros que veamos en Maude se crean siguiendo el siguiente esquema: \texttt{fmod} $\langle$Nombre del Módulo$\rangle$ \texttt{is} \verb"<"Definiciones y Declaraciones\verb">" \texttt{endfm}.\par
 
 {\codesize
 \begin{verbatim}
@@ -103,7 +103,7 @@ endfm
 \end{verbatim}
 }
 
-Si bien todo lo anterior ha resultado util para comprender la sintaxis básica de Maude, en operaciones de mayor complejidad necesitaremos mayor información sobre estas, para lo que haremos uso de los test de unidad. Como ya se ha comentado anteriormente para esto haremos uso del módulo \texttt{mUnit.maude}, que nos proporciona distintos funciones según lo que queramos comprobar.\par
+Si bien todo lo anterior ha resultado útil para comprender la sintaxis básica de Maude, en operaciones de mayor complejidad necesitaremos mayor información sobre estas, para lo que haremos uso de los test de unidad. Como ya se ha comentado anteriormente para esto haremos uso del módulo \texttt{mUnit.maude}, que nos proporciona distintos funciones según lo que queramos comprobar.\par
 
 Los test deben comenzar indicando el módulo sobre el que vamos a trabajar, en nuestro caso \texttt{PEANO-NAT-EXTRA}. \par
 

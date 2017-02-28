@@ -2,22 +2,22 @@
 
 \section{Maude}
 
-Maude es un lenguaje declarativo, vease, cualquier programa en Maude constituye una teoría lógica, y cualquier computación suya una deducción basada en la utilización de los distintos axiomas presentes en el programa. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
+Maude~\cite{maudeBook} es un lenguaje declarativo, vease, cualquier programa en Maude constituye una teoría lógica, y cualquier computación suya una deducción basada en la utilización de los distintos axiomas presentes en el programa. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
 
-El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y todos los operadores. Posteriormente nos encontraremos con una colección de ecuaciones y relaciones que se encargaran de darnos, leidas de izquierda a derecha, una conclusión, o deducción. Por ultimo nos encontraremos tanto en los operadores como en las definiciones de tipos distintas propiedades como la commutatividad o la asociatividad. De esta manera cuando Maude compila estos modulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
+El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y todos los operadores. Posteriormente nos encontraremos con una colección de ecuaciones y relaciones que se encargaran de darnos, leidas de izquierda a derecha, una conclusión, o deducción. Por ultimo nos encontraremos tanto en los operadores como en las definiciones de tipos distintas propiedades como la conmutatividad o la asociatividad. De esta manera cuando Maude compila estos modulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
 
 Por otro lado nos encontramos con los módulos de sistema. Estos funcionan con cinco tipos de elementos distintos, correspondiendose los tres primero con los vistos en el módulo funcional. El primero de los nuevos elementos se corresponde con con la especificación de los argumentos para cada uno de los tipos u operadores, y el segundo se correspondería con las reglas de reescritura. La computación de este tipo de módulos sería entonces una mezcla de los anteriores con los argumentos dados, con las nuevas reglas.\par
 
-Un hecho importante de Maude a comentar sería que sus modulos no constituyen unicamaente una teoría, funcionando los elementos anteriores como axiomas, sino que representan un modelo matemático. En el caso de los módulos funcionales, estos con sus distintos operadores y funciones definen un algebra. Esto se puede ver claramente en \verb"PEANO-NAT-EXTRA" donde construimos los números naturales a partir de los axiomas de Peáno y los dotamos de distintas operaciones como la suma.\par
+Un hecho importante de Maude a comentar sería que sus módulos no constituyen unicamaente una teoría, funcionando los elementos anteriores como axiomas, sino que representan un modelo matemático. En el caso de los módulos funcionales, estos con sus distintos operadores y funciones definen un algebra. Esto se puede ver claramente en \verb"PEANO-NAT-EXTRA" donde construimos los números naturales a partir de los axiomas de Peano y los dotamos de distintas operaciones como la suma.\par
 
-Por otro lado los módulos de sistema nos dan una teoría de reescritura, la cual tiene asociada un algebra inicial, dada por un módulo funcional por ejemplo, y que es en esencia un sistema de transiciones algebraico. Los estados y datos de este sistema seran los elementos del algebra inicial, mientras que los estados de transición serán las reescrituras posibles en el sistema gracias a la aplicación de las distintas reglas \cite{ref1}.\par
+Por otro lado los módulos de sistema nos dan una teoría de reescritura, la cual tiene asociada un algebra inicial, dada por un módulo funcional por ejemplo, y que es en esencia un sistema de transiciones algebraico. Los estados y datos de este sistema serán los elementos del algebra inicial, mientras que los estados de transición serán las reescrituras posibles en el sistema gracias a la aplicación de las distintas reglas.\par
 
 
 \section{Los test de unidad}
 
-Un test de unidad es un trozo de código que llama a un módulo, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
+Un test de unidad~\cite{unitTests} es un trozo de código que llama a un módulo, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
 
-Un test de unidad debe cumplir las siguiente condiciones: \par
+Un test de unidad debe cumplir las siguiente condiciones~\cite{unitTests}: \par
 
 \begin{itemize}
 \item Debe estar automatizado.
@@ -31,7 +31,7 @@ Un test de unidad debe cumplir las siguiente condiciones: \par
 \item En caso de que falle, debe ser sencillo encontrar donde se originó el error.
 \end{itemize}.
 
-\cite{ref2}
+
 
 
 \section{Método de aprendizaje}

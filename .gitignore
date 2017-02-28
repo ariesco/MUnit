@@ -12,3 +12,7 @@ memoria/tfg_fiesta.pdf
 *.aux
 
 *.gz
+
+memoria/tfg_fiesta.blg
+
+memoria/tfg_fiesta.bbl
