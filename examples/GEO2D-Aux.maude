@@ -37,8 +37,11 @@ fmod DICC-FIGURES is
   eq (D . Q -> F)[Q] = F .
 
   op _[_/_] : Dic Qid Figure -> Dic .
+  eq (D . (Q' -> F) . (Q -> F'))[Q' / F'] = D . Q' -> F' . 
+  ceq (D . (Q' -> r1) . (Q -> r2))[Q' / r2] = D . Q' -> r2
+    if are-equal(r1, r2) .
   eq (D . Q -> F)[Q / F'] = D . Q -> F' .
-  eq (D . Q -> F)[Q' / F] = D . Q -> F .
+  eq (D . Q -> F)[Q' / F] = D . Q -> F  .
   ceq (D . Q -> r1)[Q' / r2] = D . Q -> r1
     if are-equal(r1, r2) .   
   eq D[Q / F] = D . Q -> F [owise] .
