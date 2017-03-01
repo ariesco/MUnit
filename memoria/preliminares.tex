@@ -1,18 +1,20 @@
 %!TEX root = tfg_fiesta.tex
 
+A lo largo de este capítulo se explicará que son Maude, los test de unidad y los módulos de aprendizaje, aprovechando lo cual se pasará a dar ejemplos de los primeros módulos con sus casos de test mientras se explica en todo momento que se está haciendo. Así mismo haremos también mención a las herramientas que utilizaremos a los largo del proyecto como mUnit.\par
+
 \section{Maude}
 
-Maude~\cite{maudeBook} es un lenguaje declarativo, vease, sus programas se construyen declarando condiciones, ecuaciones o transformaciones que definen el problema y nos dan un solución, la cual no será construida siguiendo un conjunto de pasos sino que será el interprete en nuestro caso el encargado de deducirla en base a las funciones definidas. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
+Maude~\cite{maudeBook} es un lenguaje declarativo, vease, sus programas se construyen declarando condiciones, ecuaciones o transformaciones que definen el problema y nos dan un solución, la cual no será construida siguiendo un conjunto de pasos sino que será el interprete el encargado de deducirla en base a las funciones definidas. Maude presenta dos tipos distintos de módulos, que nos permiten modelizar distintos tipos de problemas.\par
 
-El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y relaciones entre ellos, las cuales estaran dadas en forma de ecuaciones que deberán leerse de izquierda a derecha. Ademas de esto nos encontraremos tanto en los operadores, las relaciones o los constructores de los tipos, como en las definiciones de tipos distintas propiedades como la conmutatividad o la asociatividad. De esta manera cuando Maude interpreta estos módulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
+El primero de estos es el módulo funcional. En el daremos una seríe de tipos, subtipos y relaciones entre ellos, las cuales estaran dadas en forma de ecuaciones que deberán leerse de izquierda a derecha. Ademas de esto nos encontraremos tanto en los operadores como en las relaciones o los constructores de los tipos distintas propiedades como la conmutatividad o la asociatividad. De esta manera cuando Maude interpreta estos módulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado apoyandose además en las propiedades añadidas de cada una.\par
 
-Por otro lado nos encontramos con los módulos de sistema. Estos funcionan de manera similar a los funcionales con la salvedad de que, ademas de tener relaciones dadas por ecuaciones, permite definie transiciones. Estas estarán dadas por diferentes reglas que, de manera similiar a las relaciones de los módulos funcionales, se ejecutarán de izquierda a derecha.\par
+Por otro lado nos encontramos con los módulos de sistema. Estos funcionan de manera similar a los funcionales con la salvedad de que, ademas de tener relaciones dadas por ecuaciones, permite definie transiciones. Estas estarán dadas por diferentes reglas que, de manera similiar a las ecuaciones de los módulos funcionales, se ejecutarán de izquierda a derecha.\par
 
-Sin embargo todo así explicado puede resultar un poco abstracto, así que se procedera a la creación de dos ejemplos distintos que se encarguen de ilustrar lo comentado anteriormente mientras se explica la sintaxis de cada uno. \par
+Sin embargo todo así explicado puede resultar un poco abstracto, así que se procedera a la creación de dos ejemplos que se encarguen de ilustrar lo comentado anteriormente mientras se explica la sintaxis de cada uno. \par
 
 \subsection{Ejemplo de módulo funcional}
 
-El primero de ellos consistira en un módulo funcional en el que implementaremos los naturales de Peáno con diferentes operaciones. En Maude los módulos funcionales se crean siguiendo el siguiente esquema: \texttt{fmod} $\langle$Nombre del Módulo$\rangle$ \texttt{is} $\langle$Definiciones y Declaraciones$\rangle$ \texttt{endfm}.\par
+El primero de ellos consistirá en un módulo funcional en el que implementaremos los naturales de Peáno con diferentes operaciones. En Maude los módulos funcionales se crean siguiendo el siguiente esquema: \texttt{fmod} $\langle$Nombre del Módulo$\rangle$ \texttt{is} $\langle$Definiciones y Declaraciones$\rangle$ \texttt{endfm}.\par
 
 {\codesize
 \begin{verbatim}
@@ -81,7 +83,7 @@ Para ilustrar lo comentado lo anteriormente realizaremos en \verb"_+_" una decla
 El método utilizado para dar las variables dependerá de cada uno, o de las veces que se vaya a usar esta a lo largo del módulo, pero por comodidad seguiré utilizando la declaración normal. Volviendo con las funciones, por supuesto esta no es la única forma que tenemos de darlas, sinó que en los casos de condicionales tendremos que usar el comando \texttt{ceq} así como dar con \texttt{if} las condiciones Booleanas, pudiendo añadir operaciones lógicas como \texttt{not} o \verb"/\" a las distintas ecuaciones.\par
 {\codesize
 \begin{verbatim}
-   op _*_ : Nat Nat -> Nat .
+   op _*_ : Nat Nat -> Nat [comm] .
    ceq M * N = 0 
    if M == 0.
    ceq s(M) * N = (M * N) + N
@@ -112,7 +114,7 @@ endfm
 
 \subsection{Ejemplo de módulo de sistema}
 
-El módulo que crearemos de ejemplo para los módulos de sistema será en una representación del problema de las vasijas. Este problema consiste, para aquellos que nos lo conozcan, en dadas tres vasijas con distintas capacidades, las cuales podemos llenar del todo y vaciar cuando queramos, conseguir que en una de ellas nos quede una capacidad de liquido concreta. El caso más común es aquel en que los recipientes tienen una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. Una vez entendido lo que se va a implementar, comencemos. \par
+El módulo que crearemos de ejemplo para los módulos de sistema será una representación del problema de las vasijas. Este problema consiste, para aquellos que lo desconozcan, en dadas tres vasijas con distintas capacidades, las cuales podemos llenar del todo y vaciar cuando queramos, conseguir que en una de ellas nos quede una cantidad de liquido concreta. El caso más común es aquel en que los recipientes tienen una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. Ahora ya sí, comencemos. \par
 
 Los módulos de sistema comienzan con \verb"mod _ is"
 
@@ -138,9 +140,9 @@ Los comandos básicos, como importar, dar los tipos, constructores y variables m
    vars C1 C2 N1 N2 : Nat .
 \end{verbatim}
 }
-Como se puede ver las vasijas están definidas como un par, en el que el primer elemento se corresponde con la cantidad de liquido que tiene y el segundo con la capacidad total de esta. A parte del tipo \texttt{Vasija} creamos tambien el conjunto de estas \texttt{CjVasijas} en el que almacemaremos todas la información a la vez.\par 
+Como se puede ver las vasijas están definidas como un par, en el que el primer elemento se corresponde con la cantidad de liquido que tiene y el segundo con la capacidad total de esta. A parte del tipo \texttt{Vasija} creamos tambien el conjunto de estas \texttt{CjVasijas} en el que almacemaremos varias vasijas a la vez.\par 
 
-Una vez completados los constructores, y la declaración de variables si se desea, procedemos a construir el módulo en si. Para ello a parte de las reglas que veremos más adelante podemos crear funciones mediante ecuaciones al igual que haciamos antes en los módulos funcionales. En nuestro caso la única que definiremos será el caso base sobre el que queremos que funcionen las reglas, vease, las tres vasijas antes comentadas vacías.\par
+Una vez completados los constructores, y la declaración de variables si se desea, procedemos a construir el módulo en sí. Para ello a parte de las reglas que veremos más adelante podemos crear funciones mediante ecuaciones al igual que haciamos antes en los módulos funcionales. En nuestro caso la única que definiremos será el caso base sobre el que queremos que funcionen las reglas, vease, las tres vasijas antes comentadas vacías.\par
 
 {\codesize
 \begin{verbatim}
@@ -165,7 +167,7 @@ La notación es muy similar a la ya vista en las ecuaciones, con la salvedad de 
    *** Esta regla nos llena la vasija al maximo.
 \end{verbatim}
 }
-Por supuesto, al igual que ocurría con las ecuaciones podemos construir reglas condicionales, en este caso comenzarían por \verb"crl[_]" y se construyen igual que las anteriores, indicando eso sí mediante un \texttt{if} la condición que deben cumplir.\par
+Por supuesto, al igual que ocurría con las ecuaciones podemos construir reglas condicionales, en este caso comenzarían por \verb"crl[_]" y se construirían igual que las anteriores, indicando eso sí mediante un \texttt{if} la condición que deben cumplir.\par
 
 En nuestro caso crearemos las funciones que nos transfieren el liquido de una vasija a la siguiente.\par 
 {\codesize
@@ -233,7 +235,7 @@ Maude> load VASIJAS.maude
 \end{verbatim}
 }
 
-El comando bÁsico es \texttt{rewrite}, abreviado \texttt{rew}, que aplica las ecuaciones y las reglas del módulo al término dado como argumento. Sin embargo, este ejemplo no termina (es posible vaciar todo el tiempo
+El comando básico es \texttt{rewrite}, abreviado \texttt{rew}, que aplica las ecuaciones y las reglas del módulo al término dado como argumento. Sin embargo, este ejemplo no termina (es posible vaciar todo el tiempo
 una vasija vacía, por ejemplo), así que tendremos que indicar manualmente el número de reglas que queremos utilizar en total, por ejemplo 10:
 
 {\codesize
@@ -256,7 +258,7 @@ result (sort not calculated): vasija(0, 8),vasija(3, 3),vasija(5, 5)
 \end{verbatim}
 }
 
-Ahora sí ha ocurrido algo, se han llenado las dos ultimas vasijas, pero esto tampoco nos aporta mucha información. Lo que si podemos hacer, que es lo realmente util, es buscar una solución concreta y que Maude nos la construya, pudiendo consultar despues los pasos que ha dado. Para esto utilizaremos el comando \texttt{search}
+Ahora sí ha ocurrido algo, se han llenado las dos ultimas vasijas, pero esto tampoco nos aporta mucha información. Lo que sí podemos hacer, que es lo realmente útil, es buscar una solución concreta y que Maude nos la construya, pudiendo consultar despues los pasos que ha dado. Para esto utilizaremos el comando \texttt{search}
 
 {\codesize
 \begin{verbatim}
@@ -303,11 +305,11 @@ state 75, [CjVasija]: vasija(3, 3),vasija(3, 8),vasija(4, 5)
 \end{verbatim}
 }
 
-\section{Los test de unidad}
+\section{Los test de unidad y mUnit}
 
 Un test de unidad~\cite{unitTests} es un trozo de código que llama a una función, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
 
-Un test de unidad debe cumplir las siguiente condiciones~\cite{unitTests}: \par
+Un test de unidad debe cumplir las siguientes condiciones~\cite{unitTests}: \par
 
 \begin{itemize}
 \item Debe estar automatizado.
@@ -321,26 +323,102 @@ Un test de unidad debe cumplir las siguiente condiciones~\cite{unitTests}: \par
 \item En caso de que falle, debe ser sencillo encontrar donde se originó el error.
 \end{itemize}.
 
-\section{Método de aprendizaje}
+Para trabajar con los test utilizaremos un módulo ya creado llamado mUnit, que nos proporciona distintas herramientas para verificar el funcionamiento de las funciones. Estas son: \verb"assertEqual", \verb"assertDifferent", \verb"assertTrue", \verb"assertFalse", \verb"assertTrueMsg",\\ \verb"assertReachable", \verb"assertReachableBnd" y \verb"assertSort", y realizarán las pruebas lógicas según sus nombres. Veamos a continuación ejemplos de test de unidad en que utilizamos dichas funciones:\par
 
-Aunque el proyecto en si estaría completo con la implementación de los distintos módulos y sus test de unidad se construiran de forma paralalea unos modulos de aprendizaje, los cuales se encargaran de mostrar a traves de distintos casos como ir definiendo los distintos tipos, sub-tipos y operadores que se utilizan en Maude.\par
+Los test deben comenzar indicando el módulo sobre el que vamos a trabajar, en nuestro caso \texttt{PEANO-NAT-EXTRA}. \par
 
-Estos módulos de aprendizaje se construirán una vez finalizados el módulo, ya sea funcional o de sistema, y el test de unidad correspondiente. Seran similares a los módulos completos, con la salvedad de que presentaran huecos, que deberán rellenarse. Sin embargo una vez las funciones avancen, nos encontraremos con algunas que llevaran detras unos cálculos que, aun siendo relativamente elementales, no se puede pedir al que lea que los adivine, así pues, en estos casos los huecos apareceran en los propios test de unidad donde se deberá indicar que se ha comprendido correctamente el funcionamiento de las distintas funciones. \par
+{\codesize
+\begin{verbatim}
+(munit PEANO-NAT-EXTRA is
+\end{verbatim}
+}
 
-Como es natural estos módulos irán apareciendo según se completen aquellos en que se basan, y se podrán encontrar en su apendice correspondiente.\par 
+El primer caso de test con que nos encontraremos será \verb"assertEqual(_,_)", que evaluará las dos expresiones que recibe como datos y devolverá \texttt{true} en el caso de que seán iguales, o \texttt{false} en el caso de que o bien no evaluen a lo mismo, o una no se evalue correctamente. \par
+
+{\codesize
+\begin{verbatim}
+   assertEqual(s(0) + s(0), s(s(0)))
+\end{verbatim}
+}
+
+De forma opuesta nos encontramos con \verb"assertDifferent(_,_)", que evaluará a \texttt{true} si las expresiones evaluan a cosas distintas, o \texttt{false} en otro caso. \par
+
+{\codesize
+\begin{verbatim}
+   assertDifferent(0, s(0))
+\end{verbatim}
+}
+
+Sin embargo no todas las operaciones evaluan a una expresión, sinó que es muy común que lo hagan a un Booleano. Debido a esto utilizaremos también otras dos funciones, \verb"assertTrue(_)" y \verb"assertFalse(_)". Devolviéndonos la primera \texttt{true} en caso de que evalue a \texttt{true} o \texttt{false} en otro caso. La segunda función se comporta al contrario, devolviendonos \texttt{true} si la expresión evalua a \texttt{false}, o \texttt{false} en caso contrario. Existe también una función que es una variante de \verb"assertTrue(_)", \verb"assertTrueMsg(_,_)", que, como su nombre indica, nos permite añadir un comentario a la función para que se vea en la ejecución. \par
+
+{\codesize
+\begin{verbatim}
+   assertTrue(0 < s(0))
+   assertFalse(s(0) < 0)
+   assertTrueMsg(0 > 0 , "Deberia fallar")
+\end{verbatim}
+}
+
+También puede darse el caso de que la información necesaria sea el tipo de una expresión en particular, para lo cual utilizaremos \verb"assertSort(_,_)" que recibe como parametros una expresión y un tipo, y devuelve \texttt{true} en el caso de sea el tipo de la expresión o \texttt{false} en otro.\par
+
+{\codesize
+\begin{verbatim}
+   assertSort(s(0), Nat)
+\end{verbatim}
+} 
+
+Finalmente los test se cierran con \texttt{endu}. \par
+
+{\codesize
+\begin{verbatim}
+endu)
+\end{verbatim}
+}
+
+Por otro lado los módulos de sistema nos permiten usar las dos ultimas funciones, que trabajan unicamente con reglas, \verb"assertReachable", \verb"assertReachableBnd". La primera de ellas,\\ \verb"assertReachable(_,_)", recibe dos expresiones, y nos indica si a partir de la primera se puede alcanzar la segunda con cualquier número de pasos. La segunda, \verb"assertReachableBnd(_,_,_)", nos indica lo mismo pero poniendo además un tope a los pasos, es decir, si desde primer estado se puede alcancar el segundo en como mucho n pasos. \par
+
+{\codesize
+\begin{verbatim}
+(munit VASIJAS is
+   assertReachable(vasija(0, 3), vasija(3, 3))
+   assertReachableBnd(vasija(0, 3), vasija(3, 3), 1)
+endu)
+\end{verbatim}
+}
+
+Construido el test solo queda evaluarlo en Maude, para lo cual basta con cargarlo en la consola, lo cual en el caso de PEANO-NAT-EXTRA nos daría lo siguiente:\par
+
+{\codesize
+\begin{verbatim}
+Maude> load testNat.maude
+
+	    Full Maude 2.7 March 10th 2015
+
+	MUnit: a unit testing framework for Maude.
+		Version 1.0(November 23rd, 2016)
 
 
-\section{mUnit y MaudeKoan}
+6 test cases were executed.
+1 failures.
 
-Para trabajar con los test utilizaremos un módulo ya creado llamado mUnit, que nos proporciona distintas herramientas para verificar el funcionamiento de las funciones. Estas, aunque se explicarán en detalle más adelante, son: \verb"assertEqual", \verb"assertDifferent", \verb"assertTrue"y \verb"assertFalse" y realizarán las pruebas lógicas según sus nombres.\par
+assertEqual(s(0)+ s(0),s(s(0))) passed.
+assertDifferent(0,s(0)) passed.
+assertTrue(0 < s(0)) passed.
+assertFalse(s(0)< 0) passed.
+assertTrue(0 > 0) failed.
+ --->  "Deberia fallar"
+assertSort(s(0),Nat) passed.
+\end{verbatim}
+}
+
+\section{Método de aprendizaje y MaudeKoan}
+
+Aunque el proyecto en sí estaría completo con la implementación de los distintos módulos y sus test de unidad se construirán de forma paralela unos módulos de aprendizaje, los cuales se encargarán de mostrar a través de distintos casos cómo ir definiendo los distintos tipos, sub-tipos y operadores que se utilizan en Maude.\par
+
+Estos módulos de aprendizaje se construirán una vez finalizados el módulo, ya sea funcional o de sistema, y el test de unidad correspondiente. Serán similares a los módulos completos, con la salvedad de que presentarán huecos, que deberán rellenarse. Sin embargo una vez las funciones avancen, nos encontraremos con algunas que llevarán detrás unos cálculos que, aún siendo relativamente elementales, no se puede pedir al que lea que los adivine, así pues, en estos casos los huecos apareceran en los propios test de unidad donde se deberá indicar que se ha comprendido correctamente el funcionamiento de las distintas funciones. \par
 
 Por supuesto esta idea no es nueva, sino que se inspira claramente en el proyecto ScalaKoans, que nos ayuda a aprender Scala con un método muy similar, aunque no igual, y que podemos ver para otros muchos lenguajes como puede ser Python. Las diferencias entre nuestro proyecto y ScalaKoans son las siguientes:\par
 \begin{itemize}
 \item Los casos no serań completados desde un programa externo, sino que deberemos modificar los módulos \texttt{.maude} manualmente.
 \item De manera análoga, no utilizaremos un programa externo para comprobar la vericidad de nuestros programas, sino que se tendrán que ejecutar los test de unidad desde la propia consola de Maude hasta conseguir que todas las funciones los pasen.
 \end{itemize}
-
-\section{Sobre los módulos implementados}
-
-Con motivo de mostrar todo lo anteriormente nombrado se recurrirá a implementar la geometría con regla y compás en Maude, para ello se crearán módulos de los dos tipos, uno funcional encargado de toda la parte matemática, y uno de sistema encargado de la entrada y la salida. Estos dos módulos irán por supuesto acompañados por sus respectivos Test y sus módulos de aprendizaje. Sin embargo, y por razones de espacio, no se irán dando todas las funciones a lo largo del trabajo, sino que los módulos completos apareceran en los apendices, y se podran descargar de un repositorio de GitHub, y es que, aunque lo verdaderamente interesante puedan ser los modulos en si, no nos podemos alargar tanto como nos gustaría.\par
-
