@@ -2,20 +2,310 @@
 
 \section{Maude}
 
-Maude~\cite{maudeBook} es un lenguaje declarativo, vease, cualquier programa en Maude constituye una teoría lógica, y cualquier computación suya una deducción basada en la utilización de los distintos axiomas presentes en el programa. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
+Maude~\cite{maudeBook} es un lenguaje declarativo, vease, sus programas se construyen declarando condiciones, ecuaciones o transformaciones que definen el problema y nos dan un solución, la cual no será construida siguiendo un conjunto de pasos sino que será el interprete en nuestro caso el encargado de deducirla en base a las funciones definidas. Maude presenta dos tipos distintos de módulos, teniendo un distinto sistema de deducción en cada uno de ellos y además, pudiendo presentarse uno como caso particular del otro.\par
 
-El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y todos los operadores. Posteriormente nos encontraremos con una colección de ecuaciones y relaciones que se encargaran de darnos, leidas de izquierda a derecha, una conclusión, o deducción. Por ultimo nos encontraremos tanto en los operadores como en las definiciones de tipos distintas propiedades como la conmutatividad o la asociatividad. De esta manera cuando Maude compila estos modulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
+El primero de estos modelos es el módulo funcional. En el daremos una seríe de tipos, subtipos y relaciones entre ellos, las cuales estaran dadas en forma de ecuaciones que deberán leerse de izquierda a derecha. Ademas de esto nos encontraremos tanto en los operadores, las relaciones o los constructores de los tipos, como en las definiciones de tipos distintas propiedades como la conmutatividad o la asociatividad. De esta manera cuando Maude interpreta estos módulos lo que hacer es utilizar las distintas ecuaciones para deducir un resultado.\par
 
-Por otro lado nos encontramos con los módulos de sistema. Estos funcionan con cinco tipos de elementos distintos, correspondiendose los tres primero con los vistos en el módulo funcional. El primero de los nuevos elementos se corresponde con con la especificación de los argumentos para cada uno de los tipos u operadores, y el segundo se correspondería con las reglas de reescritura. La computación de este tipo de módulos sería entonces una mezcla de los anteriores con los argumentos dados, con las nuevas reglas.\par
+Por otro lado nos encontramos con los módulos de sistema. Estos funcionan de manera similar a los funcionales con la salvedad de que, ademas de tener relaciones dadas por ecuaciones, permite definie transiciones. Estas estarán dadas por diferentes reglas que, de manera similiar a las relaciones de los módulos funcionales, se ejecutarán de izquierda a derecha.\par
 
-Un hecho importante de Maude a comentar sería que sus módulos no constituyen unicamaente una teoría, funcionando los elementos anteriores como axiomas, sino que representan un modelo matemático. En el caso de los módulos funcionales, estos con sus distintos operadores y funciones definen un algebra. Esto se puede ver claramente en \verb"PEANO-NAT-EXTRA" donde construimos los números naturales a partir de los axiomas de Peano y los dotamos de distintas operaciones como la suma.\par
+Sin embargo todo así explicado puede resultar un poco abstracto, así que se procedera a la creación de dos ejemplos distintos que se encarguen de ilustrar lo comentado anteriormente mientras se explica la sintaxis de cada uno. \par
 
-Por otro lado los módulos de sistema nos dan una teoría de reescritura, la cual tiene asociada un algebra inicial, dada por un módulo funcional por ejemplo, y que es en esencia un sistema de transiciones algebraico. Los estados y datos de este sistema serán los elementos del algebra inicial, mientras que los estados de transición serán las reescrituras posibles en el sistema gracias a la aplicación de las distintas reglas.\par
+\subsection{Ejemplo de módulo funcional}
 
+El primero de ellos consistira en un módulo funcional en el que implementaremos los naturales de Peáno con diferentes operaciones. En Maude los módulos funcionales se crean siguiendo el siguiente esquema: \texttt{fmod} $\langle$Nombre del Módulo$\rangle$ \texttt{is} $\langle$Definiciones y Declaraciones$\rangle$ \texttt{endfm}.\par
+
+{\codesize
+\begin{verbatim}
+fmod PEANO-NAT-EXTRA is
+\end{verbatim}
+}
+
+Es posible definir tipos de datos mediante \texttt{sort}, y \texttt{sorts} en el caso en que sean varios. \par
+
+{\codesize
+\begin{verbatim}
+   sorts Nat NoZeroNat ZeroNat .
+\end{verbatim}
+}
+
+Dentro de los tipos se les puede dotar de orden, esto se debe a que el lenguaje consta de una jerarquía de tipos, extendiendo así el dominio de las propiedades. \par
+
+{\codesize
+\begin{verbatim}
+   subsort NoZeroNat < Nat .
+   subsort ZeroNat < Nat .
+\end{verbatim}
+}
+
+En este caso por ejemplo, solo definiremos los \texttt{ZeroNat} y \texttt{NoZeroNat}, sin embargo en las funciones el dominio serán siempre los \texttt{Nat}, siendo Maude quien distinga dentro de que subtipo nos encontramos en cada momento para saber que ecuación debe elegir. Esto se verá claramente más adelante. Continuando con lo que nos ocupaba, antes de utilizar un tipo suele ser necesario darle un constructor para poder trabajar con él. Para ello daremos un operador \texttt{op}, unos tipos a este, indicando la entrada y la salida, y por último indicaremos que es un constructor con el atributo \texttt{ctor}. \par
+
+{\codesize
+\begin{verbatim}
+   op 0 : -> ZeroNat [ctor] .
+   op s : Nat -> NoZeroNat [ctor iter] .
+\end{verbatim}
+}
+
+Como se puede observar, a los constructores se les puede dotar de propiedades con algunos comandos como \texttt{iter}, que le permite acortar los términos construidos con ese operador, por ejemplo, \verb"s(s(0))" sería lo mismo que \verb"s^2(0)". Siguiendo con la creación del módulo, antes de definir ninguna función será necesario hacer una declaración de variables en base a sus tipos mediante el comando \texttt{var}, o \texttt{vars} terminando con el tipo correspondiente. También existe la posibilidad de declarar las variables al vuelo, \texttt{on-the-fly}, en las propias ecuaciones de la función, pero se vera más adelante. \par
+
+{\codesize
+\begin{verbatim}
+   vars M N R : Nat .
+\end{verbatim}
+}
+
+La creación de la funciones comienza de forma similar a la de los constructores, con el comando \texttt{op}, y también va acompañado de los tipos, que indican la entrada y la salida de esta. Sin embargo también hay que dotar a la función de forma, esto se puede hacer simplemente indicando un nombre, o mediante una construcción del tipo \verb"_+_" donde \verb"_" indica la posición de los valores de entrada. quedando entonces como sigue: \par
+
+{\codesize
+\begin{verbatim}
+   op add : Nat Nat -> Nat [comm assoc] .     op _+_ : Nat Nat -> Nat [comm assoc] .
+\end{verbatim}
+}
+
+Una vez definida la función habrá que dotarla comportamiento mediante ecuaciones, las cuales como ya se ha comentado antes, se leeran de izquierda a derecha. Estas comenzaran por \texttt{eq} e indicarán mediante una igualdad el resultado de la operación. A la hora de dar las ecuaciones dependemos de la definición de la operación, siendo las ecuaciones del primer caso las de la izquierda, y las del segundo las de la derecha. \par
+{\codesize
+\begin{verbatim}
+   eq add(0 , N) = N .                        eq 0 + N = N .
+   eq add(s(M) , N) = s(add(M , N)) .         eq s(M) + N = s(M + N) .
+\end{verbatim}
+}
+
+Para ilustrar lo comentado lo anteriormente realizaremos en \verb"_+_" una declaración de variables al vuelo. \par
+{\codesize
+\begin{verbatim}
+   eq 0 + N:Nat = N:Nat .
+   eq s(M:Nat) + s(N:Nat) = s(M:Nat + N:Nat) 
+\end{verbatim}
+}
+ 
+El método utilizado para dar las variables dependerá de cada uno, o de las veces que se vaya a usar esta a lo largo del módulo, pero por comodidad seguiré utilizando la declaración normal. Volviendo con las funciones, por supuesto esta no es la única forma que tenemos de darlas, sinó que en los casos de condicionales tendremos que usar el comando \texttt{ceq} así como dar con \texttt{if} las condiciones Booleanas, pudiendo añadir operaciones lógicas como \texttt{not} o \verb"/\" a las distintas ecuaciones.\par
+{\codesize
+\begin{verbatim}
+   op _*_ : Nat Nat -> Nat .
+   ceq M * N = 0 
+   if M == 0.
+   ceq s(M) * N = (M * N) + N
+   if not (s(M) == 0) .
+\end{verbatim}
+}
+
+Ejemplos de otras funciones pueden ser las dos siguientes, definidas de forma análoga a la suma.\par
+
+{\codesize
+\begin{verbatim}
+   op _eq_ : Nat Nat -> Nat [comm] .          op _<_ : Nat Nat -> Bool .
+   eq 0 eq s(M) = false .                     eq 0 < s(M) = true .
+   eq 0 eq 0 = true .                         eq 0 < 0 = false .
+   eq s(M) eq s(N) = M eq N .                 eq s(M) < 0 = false .
+                                              eq s(M) < s(N) = M < N .	
+
+\end{verbatim}
+}
+
+Una vez hayamos creado e incluido todas las funciones será necesario indicar la terminación del módulo mediante: \par
+
+{\codesize
+\begin{verbatim}
+endfm
+\end{verbatim}
+}
+
+\subsection{Ejemplo de módulo de sistema}
+
+El módulo que crearemos de ejemplo para los módulos de sistema será en una representación del problema de las vasijas. Este problema consiste, para aquellos que nos lo conozcan, en dadas tres vasijas con distintas capacidades, las cuales podemos llenar del todo y vaciar cuando queramos, conseguir que en una de ellas nos quede una capacidad de liquido concreta. El caso más común es aquel en que los recipientes tienen una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. Una vez entendido lo que se va a implementar, comencemos. \par
+
+Los módulos de sistema comienzan con \verb"mod _ is"
+
+{\codesize
+\begin{verbatim}
+mod VASIJAS is
+\end{verbatim}
+}
+
+Los comandos básicos, como importar, dar los tipos, constructores y variables mantienen la misma sintaxis que en los módulos funcionales. Como necesitamos un conjunto númerico para la creación del tipo \texttt{Vasija} comenzaremos importando los numeros naturales. Para importar un módulo tenemos tres opciones, \texttt{protecting}, \texttt{extending} y \texttt{including}, sin embargo en general utilizaremos \texttt{protecting}, de la forma \texttt{pr}, ya que nos importa los modulos pero no nos permite modificarlos, evitando así confusión y problemas de interacción con otros. \par
+
+{\codesize
+\begin{verbatim}
+   protecting NAT .
+   sort Vasija CjVasija .
+   subsort Vasija < CjVasija .
+
+   op vasija : Nat Nat -> Vasija [ctor] .
+   *** El primer numero se corresponde con la cantidad de liquido que contiene 
+       la vasija y el segundo con su capacidad maxima.
+   op _,_ : Vasija Vasija -> CjVasija [ctor comm assoc] .
+
+   vars C1 C2 N1 N2 : Nat .
+\end{verbatim}
+}
+Como se puede ver las vasijas están definidas como un par, en el que el primer elemento se corresponde con la cantidad de liquido que tiene y el segundo con la capacidad total de esta. A parte del tipo \texttt{Vasija} creamos tambien el conjunto de estas \texttt{CjVasijas} en el que almacemaremos todas la información a la vez.\par 
+
+Una vez completados los constructores, y la declaración de variables si se desea, procedemos a construir el módulo en si. Para ello a parte de las reglas que veremos más adelante podemos crear funciones mediante ecuaciones al igual que haciamos antes en los módulos funcionales. En nuestro caso la única que definiremos será el caso base sobre el que queremos que funcionen las reglas, vease, las tres vasijas antes comentadas vacías.\par
+
+{\codesize
+\begin{verbatim}
+   op inicial : -> CjVasija .
+   *** Da un conjunto inicial de vasijas vacias con distintas capacidades.
+   eq inicial = vasija(0, 3) , vasija(0, 5) , vasija(0, 8) .
+\end{verbatim}
+}
+
+Hecho esto podemos ponernos por fin con las reglas en si. Estas deben comenzar por \verb"rl[_]" donde \verb"_" es el nombre que damos a la regla. Despues esta se construye como una transición de izquierda a derecha dada por \verb"=>".\par
+
+{\codesize
+\begin{verbatim}
+   rl[vacia] : vasija(N1, C1) => vasija(0, C1) .
+   ***Esta regla nos vacia la vasija.
+\end{verbatim}
+}
+La notación es muy similar a la ya vista en las ecuaciones, con la salvedad de que no se utiliza el nombre de la regla, ya que solo se aplica. De manera analoga a la anterior creamos la regla llena, que nos llena la vasija hasta su capacidad maxima.\par
+{\codesize
+\begin{verbatim}
+   rl[llena] : vasija(N1, C1) => vasija(C1, C1) .
+   *** Esta regla nos llena la vasija al maximo.
+\end{verbatim}
+}
+Por supuesto, al igual que ocurría con las ecuaciones podemos construir reglas condicionales, en este caso comenzarían por \verb"crl[_]" y se construyen igual que las anteriores, indicando eso sí mediante un \texttt{if} la condición que deben cumplir.\par
+
+En nuestro caso crearemos las funciones que nos transfieren el liquido de una vasija a la siguiente.\par 
+{\codesize
+\begin{verbatim}
+   crl[transferir1] : vasija(N1, C1) , vasija(N2, C2) 
+                    => vasija(0, C1) , vasija((N1 + N2), C2) 
+   if (N1 + N2) <= C2 .
+   *** Nos transfiere el contenido de una vasija a otra si la suma de 
+       los contenidos no se pasa de la capacidad de la segunda.
+
+   crl[transferir2] : vasija(N1, C1) , vasija(N2, C2) 
+                    => vasija(sd((N1 + N2) , C2), C1) , vasija(C2, C2)
+   if (N1 + N2) > C2 .
+   *** Nos transfiere el contenido de una vasija a otra si la suma de 
+       los contenidos se pasa de la capacidad de la segunda.
+\end{verbatim}
+}
+Aunque las dos reglas se refieren a la misma acción cubren casos distintos, siendo la primera aquella en que el contenido de las dos vasijas cabe en la segunda, a la que se quiere transferir, y la segunda aquella en la que no, quedando la primera entonces con el liquido sobrante.\par
+
+El módulo finalmente se cierra con \texttt{endm}.
+{\codesize
+\begin{verbatim}
+endm
+\end{verbatim}
+}
+
+\subsection{Core Maude y Full Maude}
+
+Core Maude es el interprete del lenguaje implementado en C++ y que nos proporciona todas las funcionalidades básicas de Maude. Full Maude por otro lado es una extensión de Maude programada en el propio lenguaje que se encarga de proporcionarnos más herramientas para el desarrollo de módulos y que debera ser cargada, ya sea en el fichero que se vaya a utlizar o desde la propia consola de Maude como si fuese un módulo más.\par
+
+Veamos ahora ejemplos de ejecución de los dos módulos implementados anteriormente, comenzando por PEANO-NAT-EXTRA.\par
+
+{\codesize
+\begin{verbatim}
+Maude> load PEANO-NAT-EXTRA.maude
+\end{verbatim}
+}
+
+Core Maude no ejecuta los programas como tal, sino que lee lo que hayamos escrito y lo reduce lo maximo posible utilizando las ecuaciones implementadas. Deberemos escribir entonces \texttt{red} la expresión que queremos reducir \verb" .", teniendo mucho cuidado con el punto. Veamos algunos casos sencillos:
+{\codesize
+\begin{verbatim}
+Maude> red s(0) .
+reduce in PEANO-NAT-EXTRA : s(0) .
+rewrites: 0 in 0ms cpu (0ms real) (~ rewrites/second)
+result NoZeroNat: s(0)
+\end{verbatim}
+}
+
+No ha sido demasiado impresionante pero podemos ver que todo funciona correctamente, veamos otro caso más.\par
+
+{\codesize
+\begin{verbatim}
+Maude> red (s(0) + s(s(0))) * s(s(0)) .
+reduce in PEANO-NAT-EXTRA : (s(0) + s^2(0)) * s^2(0) .
+rewrites: 15 in 0ms cpu (0ms real) (~ rewrites/second)
+result NoZeroNat: s^6(0)
+\end{verbatim}
+}
+
+Los módulos funcionales son entonces lo más sencillos de utilizar, los de sistema por el contrario tiene más opciones disponibles. Por supuesto debemos comenzar cargando el módulo VASIJAS :\par
+
+{\codesize
+\begin{verbatim}
+Maude> load VASIJAS.maude
+\end{verbatim}
+}
+
+El comando bÁsico es \texttt{rewrite}, abreviado \texttt{rew}, que aplica las ecuaciones y las reglas del módulo al término dado como argumento. Sin embargo, este ejemplo no termina (es posible vaciar todo el tiempo
+una vasija vacía, por ejemplo), así que tendremos que indicar manualmente el número de reglas que queremos utilizar en total, por ejemplo 10:
+
+{\codesize
+\begin{verbatim}
+Maude> rew [10] inicial .
+rewrite [10] in VASIJAS : inicial .
+rewrites: 139 in 0ms cpu (5ms real) (~ rewrites/second)
+result [CjVasija]: vasija(0, 3),vasija(0, 5),vasija(0, 8)
+\end{verbatim}
+}
+
+Al parecer no ha ocurrido nada, probablemente por que Maude haya utilizado diez veces la regla que vacia una vasija, así que hay que obligarle a utilizar más reglas. Para ello utilizaremos el commando \texttt{frew}.
+
+{\codesize
+\begin{verbatim}
+Maude> frew [10] inicial .
+frewrite in VASIJAS : inicial .
+rewrites: 22 in 0ms cpu (201ms real) (~ rewrites/second)
+result (sort not calculated): vasija(0, 8),vasija(3, 3),vasija(5, 5)
+\end{verbatim}
+}
+
+Ahora sí ha ocurrido algo, se han llenado las dos ultimas vasijas, pero esto tampoco nos aporta mucha información. Lo que si podemos hacer, que es lo realmente util, es buscar una solución concreta y que Maude nos la construya, pudiendo consultar despues los pasos que ha dado. Para esto utilizaremos el comando \texttt{search}
+
+{\codesize
+\begin{verbatim}
+Maude> search [1] inicial =>* vasija(4, N:Nat) , B:CjVasija .
+\end{verbatim}
+}
+
+Antes de mostrar la ejecución explicaró lo escrito. \verb"[1]" indica que solo buscamos una solución, \verb"inicial =>* " nos indica que partimos del estado inicial, y que el estado final lo queremos alcanzar en cualquier número de pasos, por último \verb"N:Nat" y \verb"B:CjVasija" son variables que nos indican el tipo de los datos que deben ocupar esa posición, pero que pueden valer cualquier cosa. Veamos ahora sí la ejecución.\par
+
+{\codesize
+\begin{verbatim}
+Maude> search [1] inicial =>* vasija(4, N:Nat) , B:CjVasija .
+search in VASIJAS : inicial =>* B:CjVasija,vasija(4, N:Nat) .
+
+Solution 1 (state 75)
+states: 76  rewrites: 2142 in 20ms cpu (48ms real) (107100 rewrites/second)
+B:CjVasija --> vasija(3, 3),vasija(3, 8)
+N:Nat --> 5
+\end{verbatim}
+}
+
+Como se puede ver la solución encontrada es aquella en la que la vasija con cuatro litros es la que tenía cinco de capacidad, y las otras dos quedas con tres litros cada una. Esta solución ha sido alcanzada en el estado 75, y se puede consultar facilmente con el comando \verb"show path 75", que nos indica cuando y donde se ejecutaron que reglas: \par
+
+{\codesize
+\begin{verbatim}
+Maude> show path 75 .
+state 0, [CjVasija]: vasija(0, 3),vasija(0, 5),vasija(0, 8)
+===[ rl vasija(N1, C1) => vasija(C1, C1) [label llena] . ]===>
+state 2, [CjVasija]: vasija(0, 3),vasija(0, 8),vasija(5, 5)
+===[ crl vasija(N1, C1),vasija(N2, C2) => vasija(C2, C2),vasija(sd(C2, N1 +
+    N2), C1) if N1 + N2 > C2 = true [label transferir2] . ]===>
+state 9, [CjVasija]: vasija(0, 8),vasija(2, 5),vasija(3, 3)
+===[ crl vasija(N1, C1),vasija(N2, C2) => vasija(0, C1),vasija(N1 + N2, C2) if
+    N1 + N2 <= C2 = true [label transferir1] . ]===>
+state 20, [CjVasija]: vasija(0, 3),vasija(2, 5),vasija(3, 8)
+===[ crl vasija(N1, C1),vasija(N2, C2) => vasija(0, C1),vasija(N1 + N2, C2) if
+    N1 + N2 <= C2 = true [label transferir1] . ]===>
+state 37, [CjVasija]: vasija(0, 5),vasija(2, 3),vasija(3, 8)
+===[ rl vasija(N1, C1) => vasija(C1, C1) [label llena] . ]===>
+state 55, [CjVasija]: vasija(2, 3),vasija(3, 8),vasija(5, 5)
+===[ crl vasija(N1, C1),vasija(N2, C2) => vasija(C2, C2),vasija(sd(C2, N1 +
+    N2), C1) if N1 + N2 > C2 = true [label transferir2] . ]===>
+state 75, [CjVasija]: vasija(3, 3),vasija(3, 8),vasija(4, 5)
+\end{verbatim}
+}
 
 \section{Los test de unidad}
 
-Un test de unidad~\cite{unitTests} es un trozo de código que llama a un módulo, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
+Un test de unidad~\cite{unitTests} es un trozo de código que llama a una función, o unidad de trabajo, y comprueba el resultado final de los programas o funciones que contiene. En caso de que una de los casos resulte falso diremos que el test ha fallado.\par
 
 Un test de unidad debe cumplir las siguiente condiciones~\cite{unitTests}: \par
 
@@ -30,9 +320,6 @@ Un test de unidad debe cumplir las siguiente condiciones~\cite{unitTests}: \par
 \item Debe ser independiente de la ejecución de otros test.
 \item En caso de que falle, debe ser sencillo encontrar donde se originó el error.
 \end{itemize}.
-
-
-
 
 \section{Método de aprendizaje}
 
