@@ -1,10 +1,12 @@
 %!TEX root = tfg_fiesta.tex
 
+A lo largo de este capítulo crearemos el \texttt{fmod CIRCUMFERENCE} que nos proporcionará la última de las figuras geométricas que necesitamos. Posteriormente crearemos otro módulo que se encargará de cargar los tres anteriores y aunar en una única función aquellas que nos proporcionan puntos de corte, facilitándonos así el proceso posteriormente en el módulo referido a la entrada y la salida de datos.\par
+
 \section{CIRCUMFERENCE}
 
-Llegamos ya al último módulo funcional para geometría en dos dimensiones, el \texttt{fmod} \\ \texttt{CIRCUNFERENCE}, y es que una vez hayamos conseguido las funciones que nos den los puntos de corte entre dos circunferencias, o entre una de estas y una recta, tendremos todos las funciones necesarias para implementar las construcciones con regla y compas. \par
+Llegamos ya al último módulo funcional para geometría en dos dimensiones, el \texttt{fmod} \\ \texttt{CIRCUNFERENCE}, y es que una vez hayamos conseguido las funciones que nos den los puntos de corte entre dos circunferencias, o entre una de estas y una recta, tendremos todos las funciones necesarias para implementar las construcciones con regla y compás. \par
 
-Comenzaremos con la definición de las circunferencias, consistiendo estas en un par formado por su centro y su radio. \par
+Comenzaremos con la construcción de las circunferencias, consistiendo estas en un par formado por su centro y su radio: \par
 
 {\codesize
 \begin{verbatim}
@@ -26,7 +28,12 @@ fmod CIRCUMFERENCE is
    vars c1 c2 c1' c2' : Circumference .
    vars t : Bool .
    vars l l1 : List .
-		
+\end{verbatim}
+}
+
+De forma paralela crearemos también tres funciones muy sencillas: \texttt{circumference-center}, \texttt{circumference-radius} y \texttt{are-in-circumference}. Las dos primeras simplemente nos devuelven el centro y el radio de la circunferencia, mientras que la tercera, un poco más interesante, nos indica si un punto esta en la circunferencia. Para esto simplemente calcula la distancia del punto al centro y la compara con el radio, si son iguales pertenecerá a esta y nos devolverá \texttt{true}, en caso contrario \texttt{false}: \par
+{\codesize
+\begin{verbatim}		
    op circumference-center : Circumference -> Point .
    *** Devuelve el centro de la circunferencia
    eq circumference-center(c(p1 , z11)) = p1 .
@@ -39,15 +46,11 @@ fmod CIRCUMFERENCE is
    *** Comprueba si un punto esta en una circunferencia, 
    ***  comprobando su distanciaal centro con el radio.
    eq are-in-circumference(p1 ,c(p2 , z11)) = distance(p1 , p2) == z11 .
-
 \end{verbatim}  
 }
 
-De forma paralela creamos tambien tres funciones muy sencillas: \texttt{circumference-center}, \texttt{circumference-radius} y \texttt{are-in-circumference}. Las dos primeras simplemente nos devuelven el centro y el radio de la circunferencia, mientras que la tercera, un poco más interesante, nos indica si un punto esta en la circunferencia. Para esto simplemente calcula la distancia del punto al centro y la compara con el radio, si son iguales pertenecerá a esta y nos devolverá \texttt{true}, en caso contrario \texttt{false}. Como ya ocurría en el módulo de puntos y rectas estas funciones, al no ser complicadas ni tener un gran interes se mostraran en un apéndice. \par
+Mientras que con las rectas hubo una gran variedad de funciones, en el caso de las circunferencias nos centraremos en simplemente hallar los puntos de corte comenzando por el caso de recta y circunferencia. Como ya hemos hecho otras veces para empezar crearemos una función que nos dirá si existe el punto de corte, siguiendo los siguientes pasos: trazamos una recta perpendicular a la dada que pase por el centro de la circunferencia y hallamos el punto de corte. A continuación calculamos la distancia de ese punto al centro, si es menor o igual que el radio significara que la recta y la circunferencia se cortan, no habrá corte en caso contrario.\par
 
-Mientras que con las rectas hubo una gran variedad de funciones, en el caso de las circunferencias nos centraremos en simplemente hallar los puntos de corte comenzando por el caso de recta y circunferencia. Como ya hemos hecho otras veces para empezar crearemos una función que nos dirá si existe el punto de corte, siguiendo los siguientes pasos: trazamos una recta perpendicular a la dada que pase por el centro de la circunferencia y hallamos el punto de corte. A continuación calculamos la distancia de ese punto al centro, si es menor o igual que el radio significara que la recta y la circunferencia se cortan, no habra corte en caso contrario.\par
-
-NOTA: Introducir dibujo del proceso anteriro.\par
 {\codesize
 \begin{verbatim}
 op cut?-r-c : Line Circumference -> Bool .
@@ -58,7 +61,7 @@ eq cut?-r-c(r1 , c(p1 , z11)) = distance(cut-point-r-r(r1 ,
 \end{verbatim}
 }
 
-Una vez hecho esto tenemos que ver como conseguir los puntos de corte. El primer problema que nos encontramos es el número, ya que pueden cortarse en uno o dos puntos. Para ello implementaremos en el \texttt{fmod POINT} el tipo \texttt{List} :
+Una vez terminada la función tenemos que ver como conseguir los puntos de corte. El primer problema que nos encontramos es el número, ya que pueden cortarse en uno o dos puntos. Para ello implementaremos en el \texttt{fmod POINT} el tipo \texttt{List} :
 
 {\codesize
 \begin{verbatim}
@@ -73,7 +76,7 @@ Una vez hecho esto tenemos que ver como conseguir los puntos de corte. El primer
 \end{verbatim}
 }
 
-La definición que hacemos aqui de las listas es identica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son de puntos. Las funciones definidas son entonces la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
+La definición que hacemos aquí de las listas es idéntica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son de puntos. Las funciones definidas son entonces la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
 
 {\codesize
 \begin{verbatim}
@@ -93,7 +96,7 @@ La definición que hacemos aqui de las listas es identica la que ya hicimos en e
    eq first-element(mt l1 p1) = p1 .
 \end{verbatim}
 
-Sin embargo este nos es el único cambio que deberemos realizar en este módulo, dada la forma de las ecuaciones tanto de la recta como de la circumferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. Así pués implementamos las funciones correspondientes en \texttt{fmod POINT}. \par
+Sin embargo este no es el único cambio que deberemos realizar en este módulo, dada la forma de las ecuaciones tanto de la recta como de la circunferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. Así pués implementamos las funciones correspondientes en \texttt{fmod POINT}. \par
 
 {\codesize
 \begin{verbatim}
@@ -120,7 +123,7 @@ Sin embargo este nos es el único cambio que deberemos realizar en este módulo,
 \end{verbatim}
 }
 
-Terminadas ya todas las funciones auxiliares que necesitaremos solo queda implementar la función de corte. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automaticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el fmod LINE, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los calculos referentes a estas funciones aquí(incluir hipervinculo). Veamos las funciones:
+Terminadas ya todas las funciones auxiliares que necesitaremos solo queda implementar la función de corte. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automaticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el fmod LINE, sino que se ven si son horizontales o verticales directamente por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los cálculos referentes a estas funciones aquí(incluir referencia). Veamos las funciones:
 
 {\codesize
 \begin{verbatim}
@@ -162,7 +165,7 @@ Terminadas ya todas las funciones auxiliares que necesitaremos solo queda implem
 \end{verbatim}
 }
 
-Concluida ya esta función nos ponemos con la última operación que necesitaremos, calcular los puntos de corte de dos circunferencias. Lo primero que haremos será la función que nos indique si las dos figuras se cortan, como ya hicimos en los otros casos. Esta vez la idea de la función resulta mucho más sencilla que antes, simplemente comprabamos la distancia entre los centros y vemos si es menor o igual que la suma de los radios. \par
+Concluida ya esta función nos ponemos con la última operación que necesitaremos, calcular los puntos de corte de dos circunferencias. Lo primero que haremos será construir la función que nos indique si las dos figuras se cortan, como ya hicimos en los otros casos. Esta vez la idea de la función resulta mucho más sencilla que antes, simplemente comprobamos la distancia entre los centros y vemos si es menor o igual que la suma de los radios: \par
 {\codesize
 \begin{verbatim}
    op cut?-c-c : Circumference Circumference -> Bool .
@@ -174,7 +177,7 @@ Concluida ya esta función nos ponemos con la última operación que necesitarem
 \end{verbatim}
 }
 
-Sin embargo hallar los puntos de corte sí se complica, y es que si las dos circunferencias poseen centro con la coordenada x igual, nos surgirá más adelante una división entre cero, así que en caso de que las coordenadas x sean iguales iremos por otro camino, que dependerá de que sean distintas las coordenadas y, esto se debe a que haremos una simetría respecto de la recta y = x para hallar los puntos de corte, y luego los traspondremos, lo cual también corresponde con hacer una simetría. Este proceso simplemente se hace para evitar tener que hacer una nueva distinción de casos, pues los calculos serían totalmente análogos. \par
+Sin embargo hallar los puntos de corte sí se complica, y es que, si las dos circunferencias poseen centro con la coordenada x igual, nos surgirá más adelante una división entre cero, así que en este caso iremos por otro camino, que dependerá de que sean distintas las coordenadas y, esto se debe a que haremos una simetría respecto de la recta y = x para hallar los puntos de corte, y luego los traspondremos, lo cual también corresponde con hacer una simetría. Este proceso simplemente se hace para evitar tener que hacer una nueva distinción de casos, pues los cálculos serían totalmente análogos. \par
 {\codesize
 \begin{verbatim}
    op cut-point-c-c : Circumference Circumference -> List .
@@ -202,7 +205,7 @@ Sin embargo hallar los puntos de corte sí se complica, y es que si las dos circ
 \end{verbatim}
 }
 
-Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí(incluir hipervinculo). 
+Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demás puntos de corte estos cálculos no son triviales, y pueden verse aquí(incluir referencia): 
 {\codesize
 \begin{verbatim}
    op cut-point-circumferences-1 : Circumference Circumference -> Point .
@@ -225,11 +228,32 @@ Ahora simplemente damos las funciones que nos devuelven los puntos propiamente d
 \end{verbatim}
 }
 
+A continuación se muestran algunos casos del test de unidad correspondiente a las funciones para circunferencias. \par
+{\codesize
+\begin{verbatim}
+(munit CIRCUMFERENCE is 
+	assertEqual(circumference-center(c(p(1.0 2.0), 3.0)), p(1.0 2.0))
+	assertEqual(circumference-radius(c(p(0.0 0.0), 3.4)), 3.4)
+	assertTrue(are-in-circumference(p(1.0 0.0), c(p(0.0 0.0), 1.0)))
+	assertTrue(cut?-r-c(r(p(-1.0 1.0) p(1.0 1.0)), c(p(0.0 0.0), 2.0)))
+	assertEqual(cut-point-r-c-1(r(p(0.0 0.0) p(1.0 1.0)), c(p(1.0 0.0), 1.0)), p(1.0 1.0))
+	assertEqual(cut-point-r-c-2(r(p(0.0 -2.0) p(1.0 0.0)), c(p(3.0 2.0), 1.0)), p(2.0 2.0))
+	assertEqual(cut-point-r-c(r(p(0.0 2.0) p(2.0 2.0)), c(p(0.0 0.0), 2.0)), p(0.0 2.0) p(0.0 2.0))
+	assertTrue(cut?-c-c(c(p(0.0 0.0), 1.0), c(p(2.0 0.0), 1.0)))
+ 	assertEqual(cut-point-circumferences-1(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0))
+ 	assertEqual(cut-point-circumferences-2(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(2.0 0.0))
+	assertEqual(cut-point-circumferences-y-dis(c(p(2.0 0.0), 1.0), c(p(2.0 2.0), 1.0)), p(2.0 1.0) p(2.0 1.0))
+	assertEqual(cut-point-c-c(c(p(0.0 0.0), 2.0), c(p(2.0 2.0), 2.0)), p(0.0 2.0) p(2.0 0.0))
+endu)
+\end{verbatim}
+}
+
+Con esto damos fín al módulo de circunferencias. \par
+
 \section{GEO2D}
+Como se puede ver, hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada \texttt{cut-point}, que dadas dos figuras cuales quiera, devuelve sus puntos de corte. \par
 
-Con esto damos fín al módulo de circunferencias, sin embargo nos quedamos con la sensación de ser todo muy inconexo, hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada cut-point, que dadas dos figuras cuales quiera, devuelve sus puntos de corte. \par
-
-Para ello empezaremos por crear un nuevo tipo de funciones, llamado \texttt{Figure}, que simplemente contendrá a los demas tipos, haciendo así que nos sea totalmente indiferente trabajar con una u otra figura llegado el momento.\par
+Para ello empezaremos por crear un nuevo tipo, llamado \texttt{Figure}, que simplemente contendrá a los demás tipos, haciendo así que nos sea totalmente indiferente trabajar con una u otra figura llegado el momento:\par
 {\codesize
 \begin{verbatim}
 fmod GEO2D is
@@ -275,4 +299,6 @@ fmod GEO2D is
 endfm	
 \end{verbatim}
 }
-Como se puede ver se han incluido también algunas combinaciones un poco raras, como el punto de corte entre dos puntos, pero esto es solo para evitar que el programa de problemas en el futuro al no poder usar ninguna ecuación.
+Como se puede ver se han incluido también algunas combinaciones un poco raras, como el punto de corte entre dos puntos, pero esto es solo para evitar que el programa de problemas en el futuro.
+
+
