@@ -1,0 +1,460 @@
+%!TEX root = tfg_fiesta.tex
+
+A lo largo de este capítulo desarrollaremos tres módulos dedicados enteramente a la geometría en dos dimensiones. Comenzaremos por crear los puntos y las rectas con todas las funciones que se considerarán necesarias, así como los correspondientes de unidad. Posteriormente crearemos el dedicado a las circunferencias, que nos proporcionará la última de las figuras geométricas que necesitamos. Finalmente crearemos otro módulo que se encargará de cargar los tres anteriores y aunar en una única función aquellas que nos proporcionan puntos de corte, facilitandonos así el proceso posteriormente en el módulo referido a la entrada y la salida de datos. Por último aclarar que los módulos de aprendizaje por el contrario no aparecerán aquí, sino que podrán encontrarse en el repositorio online.
+
+
+\section{POINT}
+
+Comencemos con la creación de los puntos, la definición de estos es sencilla, construyéndose como un par formado por dos números reales, igual que se haría en papel. Las funciones que hemos considerado necesarias por el momento son únicamente dos, la que nos calcula la distancia entre dos de ellos \texttt{distance}, y la que nos intercambia las coordenadas \texttt{trans-point}. Así pues el módulo funcional, quedaría como sigue:
+{\codesize
+\begin{verbatim}
+fmod POINT is
+
+   pr FLOAT .
+   sorts Point .
+
+   op p(__) : Float Float -> Point [ctor] .
+   *** Define un punto como un par de numeros reales
+
+   op distance : Point Point -> Float .
+   *** Calcula la distancia entre dos puntos mediante la metrica usual.
+   eq distance(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) 
+                                             + ((z22 - z12) ^ 2.0)) .
+
+   op trans-point : Point -> Point .
+   *** Intercambia las coordenadas de un punto
+   eq trans-point(p(z11 z12)) = p(z12 z11) .
+
+endfm
+\end{verbatim}
+}
+
+El módulo queda entonces completo aunque resulta muy simple, sin embargo, como será necesario importarlo para la creación de los otros dos, lo utilizaremos también para las funciones auxiliares que vayamos necesitando en los módulos siguientes, como por ejemplo las ecuaciones de segundo grado. Para concluir esta sección daremos algunos casos del test de unidad correspondiente a estas funciones, ilustrando así su funcionamiento. Para evitar saturar el capítulo con estos test solo se incluirán cuando contengan información nueva o sean inportantes. Veamos ahora sí los casos:\par
+
+{\codesize
+\begin{verbatim}
+(munit POINT is
+assertEqual(distance(p(1.0 0.0), p(0.0 1.0)), sqrt(2.0))
+assertEqual(distance(p(0.0 0.0), p(4.0 3.0)), sqrt(13.0))
+assertEqual(distance(p(1.0 0.0), p(2.0 0.0)), 1.0)
+assertEqual(distance(p(1.0 1.0), p(1.0 3.0)), 2.0)
+assertDifferent(trans-point(p(1.0 0.0)), p(1.0 0.0))
+assertEqual(trans-point(p(1.0 0.0)), p(0.0 1.0))
+endu)
+\end{verbatim}
+}
+
+\section{LINE}
+
+Dando por finalizada la creación del \texttt{fmod POINT}, comenzaremos con el de las rectas. Estas se implementarán de forma análoga a los puntos, pero como un par de estos en vez de números reales. Como estamos siguiendo un camino similar al de la geometría básica, implementaremos además el tipo vector, que se utilizará en varias operaciones de las rectas. Estos se construirán de nuevo como un par de reales, que serán el correspondiente a extremo menos origen de los puntos que las definen. Empezamos dando los constructores correspondientes:
+
+{\codesize
+\begin{verbatim}
+fmod LINE is 
+
+   pr POINT .
+   sorts Line Vector .
+
+   op r(__) : Point Point -> Line [ctor] .
+   *** Define una recta como un par de puntos, mas adelante la daremos ecuaciones.
+   op v(__) : Float Float -> Vector [ctor] .
+   *** Define un vector como un par de reales.
+   *** Extremo menos origen.
+\end{verbatim}
+}
+
+Las primeras funciones que crearemos para los vectores servirán para, o bien obtener información de ellos o bien construir otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y prácticamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí se mostrará es parte de su test de unidad, lógicamente ejecutado sobre el módulo completo:\par
+
+{\codesize
+\begin{verbatim}
+(munit LINE is
+   assertEqual(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), 0.0)
+   assertEqual(v-scalar-prod(v(1.0 2.0), v(2.0 1.0)), 4.0)	
+   assertDifferent(v-norm(v(2.0 0.0)), 4.0)
+   assertEqual(v-norm(v(2.0 3.0)), sqrt(13.0))
+   assertDifferent(perpendicular-vector(v(1.0 2.0)), v(2.0 1.0))
+   assertEqual(perpendicular-vector(v(1.0 0.0)), v(0.0 -1.0))
+   assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 1.0)))
+   assertFalse(v-are-perpendicular?(v(1.0 2.0), v(2.0 1.0)))
+   assertTrue(v-are-perpendicular?(v(2.0 3.0), perpendicular-vector(v(2.0 3.0))))
+endu)
+\end{verbatim}
+}
+
+Antes de continuar con las operaciones para rectas construiremos dos funciones opuestas, \texttt{direction-vector-line} que nos devuelve el vector director de una recta y \texttt{line-from-vector}, que recibe un vector, un punto y devuelve una recta, todo ello dentro del módulo \texttt{LINE}: \par
+{\codesize
+\begin{verbatim}
+   op direction-vector-line : Line -> Vector .
+   *** Devuelve el vector director de una recta
+   eq direction-vector-line(r(p(z11 z12) p(z21 z22))) =
+      v((z21 - z11) (z22 - z12)) .
+
+   op line-from-vector : Vector Point -> Line .
+   *** Construye una recta mediante un vector y un punto dados.
+   eq line-from-vector(v(z11 z12) , p(z21 z22)) =
+      r(p(z21 z22) p((z11 + z21) (z12 + z22))) .
+\end{verbatim}
+}
+
+Estas funciones nos ayudarán a comprobar si dos rectas son perpendiculares o a calcular una perpendicular a otra en función a un punto dado, ya que simplemente convertiremos las rectas a vectores, y con las funciones anteriores se realizará todo el proceso para después simplemente volver a convertirlos en rectas. Estas funciones son \texttt{perpendicular-line} y \texttt{are-perpendiculars} respectivamente. Volviendo a la idea original del módulo total, conseguir la geometría suficiente para imitar las construcciones con regla y compás, lo que necesitamos es hallar el punto de corte entre dos rectas. Para esto pondremos las ecuaciones en su forma implícita y resolveremos el sistema correspondiente. Comencemos entonces por encontrar los valores m y n, pendiente y desplazamiento respectivamente, de las rectas: \par
+
+{\codesize
+\begin{verbatim}
+   op equ-line-m : Line -> Float .
+   *** Dados los dos puntos que definen la recta, devuelve el valor de m, 
+   *** para poder "construirla" de forma y = mx + n.
+   eq equ-line-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) .
+
+   op equ-line-n : Line -> Float .
+   *** Dados los dos puntos que definen la recta, devuelve el valor de n, 
+   *** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+   *** en las que son de la forma  x = n
+   eq equ-line-n(r(p(z11 z12) p(z21 z22)))= z12 - 
+      (z11 * equ-line-m(r(p(z11 z12) p(z21 z22)))) .
+
+   op are-equal : Line Line -> Bool .
+   *** comprueba si dos rectas son iguales a partir de m y n, 
+   *** pendiente y desplazamiento, pues una recta
+   *** puede construirse mediante infinitos pares de puntos.
+   eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
+   eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and 
+      (equ-line-n(r1) == equ-line-n(r2)) [owise] .
+\end{verbatim}
+}
+
+Como se puede ver, además de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, ya que la igualdad básica, \verb"_==_", en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, véase: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo \texttt{n} natural, pero no son sintacticamente iguales, que es lo que Maude necesita. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicarán, respectivamente, si la recta que le damos es horizontal o vertical. Como ya sucedió más arriba la definición de estas funciones es directa, simplemente comprobamos las coordenadas de los puntos, así que no se incluirán aquí.\par
+Aprovechando la creación de estas funciones realizaremos la última función menor,\\ \texttt{are-in-line} que indica si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecerá aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción.\par
+
+A continuación se muestran algunos casos del test de unidad correspondiente a las funciones para rectas. \par
+
+{\codesize
+\begin{verbatim}
+(munit LINE is
+   assertEqual(direction-vector-line(r(p(0.0 0.0) p(1.0 1.0))), v(1.0 1.0))	
+   assertDifferent(line-from-vector(v(1.0 2.0), p(0.0 0.0)),
+                  r(p(1.0 2.0) p(0.0 0.0)))
+   assertTrue(are-equal(line-from-vector(v(1.0 2.0), p(0.0 0.0)),
+             r(p(0.0 0.0) p(1.0 2.0))))
+   assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)),
+             r(p(0.0 0.0) p(1.0 0.0))))
+   assertEqual(equ-line-m(r(p(0.0 0.0) p(1.0 1.0))), 1.0)
+   assertEqual(equ-line-n(r(p(1.0 1.0) p(2.0 0.0))), 2.0)
+   assertTrue(are-equal(r(p(0.0 0.0) p(1.0 1.0)) , r(p(23.0 23.0) p(-1.0 -1.0))))
+   assertTrue(vertical(r(p(13.0 -43.0) p(13.0 56.0))))
+   assertTrue(horizontal(r(p(57.0 12.0) p(24.0 12.0))))
+   assertTrue(are-in-line(p(0.0 0.0), r(p(0.0 0.0) p(1.0 1.0)))))
+endu)
+\end{verbatim}
+}
+
+Llegamos ahora a la parte más interesante de este módulo, el punto de corte de dos rectas.
+Por comodidad lo primero que se hará será crear una función \texttt{cut?-r-r} que nos dirá si dos rectas se cortan y
+posteriormente crearemos otra que nos devuelva ese punto. En caso de que las rectas no se corten, la función que nos da el punto de corte nos devolverá un error. \par
+
+{\codesize
+\begin{verbatim}	
+   op cut?-r-r : Line Line -> Bool .
+   *** comprueba si dos rectas se cortan a partir de la pendiente de estas
+   *** devolviendo el valor false si son paralelas y true en caso contrario.
+   *** El caso en que sean coincidentes debera verse de forma manual comparandolas.
+   ceq cut?-r-r(r1, r2) = true 
+   if vertical(r1) and horizontal(r2) .
+   ceq cut?-r-r(r1, r2) = true 
+   if vertical(r2) and horizontal(r1) .
+   eq cut?-r-r(r1, r2) = not (equ-line-m(r1) == equ-line-m(r2)) .
+\end{verbatim}
+}
+
+Para hallar el punto de corte haremos lo mencionado anteriormente, con las dos rectas en implícitas devolvemos la solución del sistema correspondiente. El método es trivial, salvo los cálculos, pero al encontrarnos en un caso general debemos hacer una distinción de casos que se corresponden con las rectas horizontales y verticales, ya que la pendiente cero e infinito da bastantes problemas. \par
+
+{\codesize
+\begin{verbatim}	
+   op cut-point-r-r : Line Line -> Point .
+   *** Devuelve el punto de corte de dos rectas dadas.
+   ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
+   if vertical(r1) .
+   ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
+   if horizontal(r2) .
+   ceq cut-point-r-r(r1, r2) = p(x y)
+   if x := cut-point-x(r1, r2) /\
+      y := cut-point-y(r1, r2) .
+
+\end{verbatim}
+}
+
+Los cálculos de las funciones \texttt{cut-point-x} y \texttt{cut-point-y} se pueden encontrar en el apéndice. Al igual que hemos hecho en el resto de casos comprobamos que todo funciona correctamente antes de crear el módulo incompleto. Sin embargo, a la hora de ejecutar los test nos encontramos con un único caso que no pasa, lo cual resulta extraño, que es el siguiente: \par
+
+{\codesize
+\begin{verbatim}
+(munit LINE is
+   assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))),
+              p(7.0 5.0))
+end)
+\end{verbatim}
+}
+
+Cuya ejecución, que como se puede ver está forzada para dar \texttt{true}, es la siguiente:\par
+
+{\codesize
+\begin{verbatim}
+1 test cases were executed.
+1 failures.
+
+assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
+    2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)) failed.
+\end{verbatim}
+}
+
+Para ver el problema calcularemos el punto por separado, pues, por como están construidas las rectas, debería devolvernos el punto \texttt{p(7.0 5.0)} .\par
+{\codesize
+\begin{verbatim}
+Maude> red cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))) .
+reduce in GEO2D : cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(
+    9.3000000000000007 2.3999999999999999) p(7.0 5.0))) .
+rewrites: 88 in 0ms cpu (0ms real) (~ rewrites/second)
+result Point: p(7.0000000000000009 5.0000000000000009)
+\end{verbatim}
+}
+Aquí vemos el error, Maude no se comporta bien con los decimales, y aunque sea en una posición tan baja, la dieciséis, esos números no son ni siete ni cinco, así que Maude nos devuelve un fallo. Para corregir este tipo de errores incluiremos en el \verb"fmod POINT" la función auxiliar \texttt{equal-epsilon}, que dado dos números dirá si son iguales en base a un epsilon que podremos elegir.\par
+{\codesize
+\begin{verbatim}
+   op equal-epsilon : Float Float Float -> Bool .
+   *** Comprueba si dos numeros reales son iguales en funcion de un epsilon.
+   ceq equal-epsilon(z11, z12, a) = equal-epsilon(z12, z11, a)
+   if z11 < z12 .
+   ceq equal-epsilon(z11, z12, a) = true
+   if (z11 >= z12) 
+      /\ a > (z11 - z12) .
+   ceq equal-epsilon(z11, z12, a) = false
+   if (z11 >= z12) 
+      /\ a <= (z11 - z12) .
+\end{verbatim}   
+}
+
+A continuación veremos, haciendo un pequeño cambio, como el test que antes fallaba ahora nos devuelve un resultado correcto.
+{\codesize
+\begin{verbatim}
+(munit LINE is
+   assertEqual(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))),
+               p(7.0 5.0))
+   assertTrue(equal-epsilon(0.0, distance(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)),
+              r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0)), 10.0 ^ (-5.0)))
+endu)
+
+2 test cases were executed.
+1 failures.
+
+assertEqual(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(p(9.3000000000000007
+    2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)) failed.
+assertTrue(equal-epsilon(0.0,distance(cut-point-r-r(r(p(2.0 3.0)p(7.0 5.0)),r(
+    p(9.3000000000000007 2.3999999999999999)p(7.0 5.0))),p(7.0 5.0)),1.0e+1 ^
+    -5.0)) passed.
+\end{verbatim} 
+}
+Se puede ver que todo ha pasado a funcionar correctamente, aunque a veces los decimales nos pueden dar problemas. De esta manera ponemos fin al módulo \texttt{fmod LINE}. \par
+
+\section{CIRCUMFERENCE}
+
+Llegamos ya al último módulo funcional para geometría en dos dimensiones, \texttt{CIRCUMFERENCE}, y es que una vez hayamos conseguido las funciones que nos den los puntos de corte entre dos circunferencias, o entre una de estas y una recta, tendremos todas las funciones necesarias para implementar las construcciones con regla y compás.\par
+Comenzaremos con la construcción de las circunferencias, consistiendo estas en un par formado por su centro y su radio: \par
+
+{\codesize
+\begin{verbatim}
+
+fmod CIRCUMFERENCE is
+
+   pr LINE .
+   sorts Circumference .
+
+   op c : Point Float -> Circumference [ctor] .
+   *** Define una circunferencia como un par (punto, real), correspondiendo 
+   *** estos con el centro y el radio.
+\end{verbatim}
+}
+
+De forma paralela crearemos también tres funciones muy sencillas: \texttt{circumference-center}, \texttt{circumference-radius} y \texttt{are-in-circumference}. Las dos primeras simplemente nos devuelven el centro y el radio de la circunferencia, mientras que la tercera, nos indica si un punto está en la circunferencia. Para esto simplemente calcula la distancia del punto al centro y la compara con el radio, si son iguales pertenecerá a esta y nos devolverá \texttt{true}, en caso contrario \texttt{false}: \par
+{\codesize
+\begin{verbatim}		
+   op circumference-center : Circumference -> Point .
+   *** Devuelve el centro de la circunferencia
+   eq circumference-center(c(p1 , z11)) = p1 .
+
+   op circumference-radius : Circumference -> Float .
+   *** Devuelve el radio de la circunferencia
+   eq circumference-radius(c(p1 , z11)) = z11 .
+
+   op are-in-circumference : Point Circumference -> Bool .
+   *** Comprueba si un punto esta en una circunferencia, 
+   ***  comprobando su distanciaal centro con el radio.
+   eq are-in-circumference(p1 ,c(p2 , z11)) = distance(p1 , p2) == z11 .
+\end{verbatim}  
+}
+
+Mientras que con las rectas hubo variedad de funciones, en el caso de las circunferencias nos centraremos en hallar los puntos de corte comenzando por el caso de recta y circunferencia. Comenzaremos creando una función que nos dirá si existe el punto de corte, siguiendo los siguientes pasos: trazamos una recta perpendicular a la dada que pase por el centro de la circunferencia y hallamos el punto de corte. A continuación calculamos la distancia de ese punto al centro, si es menor o igual que el radio significará que la recta y la circunferencia se cortan, no habra corte en caso contrario. Veamos la función: \par
+
+{\codesize
+\begin{verbatim}
+op cut?-r-c : Line Circumference -> Bool .
+*** Comprueba si una recta y una circunferencia se cortan mediante la comparacion 
+*** de la distancia de la recta al centro de la circunferencia.
+eq cut?-r-c(r1 , c(p1 , z11)) = distance(cut-point-r-r(r1 , 
+   perpendicular-line(r1 , p1)) , p1) <= z11 .
+\end{verbatim}
+}
+
+Una vez hecho esto tenemos que ver cómo conseguir los puntos de corte. El primer problema que nos encontramos es el número, ya que pueden cortarse en uno o dos puntos. Para ello implementaremos en el \texttt{fmod POINT} el tipo \texttt{List} :
+
+{\codesize
+\begin{verbatim}
+   sorts Point List .
+   subsort Point < List .
+
+   op p(__) : Float Float -> Point [ctor] .
+   *** Define un punto como un par de numeros reales
+
+   op mt : -> List [ctor] .
+   op __ : List List -> List [ctor assoc id: mt] . 
+\end{verbatim}
+}
+
+La definición que hacemos aqui de las listas es identica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son listas de puntos. Las funciones definidas son la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
+
+Sin embargo estas no son las únicas funciones nuevas que añadiremos al módulo, dada la forma de las ecuaciones tanto de la recta como de la circumferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. Así pués implementamos las funciones correspondientes en \texttt{POINT}: \par
+
+{\codesize
+\begin{verbatim}
+   op first-degree-equation : Float Float -> Float .
+   *** Devuelve la solucion de una ecuacion de primer grado.
+   *** Recibe los valores correspondientes a ax + b.
+   eq first-degree-equation(a, b) = - b / a .
+
+   op second-degree-equation-1 : Float Float Float -> Float .
+   *** Devuelve el valor de una ecuacion de segundo grado en el caso +
+   *** Recibe los valores correspondientes a ax^2 + bx + c.
+   eq second-degree-equation-1(0.0 , b , c) = first-degree-equation(b, c) .
+   eq second-degree-equation-1(a , b , c) = 
+      (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
+
+   op second-degree-equation-2 : Float Float Float -> Float .
+   *** Devuelve el valor de una ecuacion de segundo grado en el caso -
+   *** Recibe los valores correspondientes a ax^2 + bx + c.
+   eq second-degree-equation-2(0.0 , b , c) = first-degree-equation(b, c) .
+   eq second-degree-equation-2(a , b , c) = 
+      (- b - sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) .
+\end{verbatim}
+}
+
+Terminadas todas las funciones auxiliares que necesitaremos solo queda implementar las funciónes de corte en el módulo \texttt{CIRCUMFERENCE}. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automáticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el \texttt{LINE}, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los calculos referentes a estas funciones aquí(incluir hipervinculo). Veamos la función principal:
+
+{\codesize
+\begin{verbatim}
+   op cut-point-r-c : Line Circumference -> List .
+   *** Dados una circunferencia y un punto devuelve una lista 
+   *** con los dos puntos de corte pudiendo ser estos iguales.
+   ceq cut-point-r-c(r(p(z11 z12) p(z11 z22)), c(p(z31 z32), z41)) = 
+       p(z11 Aux-A) p(z11 Aux-B)
+   *** caso vertical 
+   if Aux-A := second-degree-equation-1(1.0, (-2.0 * z32), (z32 ^ 2.0) + 
+      ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) /\
+      Aux-B := second-degree-equation-2(1.0, (-2.0 * z32), (z32 ^ 2.0) + 
+      ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) .
+   ceq cut-point-r-c(r(p(z11 z12) p(z21 z12)), c(p(z31 z32), z41)) = 
+       p(Aux-A z12) p(Aux-B z12)
+   *** caso horizontal
+   if Aux-A := second-degree-equation-1(1.0, (-2.0 * z31), (z31 ^ 2.0) + 
+      ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) /\
+      Aux-B := second-degree-equation-2(1.0, (-2.0 * z31), (z31 ^ 2.0) + 
+      ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) .
+   eq cut-point-r-c(r1, c1) = cut-point-r-c-1(r1, c1) cut-point-r-c-2(r1, c1) .
+\end{verbatim}
+}
+
+Las dos funciones auxiliares \texttt{cut-point-r-c-1} y \texttt{cut-point-r-c-2} se omiten por comodidad. Estas se encargan de calcular los puntos de corte sustituyendo la recta en la circunferencia. Concluida ya esta función nos ponemos con la última operación que necesitaremos, calcular los puntos de corte de dos circunferencias. Lo primero que haremos será construir la función que nos indique si las dos figuras se cortan, como ya hicimos en los otros casos. Esta vez la idea de la función resulta mucho más sencilla que antes, simplemente comprabamos la distancia entre los centros y vemos si es menor o igual que la suma de los radios. \par
+{\codesize
+\begin{verbatim}
+   op cut?-c-c : Circumference Circumference -> Bool .
+   *** Comprueba si dos circunferencias se cortan en base a 
+   *** la distancia de los centros.
+   ceq cut?-c-c(c1, c2) = distance(circumference-center(c1), 
+       circumference-center(c2)) <= (circumference-radius(c1) 
+                                  + circumference-radius(c2))
+   if not (circumference-center(c1) == circumference-center(c2)) . 
+   ceq cut?-c-c(c1, c2) = circumference-radius(c1) == circumference-radius(c2)
+   if (circumference-center(c1) == circumference-center(c2)) .
+\end{verbatim}
+}
+
+Sin embargo hallar los puntos de corte sí resulta más complicado, y es que si las dos circunferencias poseen centro con la coordenada $x$ igual, nos surgirá más adelante una división entre cero, así que en ese caso iremos por otro camino, que dependerá de que sean distintas las coordenadas $y$, esto se debe a que haremos una simetría respecto de la recta $y = x$ para hallar los puntos de corte, y luego los traspondremos, lo cual también corresponde con hacer una simetría. Este proceso simplemente se hace para evitar tener que hacer una nueva distinción de casos, pues los calculos serían totalmente análogos: \par
+{\codesize
+\begin{verbatim}
+   op cut-point-c-c : Circumference Circumference -> List .
+   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = 
+       cut-point-circumferences-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
+   if not (z11 == z21) .
+   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = 
+       cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
+   if not (z12 == z22) .
+   ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
+   if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
+
+   op cut-point-circumferences-x-dis : Circumference Circumference -> List .
+   *** da una lista con dos puntos, que serian los puntos de corte de las
+   ***  dos circunferencias.
+   *** solo funciona si los centros no tienen la misma X.
+   ceq cut-point-circumferences-x-dis(c1 , c2) = p1 p2
+   if p1 := cut-point-circumferences-1(c1 , c2) 
+   /\ p2 := cut-point-circumferences-2(c1 , c2) .
+\end{verbatim}
+}
+
+Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí(incluir hipervinculo). 
+{\codesize
+\begin{verbatim}
+   op cut-point-circumferences-1 : Circumference Circumference -> Point .
+   *** halla el primer punto de corte de las dos circunferencias.
+   ceq cut-point-circumferences-1(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = 
+       p((Aux-A - (second-degree-equation-1(Aux-C , Aux-D , Aux-E) * Aux-B))  
+          second-degree-equation-1(Aux-C , Aux-D , Aux-E))
+   if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - 
+               (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
+   /\ Aux-B := (z22 - z12) / (z21 - z11) 
+   /\ Aux-C := (Aux-B) ^ 2.0 + 1.0
+   /\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
+   /\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
+
+   op cut-point-circumferences-2 : Circumference Circumference -> Point .
+   *** halla el segundo punto de corte de las dos circumferences.
+   ceq cut-point-circumferences-2(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = 
+       p((Aux-A - (second-degree-equation-2(Aux-C , Aux-D , Aux-E) * Aux-B))  
+          second-degree-equation-2(Aux-C , Aux-D , Aux-E))
+   if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) -
+               (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
+   /\ Aux-B := (z22 - z12) / (z21 - z11) 
+   /\ Aux-C := (Aux-B) ^ 2.0 + 1.0
+   /\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
+   /\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
+\end{verbatim}
+}
+
+Terminadas ya todas las funciones referidas a las circunferencias se procede a la creación del test correspondiente, el cual puede encontrarse en el archivo correspondiente del repositorio ya que no aportan ninguna información importante. Con esto damos fín al módulo de circunferencias.\par
+
+\section{GEO2D}
+
+Con esto damos fín al módulo de circunferencias, sin embargo resulta muy inconexo, hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada \texttt{cut-point}, que dadas dos figuras cuales quiera, devolverá sus puntos de corte. \par
+
+Para ello empezaremos por crear un nuevo tipo de funciones, llamado \texttt{Figure}, que simplemente contendrá a los demas tipos, haciendo así que nos sea totalmente indiferente trabajar con una u otra figura llegado el momento.\par
+{\codesize
+\begin{verbatim}
+fmod GEO2D is
+
+   pr CIRCUMFERENCE .
+   sort Figure .
+   subsort Point Line Circumference < Figure .
+
+   op cut-point : Figure Figure -> List [comm] .
+   *** Comprueba si dos figuras se cortan, y devuelve una lista con 
+   *** los puntos de corte
+   ...
+endfm	
+\end{verbatim}
+}

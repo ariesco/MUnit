@@ -1,0 +1,86 @@
+%!TEX root = tfg_fiesta.tex
+
+\section{Punto de corte entre dos rectas}
+
+A continuación se mostraran los calculos referentes al punto de corte entre dos rectas dadas de la forma $y = mx + n$ y $y = m'x + n'$: \par
+
+Igualamos una a la otra por la coordenada $y$ y despejamos $x$:\par
+
+$$mx+n = m'x+n'$$
+$$(m-m')x = n'-n$$
+$$x = \frac{(n'-n)}{(m-m')}$$
+
+Con la $x$ calculada sustimos en la ecuación de una de las rectas y terminamos:\par
+
+$$y = mx+n$$
+$$y = \frac{m((n'-n)}{(m-m')) + n}$$
+
+\section{Punto de corte entre una recta y una circunferencia}
+
+A continuación se mostraran los calculos referentes al punto de corte entre una recta y una circunferencia dadas de la forma: $y = mx + n$ y $(x-x')^2 + (y -y')^2 = r^2$ siendo $(x', y')$ el centro de la circunferencia y $r$ su radio: \par
+
+Empezamos desarrollando los cuadrados en la ecuación de la circunferencia:\par
+
+$$(x-x')^2 + (y -y')^2 = r^2$$
+$$x^2 + x'^2 - 2xx' + y^2 + y'^2 - 2yy' = r^2$$
+$$x^2 - 2xx' + y^2 + 2yy' = r^2 - x'^2 - y'^2$$
+
+Sustituimos ahora la recta en la ecuación:\par
+
+
+$$x^2 - 2xx' + (mx + n)^2 + 2(mx + n)y' = r^2 - x'^2 - y'^2$$
+$$x^2 - 2xx' + mx^2 + n^2 + 2mnx + 2(mx + n)y' = r^2 - x'^2 - y'^2$$
+
+Agrupamos las $x$ :\par
+
+
+$$x^2 + mx^2 - 2xx' + 2mnx + 2mxy' + 2ny' + n^2 = r^2 - x'^2 - y'^2$$
+$$(1+m)x^2 + x( 2mn + 2my' - 2x' ) + (2ny' + n^2 - r^2 + x'^2 + y'^2) = 0$$
+
+Resolvemos la ecuación que nos queda y obtendriamos dos valores de $x$, uno de los cuales, denotado por $x''$ sustituye a $x$ en la ecuación de la recta:\par
+
+$$y = mx'' + n$$
+
+Lo que nos dara el valor de $y$ correspondiente para cada $x$.\par
+
+\section{Punto de corte entre dos circunferencias}
+
+A continuación se mostraran los calculos referentes a los puntos de corte entre dos circunferencias dadas de la forma $(x-x')^2 + (y -y')^2 = (r')^2$ y $(x-x'')^2 + (y -y'')^2 = (r'')^2$: \par
+
+En ambas desarrollamos los cuadrados:\par
+
+$$x^2 + x'^2 - 2xx' + y^2 + y'^2 - 2yy' = (r')^2$$
+$$x^2 + x''^2 - 2xx'' + y^2 + y''^2 - 2yy'' = (r'')^2$$
+
+Le restamos la segunda a la primera:\par
+
+$$x'^2 - 2xx' + y'^2 - 2yy' -(x''^2 - 2xx'' + y''^2 - 2yy'') = (r')^2 - (r'')^2$$
+
+Agrupamos los terminos según multipliquen a la $x$ o a la $y$:\par
+
+$$ 2xx'' - 2xx' + 2yy'' - 2yy' - x''^2 + x'^2 - y''^2 + y'^2 + (r'')^2 - (r')^2 = 0$$
+$$ 2x(x'' - x') + 2y(y'' - y') - x''^2 + x'^2 - y''^2 + y'^2 + (r'')^2 - (r')^2 = 0$$
+$$ 2x(x'' - x') = 2y(y' - y'') + x''^2 - x'^2 + y''^2 - y'^2 - (r'')^2 + (r')^2 $$
+$$ x =\frac{y(y' - y'')}{x'' - x'} + \frac{(x''^2 - x'^2 + y''^2 - y'^2 - (r'')^2 + (r')^2)}{2(x'' - x')} $$
+
+Por comodidad al ser todo constantes haremos los siguientes cambios de variable:\par
+
+$$B = \frac{y' - y''}{x'' - x'}$$
+$$A = \frac{x''^2 - x'^2 + y''^2 - y'^2 - (r'')^2 + (r')^2}{2(x'' - x')}$$
+
+Lo cual no dejaría lo siguiente:\par
+
+$$ x = yB + A$$
+
+Sustituimos la $x$ en la ecuación de una de las circunferencias:\par
+
+$$(yB + A-x')^2 + (y -y')^2 = (r')^2$$
+
+Desarrollamos los cuadrados y agrupamos:\par
+
+$$(yB + A)^2 + x'^2 - 2(yB + A)x' + y^2 + y'^2 - 2yy' = (r')^2$$
+$$ (yB)^2 + A^2 + 2yAB + x'^2 - 2(yB + A)x' + y^2 + y'^2 - 2yy' = (r')^2$$
+$$ (yB)^2 + y^2 + 2yAB - 2(yB + A)x' - 2yy' + A^2 + x'^2 + y'^2 - (r')^2 = 0$$
+$$ (B^2 + 1)y^2 + 2y2AB - (B + A)x' - y') + (A^2 + x'^2 + y'^2 - (r')^2) = 0$$
+
+Resolvemos la ecuación de segundo grado para obtener dos valores de $y$, despues simplemente sustituimos en la ecuación de la $x$ y obtenemos los puntos que estabamos buscando.\par

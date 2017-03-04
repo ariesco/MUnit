@@ -8,6 +8,7 @@
 \usepackage{hyperref}
 \usepackage{fixme}
 \usepackage{apalike}
+\usepackage{graphicx}
 \bibliographystyle{apalike}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Jos\'e Ignacio P\'erez}
@@ -17,6 +18,7 @@
 \newcommand{\codesize}{\small}
 
 %\pagenumbering{roman}
+%\input{titlepage}
 \frontmatter
 \tableofcontents
 %\setcounter{page}{1}
@@ -27,18 +29,15 @@
 \input{introduccion}
 \chapter{Preliminares}\label{cap.2}
 \input{preliminares}
-\chapter{Puntos y rectas}\label{cap.3}
-\input{pto_recta}
-\chapter{Circunferencias}\label{cap.4}
-\input{circu}
-\chapter{Casos incompletos}\label{cap.5}
-\input{inter}
-\chapter{Diccionarios}\label{cap.6}
-\input{Dic}
-\chapter{Módulo interactivo}\label{cap.7}
-\input{InOut}
-\chapter{Conclusiones y trabajo futuro}\label{cap.8}
+\chapter{Puntos, rectas y circunferencias}\label{cap.3}
+\input{pto_recta_circu}
+\chapter{Módulo interactivo}\label{cap.4}
+\input{DicInOut}
+\chapter{Conclusiones y trabajo futuro}\label{cap.5}
 \input{conclusiones}
+\appendix
+\chapter{Puntos de corte}
+\input{apend}
 \backmatter
 \bibliography{./references}
 \end{document}
