@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: tfg_fiesta.aux
+The style file: apalike.bst
+Database file #1: ./references.bib
+You've used 2 entries,
+            1935 wiz_defined-function locations,
+            484 strings with 4081 characters,
+and the built_in function-call counts, 786 in all, are:
+= -- 67
+> -- 46
+< -- 2
++ -- 18
+- -- 16
+* -- 69
+:= -- 145
+add.period$ -- 6
+call.type$ -- 2
+change.case$ -- 16
+chr.to.int$ -- 2
+cite$ -- 2
+duplicate$ -- 31
+empty$ -- 48
+format.name$ -- 18
+if$ -- 145
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 2
+newline$ -- 12
+num.names$ -- 7
+pop$ -- 22
+preamble$ -- 1
+purify$ -- 18
+quote$ -- 0
+skip$ -- 19
+stack$ -- 0
+substring$ -- 26
+swap$ -- 4
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 10
+warning$ -- 0
+while$ -- 4
+width$ -- 0
+write$ -- 26

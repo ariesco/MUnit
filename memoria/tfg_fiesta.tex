@@ -1,5 +1,5 @@
-\documentclass[12pt,a4paper,draft]{book}
-%\documentclass[12pt,a4paper]{book}
+%\documentclass[12pt,a4paper,draft]{book} % Si compilas con esto las imagenes no se muestran.
+\documentclass[12pt,a4paper]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsmath}
@@ -11,15 +11,18 @@
 \usepackage{graphicx}
 \bibliographystyle{apalike}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
-\author{Jos\'e Ignacio P\'erez}
-\title{Trabajo de fin de carrera}
+
+%\author{Jos\'e Ignacio P\'erez}
+%\title{Trabajo de fin de carrera}
+
 \begin{document}
-
 \newcommand{\codesize}{\small}
-
 %\pagenumbering{roman}
-%\input{titlepage}
+%\input{title}
 \frontmatter
+\input{titlepage}
+\chapter*{Abstract}
+\input{abstract}
 \tableofcontents
 %\setcounter{page}{1}
 %\pagenumbering{arabic}

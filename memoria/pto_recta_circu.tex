@@ -1,11 +1,11 @@
 %!TEX root = tfg_fiesta.tex
 
-A lo largo de este capítulo desarrollaremos tres módulos dedicados enteramente a la geometría en dos dimensiones. Comenzaremos por crear los puntos y las rectas con todas las funciones que se considerarán necesarias, así como los correspondientes de unidad. Posteriormente crearemos el dedicado a las circunferencias, que nos proporcionará la última de las figuras geométricas que necesitamos. Finalmente crearemos otro módulo que se encargará de cargar los tres anteriores y aunar en una única función aquellas que nos proporcionan puntos de corte, facilitandonos así el proceso posteriormente en el módulo referido a la entrada y la salida de datos. Por último aclarar que los módulos de aprendizaje por el contrario no aparecerán aquí, sino que podrán encontrarse en el repositorio online.
+A lo largo de este capítulo desarrollaremos tres módulos dedicados enteramente a la geometría en dos dimensiones. Comenzaremos por crear los puntos y las rectas con todas las funciones que se considerarán necesarias, así como los correspondientes test de unidad. Posteriormente crearemos el dedicado a las circunferencias, que nos proporcionará la última de las figuras geométricas que necesitamos. Finalmente crearemos otro módulo que se encargará de cargar los tres anteriores y aunar en una única función aquellas que nos proporcionan puntos de corte, facilitándonos así el proceso posteriormente en el módulo referido a la entrada y la salida de datos. Por último aclarar que los módulos de aprendizaje por el contrario no aparecerán aquí, sino que podrán encontrarse en el repositorio online.
 
 
 \section{POINT}
 
-Comencemos con la creación de los puntos, la definición de estos es sencilla, construyéndose como un par formado por dos números reales, igual que se haría en papel. Las funciones que hemos considerado necesarias por el momento son únicamente dos, la que nos calcula la distancia entre dos de ellos \texttt{distance}, y la que nos intercambia las coordenadas \texttt{trans-point}. Así pues el módulo funcional, quedaría como sigue:
+Comencemos con la creación de los puntos. La definición de estos es sencilla, construyéndose como un par formado por dos números reales, igual que se haría en papel. Las funciones que hemos considerado necesarias por el momento son únicamente dos, la que nos calcula la distancia entre dos de ellos \texttt{distance}, y la que nos intercambia las coordenadas \texttt{trans-point}. Así pues el módulo funcional, quedaría como sigue:
 {\codesize
 \begin{verbatim}
 fmod POINT is
@@ -63,7 +63,7 @@ fmod LINE is
 \end{verbatim}
 }
 
-Las primeras funciones que crearemos para los vectores servirán para, o bien obtener información de ellos o bien construir otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y prácticamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí se mostrará es parte de su test de unidad, lógicamente ejecutado sobre el módulo completo:\par
+Las primeras funciones que crearemos para los vectores servirán para, o bien obtener información de ellos, o bien construir otros. Estas se corresponden con \texttt{v-scalar-prod}, que nos devuelve el producto escalar de dos vectores, \texttt{v-norm}, que nos da la norma de un vector, \texttt{perpendicular-vector}, que nos proporciona un vector perpendicular a uno dado, y finalmente \texttt{v-are-perpendicular?}, que nos dice si dos vectores son perpendiculares. Todas estas funciones son sencillas, y prácticamente una copia de sus definiciones, motivo por el que no se incluyen aquí. Lo que sí se mostrará es parte de su test de unidad, lógicamente ejecutado sobre el módulo completo:\par
 
 {\codesize
 \begin{verbatim}
@@ -123,7 +123,7 @@ Estas funciones nos ayudarán a comprobar si dos rectas son perpendiculares o a 
 }
 
 Como se puede ver, además de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, ya que la igualdad básica, \verb"_==_", en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, véase: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo \texttt{n} natural, pero no son sintacticamente iguales, que es lo que Maude necesita. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicarán, respectivamente, si la recta que le damos es horizontal o vertical. Como ya sucedió más arriba la definición de estas funciones es directa, simplemente comprobamos las coordenadas de los puntos, así que no se incluirán aquí.\par
-Aprovechando la creación de estas funciones realizaremos la última función menor,\\ \texttt{are-in-line} que indica si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecerá aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción.\par
+Aprovechando la creación de estas funciones realizaremos la última función menor, \texttt{are-in-line} que indica si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecerá aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción.\par
 
 A continuación se muestran algunos casos del test de unidad correspondiente a las funciones para rectas. \par
 
@@ -290,7 +290,7 @@ De forma paralela crearemos también tres funciones muy sencillas: \texttt{circu
 \end{verbatim}  
 }
 
-Mientras que con las rectas hubo variedad de funciones, en el caso de las circunferencias nos centraremos en hallar los puntos de corte comenzando por el caso de recta y circunferencia. Comenzaremos creando una función que nos dirá si existe el punto de corte, siguiendo los siguientes pasos: trazamos una recta perpendicular a la dada que pase por el centro de la circunferencia y hallamos el punto de corte. A continuación calculamos la distancia de ese punto al centro, si es menor o igual que el radio significará que la recta y la circunferencia se cortan, no habra corte en caso contrario. Veamos la función: \par
+Mientras que con las rectas hubo variedad de funciones, en el caso de las circunferencias nos centraremos en hallar los puntos de corte comenzando por el caso de recta y circunferencia. Comenzaremos creando una función que nos dirá si existe el punto de corte, siguiendo los siguientes pasos: trazamos una recta perpendicular a la dada que pase por el centro de la circunferencia y hallamos el punto de corte. A continuación calculamos la distancia de ese punto al centro, si es menor o igual que el radio significará que la recta y la circunferencia se cortan, no habrá corte en caso contrario. Veamos la función: \par
 
 {\codesize
 \begin{verbatim}
@@ -317,9 +317,9 @@ Una vez hecho esto tenemos que ver cómo conseguir los puntos de corte. El prime
 \end{verbatim}
 }
 
-La definición que hacemos aqui de las listas es identica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son listas de puntos. Las funciones definidas son la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
+La definición que hacemos aquí de las listas es idéntica la que ya hicimos en el primer capítulo, con la salvedad de que ahora son listas de puntos. Las funciones definidas son la mismas que la otra vez, con solamente dos nuevas, \texttt{first-element} y \texttt{delete-first-element} que respectivamente nos dan el primer elemento de una lista, o nos dan esta sin el primer elemento.\par
 
-Sin embargo estas no son las únicas funciones nuevas que añadiremos al módulo, dada la forma de las ecuaciones tanto de la recta como de la circumferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. Así pués implementamos las funciones correspondientes en \texttt{POINT}: \par
+Sin embargo estas no son las únicas funciones nuevas que añadiremos al módulo, dada la forma de las ecuaciones tanto de la recta como de la circunferencia necesitaremos resolver llegado el momento ecuaciones de segundo grado. Así pués implementamos las funciones correspondientes en \texttt{POINT}: \par
 
 {\codesize
 \begin{verbatim}
@@ -344,7 +344,7 @@ Sin embargo estas no son las únicas funciones nuevas que añadiremos al módulo
 \end{verbatim}
 }
 
-Terminadas todas las funciones auxiliares que necesitaremos solo queda implementar las funciónes de corte en el módulo \texttt{CIRCUMFERENCE}. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automáticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el \texttt{LINE}, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los calculos referentes a estas funciones aquí(incluir hipervinculo). Veamos la función principal:
+Terminadas todas las funciones auxiliares que necesitaremos solo queda implementar las funciones de corte en el módulo \texttt{CIRCUMFERENCE}. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automáticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el \texttt{LINE}, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los cálculos referentes a estas funciones aquí (incluir hipervinculo). Veamos la función principal:
 
 {\codesize
 \begin{verbatim}
@@ -369,7 +369,7 @@ Terminadas todas las funciones auxiliares que necesitaremos solo queda implement
 \end{verbatim}
 }
 
-Las dos funciones auxiliares \texttt{cut-point-r-c-1} y \texttt{cut-point-r-c-2} se omiten por comodidad. Estas se encargan de calcular los puntos de corte sustituyendo la recta en la circunferencia. Concluida ya esta función nos ponemos con la última operación que necesitaremos, calcular los puntos de corte de dos circunferencias. Lo primero que haremos será construir la función que nos indique si las dos figuras se cortan, como ya hicimos en los otros casos. Esta vez la idea de la función resulta mucho más sencilla que antes, simplemente comprabamos la distancia entre los centros y vemos si es menor o igual que la suma de los radios. \par
+Las dos funciones auxiliares \texttt{cut-point-r-c-1} y \texttt{cut-point-r-c-2} se omiten por comodidad. Estas se encargan de calcular los puntos de corte sustituyendo la recta en la circunferencia. Concluida ya esta función nos ponemos con la última operación que necesitaremos, calcular los puntos de corte de dos circunferencias. Lo primero que haremos será construir la función que nos indique si las dos figuras se cortan, como ya hicimos en los otros casos. Esta vez la idea de la función resulta mucho más sencilla que antes, simplemente comprobamos la distancia entre los centros y vemos si es menor o igual que la suma de los radios. \par
 {\codesize
 \begin{verbatim}
    op cut?-c-c : Circumference Circumference -> Bool .
@@ -384,7 +384,7 @@ Las dos funciones auxiliares \texttt{cut-point-r-c-1} y \texttt{cut-point-r-c-2}
 \end{verbatim}
 }
 
-Sin embargo hallar los puntos de corte sí resulta más complicado, y es que si las dos circunferencias poseen centro con la coordenada $x$ igual, nos surgirá más adelante una división entre cero, así que en ese caso iremos por otro camino, que dependerá de que sean distintas las coordenadas $y$, esto se debe a que haremos una simetría respecto de la recta $y = x$ para hallar los puntos de corte, y luego los traspondremos, lo cual también corresponde con hacer una simetría. Este proceso simplemente se hace para evitar tener que hacer una nueva distinción de casos, pues los calculos serían totalmente análogos: \par
+Sin embargo hallar los puntos de corte sí resulta más complicado, y es que si las dos circunferencias poseen centro con la coordenada $x$ igual, nos surgirá más adelante una división entre cero, así que en ese caso iremos por otro camino, que dependerá de que sean distintas las coordenadas $y$. Esto se debe a que haremos una simetría respecto de la recta $y = x$ para hallar los puntos de corte, y luego los traspondremos, lo cual también corresponde con hacer una simetría. Este proceso simplemente se hace para evitar tener que hacer una nueva distinción de casos, pues los calculos serían totalmente análogos: \par
 {\codesize
 \begin{verbatim}
    op cut-point-c-c : Circumference Circumference -> List .
@@ -407,7 +407,7 @@ Sin embargo hallar los puntos de corte sí resulta más complicado, y es que si 
 \end{verbatim}
 }
 
-Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí(incluir hipervinculo). 
+Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí (incluir hipervinculo). 
 {\codesize
 \begin{verbatim}
    op cut-point-circumferences-1 : Circumference Circumference -> Point .
@@ -436,11 +436,11 @@ Ahora simplemente damos las funciones que nos devuelven los puntos propiamente d
 \end{verbatim}
 }
 
-Terminadas ya todas las funciones referidas a las circunferencias se procede a la creación del test correspondiente, el cual puede encontrarse en el archivo correspondiente del repositorio ya que no aportan ninguna información importante. Con esto damos fín al módulo de circunferencias.\par
+Terminadas ya todas las funciones referidas a las circunferencias se procede a la creación del test correspondiente, el cual puede encontrarse en el archivo correspondiente del repositorio ya que no aportan ninguna información importante. Con esto damos fin al módulo de circunferencias.\par
 
 \section{GEO2D}
 
-Con esto damos fín al módulo de circunferencias, sin embargo resulta muy inconexo, hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada \texttt{cut-point}, que dadas dos figuras cuales quiera, devolverá sus puntos de corte. \par
+Habiendo concluido los módulos \texttt{POINT}, \texttt{LINE} y \texttt{CIRCUNFERENCE} nos encontramos con que hay puntos de corte entre muchos tipos de figuras, pero según sean estas de un tipo u otro tendremos que usar distintas funciones. Por ello creamos un último módulo llamado GEO2D, que solo incluirá una función llamada \texttt{cut-point}, que dadas dos figuras cuales quiera, devolverá sus puntos de corte. \par
 
 Para ello empezaremos por crear un nuevo tipo de funciones, llamado \texttt{Figure}, que simplemente contendrá a los demas tipos, haciendo así que nos sea totalmente indiferente trabajar con una u otra figura llegado el momento.\par
 {\codesize

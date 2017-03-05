@@ -1,12 +1,12 @@
 %!TEX root = tfg_fiesta.tex
 
-A lo largo de este capítulo explicaremos la creación del modulo encargado de la entrada y la salida de datos, y de los diccionarios de figuras, que serán la estrucctura de datos que utilizaremos para almacenar la información.\par
+A lo largo de este capítulo explicaremos la creación del módulo encargado de la entrada y la salida de datos, y de los diccionarios de figuras, que serán la estructura de datos que utilizaremos para almacenar la información.\par
 
 \section{Diccionarios}
 
-Dando por concluido los módulos referidos a la geometría en dos dimensiones comenzamos con el de entrada/salida. Queremos que este tenga una interfaz simple para crear las figuras, del tipo: ''la circunferencia c1 con centro el punto p y radio z''. Así pues necesitaremos crear una estructura de datos que se encargue de almacenar toda la información. Para esto podriamos crear simplemente una lista, como ya hemos hecho otras veces, pero resulta más natural, al constar las figuras de nombre, que hagamos uso directamente de un diccionario. \par
+Dando por concluido los módulos referidos a la geometría en dos dimensiones comenzamos con el de entrada/salida. Queremos que este tenga una interfaz simple para crear las figuras, del tipo: ''la circunferencia c1 con centro el punto p y radio z''. Así pues necesitaremos crear una estructura de datos que se encargue de almacenar toda la información. Para esto podríamos crear simplemente una lista, como ya hemos hecho otras veces, pero resulta más natural, al constar las figuras de nombre, que hagamos uso directamente de un diccionario. \par
 
-El diccionario deberá contar con unas estructuras internas más sencillas que llamaremos entradas (\texttt{entry}), las cuales llevaran por un lado el nombre, y por otro la figura asociada. Para los tipos de las figuras no tenemos ningun problema, ya creamos el tipo \texttt{Figure} en el módulo \texttt{GEO2D}. Para los nombres por el contrario no tenemos ningun tipo creado por nosotros que nos sirva, así que haremos uso de uno incluido en Core Maude, los \texttt{Qid}. Con esto ya decidido veamo la creación de los diccionarios:\par
+El diccionario deberá contar con unas estructuras internas más sencillas que llamaremos entradas (\texttt{entry}), las cuales llevarán por un lado el nombre, y por otro la figura asociada. Para los tipos de las figuras no tenemos ningun problema, ya creamos el tipo \texttt{Figure} en el módulo \texttt{GEO2D}. Para los nombres por el contrario no tenemos ningún tipo creado por nosotros que nos sirva, así que haremos uso de uno incluido en Core Maude, los \texttt{Qid}. Con esto ya decidido veamos la creación de los diccionarios:\par
 
 {\codesize
 \begin{verbatim}
@@ -24,9 +24,9 @@ fmod DICC-FIGURES is
 \end{verbatim}
 }
 
-Como se puede ver la definición resulta natural, \texttt{mtD} es el diccionario vacio y \verb"_._" la operación que nos permite unirlos, siendo el vacío su elemento neutro. Los \texttt{Entry} por otro lado se definen como ya habiamos dicho anteriormentes, uniendo sus dos terminos mediante una flecha.\par
+Como se puede ver la definición resulta natural, \texttt{mtD} es el diccionario vacío y \verb"_._" la operación que nos permite unirlos, siendo el vacío su elemento neutro. Los \texttt{Entry} por otro lado se definen como ya habíamos dicho anteriormentes, uniendo sus dos términos mediante una flecha.\par
 
-A continuación definimos las operaciones de los diccionaros que haran uso sobre todo de la commutatividad de la unión para facilitar su implementación. La primera función que crearemos sera aquella que dado un diccionario y un \texttt{Qid} nos devuelva la figura correspondiente, seguida de aquella que nos indica recibiendo los mismos datos si el diccionario contiene alguna figura con ese identificador. Estas funciones serían :
+A continuación definimos las operaciones de los diccionaros que harán uso sobre todo de la commutatividad de la unión para facilitar su implementación. La primera función que crearemos será aquella que dado un diccionario y un \texttt{Qid} nos devuelva la figura correspondiente, seguida de aquella que nos indica recibiendo los mismos datos si el diccionario contiene alguna figura con ese identificador. Estas funciones serían :
 {\codesize
 \begin{verbatim}
 
@@ -41,7 +41,7 @@ A continuación definimos las operaciones de los diccionaros que haran uso sobre
 \end{verbatim}
 }
 
-Continuando con estas operaciones básicas se procedera a crear una que nos permita actualizar el diccionario. Esta función se encargara además de evitar las repeticiones, tanto en los identificadores como en las figuras, y en caso de que la información no estuviese ya en él simplemente la incluye. Esta función quedaría entonces como sigue:
+Continuando con estas operaciones básicas se procederá a crear una que nos permita actualizar el diccionario. Esta función se encargará además de evitar las repeticiones, tanto en los identificadores como en las figuras, y en caso de que la información no estuviese ya en él simplemente la incluye. Esta función quedaría entonces como sigue:
 
 {\codesize
 \begin{verbatim}
@@ -54,9 +54,9 @@ Continuando con estas operaciones básicas se procedera a crear una que nos perm
 \end{verbatim}
 }
 
-Como se puede ver presenta un caso diferenciado, que es aquel que se refiere a las rectas, esto es, como ya se explico en el apartado correspondiente, debido a la forma que tienen  estas. El resto de la función es sencillo, el primer caso cubre una actualización, el segundo, junto con el de las rectas, evita que introduzcamos de nuevo una figura pero con distinto nombre. El último simplemente cubre el caso de que no estuviese y lo añade directamente.\par
+Como se puede ver presenta un caso diferenciado, que es aquel que se refiere a las rectas, que como ya se explicó en el apartado correspondiente, debido a la forma que tienen  estas. El resto de la función es sencillo; el primer caso cubre una actualización, el segundo, junto con el de las rectas, evita que introduzcamos de nuevo una figura pero con distinto nombre. El último simplemente cubre el caso de que no estuviese y lo añade directamente.\par
 
-Para concluir esta sección crearemos dos funciones, la primera de ellas (\verb"_in_") sera análoga a \verb"contains?" pero en este caso recibira la figura en vez del nombre, la segunda (\verb"name") será análoga a aquella que nos daba una figura dado su nombre, sin embargo en este caso si cubrira el caso en que no este, pues lo necesitamos a la hora de mostrar la información por pantalla. Para ello haremos uso de un nuevo tipo \verb"QidList", que se corresponde con las listas de \verb"Qid", de él tomaremos un único elemento, \verb"nil", la lista vacía, y que usaremos para no devolver nada. Mostramos a continuación estas dos funciones:\par 
+Para concluir esta sección crearemos dos funciones, la primera de ellas (\verb"_in_") será análoga a \verb"contains?" pero en este caso recibirá la figura en vez del nombre, la segunda (\verb"name") será análoga a aquella que nos daba una figura dado su nombre. Sin embargo en este caso sí cubrirá el caso en que no esté, pues lo necesitamos a la hora de mostrar la información por pantalla. Para ello haremos uso de un nuevo tipo \verb"QidList", que se corresponde con las listas de \verb"Qid", de él tomaremos un único elemento, \verb"nil", la lista vacía, que usaremos para no devolver nada. Mostramos a continuación estas dos funciones:\par 
 
 {\codesize
 \begin{verbatim}
@@ -84,7 +84,7 @@ A continuación daremos algunos casos del test de unidad para diccionarios para 
 
 \subsection{Diccionario de figuras}
 
-Simplemente con estos diccionarios podriamos dar por creada la estructura de datos, sin embargo, aunque son totalmente funcionales, carecen de órden, ya que los puntos, rectas y circunferencias se encuentran totalmente mezclados. Así pues construiremos un nuevo tipo \texttt{DicFigures} que se corresponde con un conjunto de tres diccionarios, estando cada uno de ellos destinado a un tipo de figura concreta. Su definición sería entonces la que sigue:
+Simplemente con estos diccionarios podríamos dar por creada la estructura de datos. Sin embargo, aunque son totalmente funcionales, carecen de orden, ya que los puntos, rectas y circunferencias se encuentran totalmente mezclados. Así pues construiremos un nuevo tipo \texttt{DicFigures} que se corresponde con un conjunto de tres diccionarios, estando cada uno de ellos destinado a un tipo de figura concreta. Su definición sería entonces la que sigue:
 
 {\codesize
 \begin{verbatim}
@@ -111,7 +111,7 @@ Las funciones que definiremos para estos nuevos diccionarios serán las mismas q
 \end{verbatim}
 }
 
-Los casos de test serían entonces totalmente analogos, pero al igual que antes incluiremos alguno como ejemplo:
+Los casos de test serían entonces totalmente análogos, pero al igual que antes incluiremos alguno como ejemplo:
 
 {\codesize
 \begin{verbatim}
@@ -125,7 +125,7 @@ assertEqual(([mtD, mtD, mtD] ['c1 / c(p(1.0 1.0), 1.0)]),
 
 \section{Módulo interactivo}
 
-Una vez terminado el módulo referente a las estructuras de datos comenzaremos por el de entrada/salida. Este se encontrará dividido en cinco módulos distintos, situados en el mismo archivo, dedicandose cada uno a aspecto distinto de lo que queremos implementar. Para la construcción de estos módulos sera necesario importar Full Maude, que importaremos al comienzo del archivo, lo que si necesitaremos importar dentro del módulo será \verb"FULL-MAUDE-SIGN" pero como este sí lo modicaremos al incluir nuevas funciones de entrada, lo importamos con el comando \verb"inc". \par
+Una vez terminado el módulo referente a las estructuras de datos comenzaremos con el de entrada/salida. Este se encontrará dividido en cinco módulos distintos, situados en el mismo archivo, dedicándose cada uno a aspecto distinto de lo que queremos implementar. Para la construcción de estos módulos será necesario importar Full Maude, que importaremos al comienzo del archivo. Lo que sí necesitaremos importar dentro del módulo será \verb"FULL-MAUDE-SIGN" pero como este sí lo modicaremos al incluir nuevas funciones de entrada, lo importamos con el comando \verb"inc". \par
 
 En este primer módulo que crearemos daremos los comandos que más adelante utilizaremos para la entrada de datos. Por esto hay que tener cuidado con los tipos, ya que mediante inputs Maude recibe \verb"Token" y \verb"Bubble",
 los cuales tendremos que modificar despues para obtener la información requerida. Como de momento solo nos interesa la creación de figuras solo crearemos los comandos de estas:\par
@@ -147,11 +147,11 @@ endfm
 \end{verbatim}
 }
 
-Como se puede ver la definición es la análoga a la de cualquier otra en Maude, con la salvedad de que los tipos deben darse entre \verb"@". \par 
+Como se puede ver la definición es análoga a la de cualquier otra en Maude, con la salvedad de que los tipos deben darse entre \verb"@". \par 
 
-Tal y como estan dados los comandos veamos como se dan los comandos: los puntos se escribirían \verb"point p(0.0 0.0) as p1", las circunferencias \verb"circumference c1 in p1" \\ \verb" with radius 1.0", y finalmente las rectas como \verb"line r1 from p1 to p2". Como se puede ver todas las figuras menos los puntos depende de tener ya otras creadas. Esto es así para representar la necesidad de conocer otras figuras para construir unas nuevas.\par
+Tal y como estan dados los comandos veamos cómo se dan los comandos: los puntos se escribirían \verb"point p(0.0 0.0) as p1", las circunferencias \verb"circumference c1 in p1" \\ \verb" with radius 1.0", y finalmente las rectas como \verb"line r1 from p1 to p2". Como se puede ver todas las figuras menos los puntos depende de tener ya otras creadas. Esto es así para representar la necesidad de conocer otras figuras para construir unas nuevas.\par
 
-Una vez concluido este módulo nos encargaremos de hacer que Maude entienda lo que queremos hacer, para ello crearemos un módulo de sisterma llamado \verb"GEO-DATABASE-HANDLING" en el que ir recogiendo las distintas reglas que se encargaran de interpretar la información. Estas reglas serán analogas a la siguiente:\par
+Una vez concluido este módulo nos encargaremos de hacer que Maude entienda lo que queremos hacer, para ello crearemos un módulo de sistema llamado \verb"GEO-DATABASE-HANDLING" en el que ir recogiendo las distintas reglas que se encargarán de interpretar la información. Estas reglas serán analogas a la siguiente:\par
 
 {\codesize
 \begin{verbatim}
@@ -164,11 +164,11 @@ Una vez concluido este módulo nos encargaremos de hacer que Maude entienda lo q
      names := mod-elements(D [Q / F], Q -> F) .
 \end{verbatim}
 }
-Empezaremos explicando el significado de lo que se acaba de mostrar, la regla nos da una transición entre dos estados del sistema, de los cuales los elementos que nos interesan son los tres centrales, vease, el input, el dic, y el output. El input se corresponde con los comandos puestos arriba, donde T1 y T2 son el punto y su nombre respectivamente. El dic es logicamente el diccionario que llevamos en todo momento como estructura de datos donde almacenaremos todas las figuras y sería un \verb"DicFigures". Finalmente el output sera la información mostrada por pantalla, en nuestro caso el nombre del punto almacenado. \par
+Empezaremos explicando el significado de lo que se acaba de mostrar, la regla nos da una transición entre dos estados del sistema, de los cuales los elementos que nos interesan son los tres centrales, véase, el input, el dic, y el output. El input se corresponde con los comandos puestos arriba, donde T1 y T2 son el punto y su nombre respectivamente. El dic es logicamente el diccionario que llevamos en todo momento como estructura de datos donde almacenaremos todas las figuras y sería un \verb"DicFigures". Finalmente el output será la información mostrada por pantalla, en nuestro caso el nombre del punto almacenado. \par
 
-El funcionamiento de la regla comieza calculando \texttt{processPoint(T1, T2)} que nos devolvera una entrada de la forma \texttt{Q -> F}. Una vez hecho esto el diccionario se actualizara mediante la función correspondiente(\verb"dic : (D [Q / F])") con la nueva información. Finalmente indica mediante un output que el punto ha sido almacenado, indicando eso sí solamente el nombre. Para esto ultimo se realizara un llamamiento a la función \texttt{mod-elements} que nos dara los nombres de las figuras que han sido incluidas en el diccionario, pero en el caso de ya pertenecer a el, nos dara el nombre original de estas, vease, con el que se incluyeron la primera vez. Esto es así para evitar dar información incorrecta por pantalla. La función \texttt{mod-elements}, que no se mostrara aquí, se puede encontrar en el módulo auxiliar del que hablaremos a continuación.\par
+El funcionamiento de la regla comieza calculando \texttt{processPoint(T1, T2)} que nos devolverá una entrada de la forma \texttt{Q -> F}. Una vez hecho esto el diccionario se actualizará mediante la función correspondiente (\verb"dic : (D [Q / F])") con la nueva información. Finalmente indica mediante un output que el punto ha sido almacenado, indicando eso sí solamente el nombre. Para esto último se realizará un llamamiento a la función \texttt{mod-elements} que nos dará los nombres de las figuras que han sido incluidas en el diccionario, pero en el caso de ya pertenecer a él, nos dará el nombre original de estas, véase, con el que se incluyeron la primera vez. Esto es así para evitar dar información incorrecta por pantalla. La función \texttt{mod-elements}, que no se mostrará aquí, se puede encontrar en el módulo auxiliar del que hablaremos a continuación.\par
 
-Como se ha podido ver en la regla anterior, se hace un llamamiento a la función\\ \verb"processPoint", esta se encuentra en un módulo funcional auxiliar llamado\\ \verb"GEO-COMMAND-PROCESSING" que se encargará de estas funciones y otras auxiliares como la mencionada antes. Como hemos dado de ejemplo la regla para los puntos veremos a continuación la función \verb"processPoint", que se encargara de convertir los datos de entrada a los tipos que necesitamos mediante otras dos:
+Como se ha podido ver en la regla anterior, se hace un llamamiento a la función  \verb"processPoint", ésta se encuentra en un módulo funcional auxiliar llamado \verb"GEO-COMMAND-PROCESSING" que se encargará de estas funciones y otras auxiliares como la mencionada antes. Como hemos dado de ejemplo la regla para los puntos veremos a continuación la función \verb"processPoint", que se encargará de convertir los datos de entrada a los tipos que necesitamos mediante otras dos:
 
 {\codesize
 \begin{verbatim}
@@ -189,9 +189,9 @@ Como se ha podido ver en la regla anterior, se hace un llamamiento a la función
 \end{verbatim}
 }
 
-Veamos lo que hacen las funciones anteriores. \texttt{processPoint} se encarga de extraer el nombre de uno de los terminos, en este caso de \verb"'token[NP]", y dar la entrada al diccionario utilizando la funcion \texttt{processPointAux} que dado el termino \verb"p(_ _)" lo descompone, y a través de \texttt{qid2point} lo convierte en un punto como los que definimos atras. \par
+Veamos lo que hacen las funciones anteriores. \texttt{processPoint} se encarga de extraer el nombre de uno de los términos, en este caso de \verb"'token[NP]", y dar la entrada al diccionario utilizando la función \texttt{processPointAux} que dado el término \verb"p(_ _)" lo descompone, y a través de \texttt{qid2point} lo convierte en un punto como los que definimos atráss. \par
 
-Nos quedaría por tanto explicar las reglas para las rectas y las circunferencias y sus \verb"process", pero se omitiran al ser análogas a la que acabamos de dar.\par
+Nos quedaría por tanto explicar las reglas para las rectas y las circunferencias y sus \verb"process", pero se omitirán al ser análogas a la que acabamos de dar.\par
 
 Dadas las construcciones para las tres figuras procederemos a calcular los puntos de corte, para lo cual extenderemos el módulo \verb"GEO-SIGNATURE" con un nuevo comando:
 {\codesize
@@ -200,7 +200,7 @@ Dadas las construcciones para las tres figuras procederemos a calcular los punto
 \end{verbatim}
 }
 
-Como se puede ver recibe cuatro elementos, los dos primeros corresponden con los nombres de los posibles puntos de corte, recordemos que dos circunferencias se pueden cortar en dos puntos, mientras que los dos ultimos son los nombres de las figuras cuyos puntos de corte estamos calculando. La regla correspondiente sería la siguiente: \par
+Como se puede ver recibe cuatro elementos: los dos primeros corresponden con los nombres de los posibles puntos de corte, recordemos que dos circunferencias se pueden cortar en dos puntos, mientras que los dos últimos son los nombres de las figuras cuyos puntos de corte estamos calculando. La regla correspondiente sería la siguiente: \par
  
 {\codesize
 \begin{verbatim}
@@ -214,7 +214,7 @@ Como se puede ver recibe cuatro elementos, los dos primeros corresponden con los
 \end{verbatim}
 }
 
-Aunque la regla es similar a las ya dadas debe llamarnos la atencion \verb"D U [D' , mtD , mtD]" dado que no tenemos ninguna función de los diccionarios que sea así. Esta es simplemente una unión de estos, y se puede ver en el modulo correspondiente. Lo verdaderamente importante es el motivo de que este ahí, en todas las reglas anteriores sabiamos que solo se añadia una figura al diccionario, y por tanto podiamos hacerlo manualmente, el problema es que ahora no sabemos cuantas serán, ya que las figuras pueden no cortarse, ser dos rectas, o dos circunferencias así que se procede a simplemente unir los diccionarios para evitar problemas o la creación de más casos.
+Aunque la regla es similar a las ya dadas debe llamarnos la atención \verb"D U [D' , mtD , mtD]" dado que no tenemos ninguna función de los diccionarios que sea así. Esta es simplemente una unión de estos, y se puede ver en el módulo correspondiente. Lo verdaderamente importante es el motivo de que este ahí. En todas las reglas anteriores sabíamos que solo se añadía una figura al diccionario, y por tanto podíamos hacerlo manualmente; el problema es que ahora no sabemos cuántas serán, ya que las figuras pueden no cortarse, ser dos rectas, o dos circunferencias así que se procede a simplemente unir los diccionarios para evitar problemas o la creación de más casos.
 
 Como se puede ver en \verb"processCutPoint(T1, T2, D[downQid(T3)], D[downQid(T4)])" la función \texttt{processCutPoint} no será demasiado complicada, pues recibe directamente figuras sobre las que hacer los cálculos: \par
 
@@ -230,11 +230,11 @@ Como se puede ver en \verb"processCutPoint(T1, T2, D[downQid(T3)], D[downQid(T4)
 \end{verbatim}
 }
 
-\texttt{p1} y \texttt{p2} se corresponderán entonces con los dos puntos puntos de corte, y \texttt{1entrada} y \texttt{2entrada} con los las entradas para el diccionario. La función \texttt{processCutPointAux} sería entonces lo más llamativo, pero la verdad es que lo unico que hace es comprobar que no devuelven la misma figura, evitando asi que almacenemos el mismo punto dos veces y mostremos por pantalla el nombre de dos figuras iguales, o de una que no existe, pues \texttt{p2} puede ser la lista vacia de puntos. \par
+\texttt{p1} y \texttt{p2} se corresponderán entonces con los dos puntos puntos de corte, y \texttt{1entrada} y \texttt{2entrada} con los las entradas para el diccionario. La función \texttt{processCutPointAux} sería entonces lo más llamativo, pero la verdad es que lo único que hace es comprobar que no devuelven la misma figura, evitando asi que almacenemos el mismo punto dos veces y mostremos por pantalla el nombre de dos figuras iguales, o de una que no existe, pues \texttt{p2} puede ser la lista vacía de puntos. \par
 
-Dados los tres módulos que acabamos de crear tenemos practicamente todo lo necesario para la entrada y salida de datos. Solo nos quedaria crear un módulo para incluir los comandos que hemos creado en la gramática de Full Maude, y un segundo que se encargará da darnos un entorno. Para comenzar se encargará de dar unos valores iniciales sobre los que trabajar, el diccionario de figuras vacío, \verb"dic : [mtD, mtD, mtD]", así como inicializar el bucle dentro del que se realizan las acciones, en nuestro caso \verb"init-geo", y finalmente controlar que la entrada y la salida funcionan tal y como queremos con distintos casos de errores. Estos dos módulos son \verb"fmod META-GEO-SIGN" y \verb"mod IOGEO2" respectivamente.\par
+Dados los tres módulos que acabamos de crear tenemos prácticamente todo lo necesario para la entrada y salida de datos. Solo nos quedaría crear un módulo para incluir los comandos que hemos creado en la gramática de Full Maude, y un segundo que se encargará da darnos un entorno. Para comenzar se encargará de dar unos valores iniciales sobre los que trabajar, el diccionario de figuras vacío, \verb"dic : [mtD, mtD, mtD]", así como inicializar el bucle dentro del que se realizan las acciones, en nuestro caso \verb"init-geo", y finalmente controlar que la entrada y la salida funcionan tal y como queremos con distintos casos de errores. Estos dos módulos son \verb"fmod META-GEO-SIGN" y \verb"mod IOGEO2" respectivamente.\par
 
-Veamos ahora como funciona la entrada y la salida de \texttt{geoIO.maude} con casos sencillos:\par 
+Veamos ahora cómo funciona la entrada y la salida de \texttt{geoIO.maude} con casos sencillos:\par 
 
 {\codesize
 \begin{verbatim}
@@ -269,7 +269,7 @@ db(...),input : nilTermList,output : nil,default : 'CONVERSION,dic : [('p1 ->
 \end{verbatim}
 }
 
-Como se puede ver nos da bastante información, pero lo que nos interesa es el diccionario \verb"dic : [('p1 -> p(0.0 0.0)) . 'p2 -> p(1.0 1.0),'r -> r(p(0.0 0.0) p(1.0 1.0))"\\ \verb",'c -> c(p(0.0 0.0), 1.0)]" en el que podemos ver que toda la información se ha almacenado correctamente tal y como queriamos. Ahora solo nos quedaría ver los puntos de corte y habriamos terminado:\par
+Como se puede ver nos da bastante información, pero lo que nos interesa es el diccionario \verb"dic : [('p1 -> p(0.0 0.0)) . 'p2 -> p(1.0 1.0),'r -> r(p(0.0 0.0) p(1.0 1.0))"\\ \verb",'c -> c(p(0.0 0.0), 1.0)]" en el que podemos ver que toda la información se ha almacenado correctamente tal y como queríamos. Ahora solo nos quedaría ver los puntos de corte y habríamos terminado:\par
 
 {\codesize
 \begin{verbatim}
@@ -284,9 +284,9 @@ db(...),input : nilTermList,output : nil,default : 'CONVERSION,dic : [('p1 ->
 \end{verbatim}
 }
 
-De nuevo se puede ver que funciona perfectamente, ya que los puntos de corte de las dos figuras son \verb"p(0.0 1.0)" y \verb"p(0.0 -1.0)", pero como uno ya estaba en el diccionario no se hace nada, aunque se indica que ha sido añadido para dejar claro que habia dos puntos de corte.\par
+De nuevo se puede ver que funciona perfectamente, ya que los puntos de corte de las dos figuras son \verb"p(0.0 1.0)" y \verb"p(0.0 -1.0)", pero como uno ya estaba en el diccionario no se hace nada, aunque se indica que ha sido añadido para dejar claro que había dos puntos de corte.\par
 
-A continuación veremos los algunos casos del test de unidad para las funciones de estos módulos. Al estar trabajando en Full Maude, utilizaremos dos nuevos comandos, además de todos los que vimos para Core Maude, que explicaremos a continuación:
+A continuación veremos algunos casos del test de unidad para las funciones de estos módulos. Al estar trabajando en Full Maude, utilizaremos dos nuevos comandos, además de todos los que vimos para Core Maude, que explicaremos a continuación:
 {\codesize
 \begin{verbatim}
 (munit IOGEO2D is
@@ -300,14 +300,14 @@ El primero de ellos es \verb"loop(_)" que se encarga de reiniciar el bucle donde
   assertTrue(contains?(@dic, 'p1))
 \end{verbatim}
 }
-El segundo de ellos es \verb"command(_)", que nos permite usar los comandos ya creados en el bucle que acabamos de reiniciar. Además, se puede ver dentro del \verb"assertTrue" que para llamar al diccionario necesitmos escribir \verb"@dic" para indicar que nos referimos al creado en \verb"init-geo". Finalmente el test se cierra con \verb"endu":\par
+El segundo de ellos es \verb"command(_)", que nos permite usar los comandos ya creados en el bucle que acabamos de reiniciar. Además, se puede ver dentro del \verb"assertTrue" que para llamar al diccionario necesitamos escribir \verb"@dic" para indicar que nos referimos al creado en \verb"init-geo". Finalmente el test se cierra con \verb"endu":\par
 {\codesize
 \begin{verbatim}
 endu)
 \end{verbatim}
 }
 
-Simplemente con estos comandos podriamos dar por terminado esta parte y con ella el proyecto, sin embargo para dar unas construcciones de circunferencias más realistas daremos un nuevo comando que en vez de recibir un número real como radio tome dos puntos:
+Simplemente con estos comandos podríamos dar por terminado esta parte y con ella el proyecto. Sin embargo, para dar unas construcciones de circunferencias más realistas daremos un nuevo comando que en vez de recibir un número real tome como radio  dos puntos:
 
 {\codesize
 \begin{verbatim}
@@ -318,7 +318,7 @@ Simplemente con estos comandos podriamos dar por terminado esta parte y con ella
 
 Las funciones asociadas a este comando así como la regla correspondiente son análogas a las vistas para los anteriores, así que no la mostraremos aquí. \par
 
-De forma paralela a la creación de este comando se crea una nueva función que se encargara de dar nombre automaticamente a las puntos de corte calculados, y así simplificar los comandos. Esa función es la siguiente:
+De forma paralela a la creación de este comando se crea una nueva función que se encargará de dar nombre automáticamente a las puntos de corte calculados, y así simplificar los comandos. Esa función es la siguiente:
 
 {\codesize
 \begin{verbatim}
@@ -336,7 +336,7 @@ De forma paralela a la creación de este comando se crea una nueva función que 
 
 La función recibe los nombres de los dos elementos que la forman, como por ejemplo dos rectas, un tercer nombre que servirá, en el caso de tener dos puntos de corte, para evitar que los dos se llamen igual, y finalmente el diccionario total con todas las figuras. La función se encargaría entonces de sumar los nombres de los dos elementos que le forman teniendo cuidado de que no exista ninguna figura anterior con el mismo nombre. El caso de los puntos de corte es distinto ya que los puntos se nombran antes de añadirlos, o actualizarlos, al diccionario.\par
 
-Como se puede ver esta función resulta entonces muy util saliendose de su proposito base, y es que dando como tercer \verb"Qid" \verb"'none" podemos conseguir que todas ninguno de los comandos a excepción de los numeros necesiten nombrarse. Estos ultimos comandos son:
+Como se puede ver esta función resulta entonces muy útil saliéndose de su propósito base, y es que dando como tercer \verb"Qid" \verb"'none" podemos conseguir que ninguno de los comandos a excepción de los números necesiten nombrarse. Estos últimos comandos son:
 
 {\codesize
 \begin{verbatim}
@@ -367,5 +367,5 @@ Y la regla de los puntos de corte queda como sigue:
 
 El resto de reglas son análogas y se pueden encontrar en el módulo completo disponible en el repositorio, junto con los respectivos casos de test. \par
 
-Con estas últimas reglas damos entonces por terminado este cápitulo y el proyecto, con el que hemos conseguido emular perfectamente en Maude la geometría euclidea con regla y compás mientras desarrollabamos una buena cantidad de test de unidad y los módulos de aprendizaje. \par
+Con estas últimas reglas damos entonces por terminado este capítulo y el proyecto, con el que hemos conseguido emular perfectamente en Maude la geometría euclídea con regla y compás mientras desarrollábamos una buena cantidad de test de unidad y los módulos de aprendizaje. \par
 
