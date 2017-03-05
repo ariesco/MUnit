@@ -29,7 +29,7 @@ endfm
 \end{verbatim}
 }
 
-El módulo queda entonces completo aunque resulta muy simple, sin embargo, como será necesario importarlo para la creación de los otros dos, lo utilizaremos también para las funciones auxiliares que vayamos necesitando en los módulos siguientes, como por ejemplo las ecuaciones de segundo grado. Para concluir esta sección daremos algunos casos del test de unidad correspondiente a estas funciones, ilustrando así su funcionamiento. Para evitar saturar el capítulo con estos test solo se incluirán cuando contengan información nueva o sean inportantes. Veamos ahora sí los casos:\par
+El módulo queda entonces completo aunque resulta muy simple, sin embargo, como será necesario importarlo para la creación de los otros dos, lo utilizaremos también para las funciones auxiliares que vayamos necesitando en los módulos siguientes, como por ejemplo las ecuaciones de segundo grado. Para concluir esta sección daremos algunos casos del test de unidad correspondiente a estas funciones, ilustrando así su funcionamiento. Para evitar saturar el capítulo con estos test solo se incluirán cuando contengan información nueva o sean inportantes. Veamos ahora sí algunos casos:\par
 
 {\codesize
 \begin{verbatim}
@@ -123,7 +123,7 @@ Estas funciones nos ayudarán a comprobar si dos rectas son perpendiculares o a 
 }
 
 Como se puede ver, además de las funciones antes mencionadas se ha incluido una más llamada \texttt{are-equal}, ya que la igualdad básica, \verb"_==_", en estos casos falla pues la misma recta puede estar definida de infinitas maneras distintas, véase: \texttt{r(p(0.0 0.0) p(1.0 1.0))} y \texttt{r(p(0.0 0.0) p(n n))} son la misma recta para todo \texttt{n} natural, pero no son sintacticamente iguales, que es lo que Maude necesita. Antes de definir los puntos de corte de dos rectas necesitaremos dos funciones básicas para la distinción de casos, \texttt{horizontal} y \texttt{vertical} que nos indicarán, respectivamente, si la recta que le damos es horizontal o vertical. Como ya sucedió más arriba la definición de estas funciones es directa, simplemente comprobamos las coordenadas de los puntos, así que no se incluirán aquí.\par
-Aprovechando la creación de estas funciones realizaremos la última función menor, \texttt{are-in-line} que indica si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecerá aquí por los motivos antes mencionados, su ecuación es practicamente trivial, consistiendo en una transcripción.\par
+Aprovechando la creación de estas funciones realizaremos la última función menor, \texttt{are-in-line} que indica si un punto pertenece a una recta comprobando la distancia del punto dado con los dos que la definen, si la suma de las distancias del punto dado a los originales es igual que la distancia entre estos el punto estará contenido en la recta. Esta función tampoco aparecerá aquí por los motivos antes mencionados, su ecuación es muy sencilla, consistiendo en una transcripción.\par
 
 A continuación se muestran algunos casos del test de unidad correspondiente a las funciones para rectas. \par
 
@@ -182,7 +182,7 @@ Para hallar el punto de corte haremos lo mencionado anteriormente, con las dos r
 \end{verbatim}
 }
 
-Los cálculos de las funciones \texttt{cut-point-x} y \texttt{cut-point-y} se pueden encontrar en el apéndice. Al igual que hemos hecho en el resto de casos comprobamos que todo funciona correctamente antes de crear el módulo incompleto. Sin embargo, a la hora de ejecutar los test nos encontramos con un único caso que no pasa, lo cual resulta extraño, que es el siguiente: \par
+Los cálculos de las funciones \texttt{cut-point-x} y \texttt{cut-point-y} se pueden encontrar en el apéndice~\ref{r-r}. Al igual que hemos hecho en el resto de casos comprobamos que todo funciona correctamente antes de crear el módulo incompleto. Sin embargo, a la hora de ejecutar los test nos encontramos con un único caso que no pasa, lo cual resulta extraño, que es el siguiente: \par
 
 {\codesize
 \begin{verbatim}
@@ -344,7 +344,7 @@ Sin embargo estas no son las únicas funciones nuevas que añadiremos al módulo
 \end{verbatim}
 }
 
-Terminadas todas las funciones auxiliares que necesitaremos solo queda implementar las funciones de corte en el módulo \texttt{CIRCUMFERENCE}. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automáticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el \texttt{LINE}, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los cálculos referentes a estas funciones aquí (incluir hipervinculo). Veamos la función principal:
+Terminadas todas las funciones auxiliares que necesitaremos solo queda implementar las funciones de corte en el módulo \texttt{CIRCUMFERENCE}. Para ello volveremos a hacer una distinción de casos, siendo esta vez tres. Los dos primeros son aquellos en los que las rectas son verticales u horizontales, ya que eso nos da automáticamente uno de los valores de los puntos. Sin embargo, como puede verse en el programa, no he hecho uso de las funciones definidas en el \texttt{LINE}, sino que se ven si son horizontales o verticales por los puntos que las forman. Por otro lado tenemos el caso general, que calcula por separado los dos puntos de corte y los devuelve en forma de lista. Podemos encontrar los cálculos referentes a estas funciones aquí~\ref{r-c}. Veamos la función principal:
 
 {\codesize
 \begin{verbatim}
@@ -407,7 +407,7 @@ Sin embargo hallar los puntos de corte sí resulta más complicado, y es que si 
 \end{verbatim}
 }
 
-Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí (incluir hipervinculo). 
+Ahora simplemente damos las funciones que nos devuelven los puntos propiamente dichos y listo. Como ocurría con los demas puntos de corte estos cálculos no son triviales, y pueden verse aquí~\ref{c-c}. 
 {\codesize
 \begin{verbatim}
    op cut-point-circumferences-1 : Circumference Circumference -> Point .
