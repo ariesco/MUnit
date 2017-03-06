@@ -145,7 +145,7 @@ result NoZeroNat: s^6(0)
 
 \subsection{Ejemplo de módulo de sistema}
 
-El módulo que crearemos de ejemplo para los módulos de sistema será una representación del problema de las vasijas ~\cite{maudeBook}. Este problema consiste en, dadas $n$ vasijas con distintas capacidades, las cuales podermos llenar del todo, vaciar cuando queramos y verter de una a otra hasta vaciar la primera o llenar la segunda, conseguir que en una de ellas nos quede una cantidad de líquido concreta. El caso más común es aquel en que tenemos $3$ recipientes con una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. \par
+El módulo que crearemos de ejemplo para los módulos de sistema será una representación del problema de las vasijas~\cite[capítulo 7]{maudeBook}. Este problema consiste en, dadas $n$ vasijas con distintas capacidades, las cuales podermos llenar del todo, vaciar cuando queramos y verter de una a otra hasta vaciar la primera o llenar la segunda, conseguir que en una de ellas nos quede una cantidad de líquido concreta. El caso más común es aquel en que tenemos $3$ recipientes con una capacidad de 3, 5 y 8 litros respectivamente, y buscamos conseguir que en uno de ellos queden 4 litros de agua. \par
 
 En Maude los módulos de sistema se crean siguiendo el siguiente esquema: \texttt{mod} $\langle$Nombre del Módulo$\rangle$ \texttt{is} $\langle$Definiciones, Declaraciones y Reglas$\rangle$ \texttt{endm}. Empezaremos definiendo el módulo \texttt{VASIJAS}: \par
 
@@ -303,9 +303,38 @@ state 75, [CjVasija]: vasija(3, 3),vasija(3, 8),vasija(4, 5)
 \end{verbatim}
 }
 
-\subsection{Core Maude y Full Maude}
+\subsection{Loop Mode y Full Maude}
 
-Core Maude es el intérprete del lenguaje implementado en C++ y que nos proporciona todas las funcionalidades básicas de Maude, todos los módulos desarrollados anteriormente en los ejemplos están realizados para poder ejecutarse en Core Maude directamente. Full Maude por otro lado es una extensión de Maude programada en el propio lenguaje que se encarga de proporcionarnos más herramientas para el desarrollo de módulos y que deberá ser cargada, ya sea en el fichero que se vaya a utlizar o desde la propia consola de Maude como si fuese un módulo más. Full Maude nos proporciona nuevas opciones muy interesantes a la hora de crear nuestros programas dándonos por ejemplo la posibilidad de utilizar la entrada/salida de datos, con la que trabajaremos mucho, o la creación de los módulos orientados a objetos, que no trataremos en este proyecto.\par 
+Los módulos interactivos en Maude se implementan usando el módulo
+Loop Mode~\cite[capítulo 17]{maudeBook}, un módulo que permite
+hacer E/S por pantalla pero que require que el usuario siga los siguientes pasos:
+\begin{itemize}
+\item
+Definir la sintaxis de la aplicación que queremos desarrollar.
+
+\item
+Analizar sintácticamente en la gramática (meta-representada) los comandos introducidos
+mediante reglas de reescritura.
+
+\item
+Definir, también mediante reglas (y posiblemente ecuaciones auxiliares) el comportamiento
+de los comandos.
+\end{itemize}
+
+Un caso particular de aplicación usando el Loop Mode es Full Maude~\cite[parte 2]{maudeBook}.
+Full Maude es una extensión de Maude implementada en el propio Maude\footnote{Cuando estamos
+interesados en distinguir el subconjunto de Maude implementado en C++ presentado en las
+secciones anteriores nos referiremos a él como Core Maude.} Full Maude cuenta con una base de
+datos de módulos explícita, implementa los comandos de Core Maude usando el metanivel de
+Maude~\cite[capítulo 14]{maudeBook} y además proporciona extensiones como soporte para
+especificaciones orientadas a objetos. Por ello, Full Maude es a menudo usado como base para
+otras extensiones del sistema. En el caso que nos ocupa, es interesante apuntar que mUnit
+es una extensión de Full Maude y que nuestro módulo interactivo (ver sección~\ref{cap.4})
+usa funciones auxiliares desarrolladas para Full Maude para simplificar el análisis sintáctico
+de los comandos.
+
+%Core Maude es el intérprete del lenguaje implementado en C++ y que nos proporciona todas las funcionalidades básicas de Maude, todos los módulos desarrollados anteriormente en los ejemplos están realizados para poder ejecutarse en Core Maude directamente. Full Maude por otro lado es una extensión de Maude programada en el propio lenguaje que se encarga de proporcionarnos más herramientas para el desarrollo de módulos y que deberá ser cargada, ya sea en el fichero que se vaya a utilizar o desde la propia consola de Maude como si fuese un módulo más. Full Maude nos proporciona nuevas opciones muy interesantes a la hora de crear nuestros programas dándonos por ejemplo la posibilidad de utilizar la entrada/salida de datos, con la que trabajaremos mucho, o la creación de los módulos orientados a objetos, que no trataremos en este proyecto.\par 
+
 
 \section{Los test de unidad y mUnit}
 
@@ -321,7 +350,7 @@ Un test de unidad bien diseñado debe cumplir las siguientes condiciones~\cite{u
 \item Debe tener una ejecución rápida.
 \item Debe ser consistente con sus resultados. 
 \item Debe tener control total sobre el módulo donde se ejecuta el test, véase, ejecutar todos los casos posibles en todas las funciones con que se encuentre.
-\item Debe ser independiente de la ejecución de otros test.\footnote{Esto no ocurre estrictamente en nuestro caso, porque tenemos E/S y es necesarío volver a los valores iniciales despues de cada ejecución. Esto se explicará con mayor claridad en el capítulo correspondiente.}
+\item Debe ser independiente de la ejecución de otros test.\footnote{Esto no ocurre estrictamente en nuestro caso, porque tenemos E/S y es necesarío volver a los valores iniciales después de cada ejecución. Esto se explicará con mayor claridad en el capítulo correspondiente.}
 \item En caso de que falle, debe ser sencillo encontrar donde se originó el error.
 \end{itemize}.
 
@@ -335,7 +364,7 @@ Los test deben comenzar indicando el módulo sobre el que vamos a trabajar, en n
 \end{verbatim}
 }
 
-El primer caso de test con que usaremos será \verb"assertEqual(_,_)", que evaluará las dos expresiones que recibe como datos y devolverá \texttt{true} en el caso de que sean iguales, o \texttt{false} en el caso de que no se evalúen a lo mismo. Por ejemplo: \par
+El primer caso de test con que usaremos será \verb"assertEqual", que evaluará las dos expresiones que recibe como datos y devolverá \texttt{true} en el caso de que sean iguales, o \texttt{false} en el caso de que no se evalúen a lo mismo. Por ejemplo: \par
 
 {\codesize
 \begin{verbatim}
@@ -343,7 +372,7 @@ El primer caso de test con que usaremos será \verb"assertEqual(_,_)", que evalu
 \end{verbatim}
 }
 
-De forma complementaria nos encontramos con \verb"assertDifferent(_,_)", que evaluará a \texttt{true} si las expresiones evaluan a cosas distintas, y a \texttt{false} en otro caso. Por ejemplo: \par
+De forma complementaria nos encontramos con \verb"assertDifferent", que evaluará a \texttt{true} si las expresiones evalúan a cosas distintas, y a \texttt{false} en otro caso. Por ejemplo: \par
 
 {\codesize
 \begin{verbatim}
@@ -351,7 +380,7 @@ De forma complementaria nos encontramos con \verb"assertDifferent(_,_)", que eva
 \end{verbatim}
 }
 
-Sin embargo no todas las operaciones se evalúan a una expresión, sino que es muy común que lo hagan a un Booleano. Debido a esto utilizaremos también otras dos funciones,\\ \verb"assertTrue(_)" y \verb"assertFalse(_)". Devolviéndonos la primera \texttt{true} en caso de que evalúe a \texttt{true} o \texttt{false} en otro caso. La segunda función se comporta al contrario, devolviéndonos \texttt{true} si la expresión evalua a \texttt{false}, o \texttt{false} en caso contrario. Existe también una función que es una variante de \verb"assertTrue(_)", \verb"assertTrueMsg(_,_)", que, como su nombre indica, nos permite añadir un comentario a la función para que se vea en la ejecución. Por ejemplo: \par
+Sin embargo no todas las operaciones se evalúan a una expresión, sino que es muy común que lo hagan a un Booleano. Debido a esto utilizaremos también otras dos funciones,\\ \verb"assertTrue" y \verb"assertFalse". Devolviéndonos la primera \texttt{true} en caso de que evalúe a \texttt{true} o \texttt{false} en otro caso. La segunda función se comporta al contrario, devolviéndonos \texttt{true} si la expresión evalúa a \texttt{false}, o \texttt{false} en caso contrario. Existe también una función que es una variante de \verb"assertTrue", \verb"assertTrueMsg", que, como su nombre indica, nos permite añadir un comentario a la función para que se vea en la ejecución. Por ejemplo: \par
 
 {\codesize
 \begin{verbatim}
@@ -361,7 +390,7 @@ Sin embargo no todas las operaciones se evalúan a una expresión, sino que es m
 \end{verbatim}
 }
 
-También puede darse el caso de que la información necesaria sea el tipo de una expresión en particular, para lo cual utilizaremos \verb"assertSort(_,_)" que recibe como parámetros una expresión y un tipo, y devuelve \texttt{true} en el caso de sea el tipo de la expresión y \texttt{false} en el otro. Por ejemplo: \par
+También puede darse el caso de que la información necesaria sea el tipo de una expresión en particular, para lo cual utilizaremos \verb"assertSort" que recibe como parámetros una expresión y un tipo, y devuelve \texttt{true} en el caso de sea el tipo de la expresión y \texttt{false} en el otro. Por ejemplo: \par
 
 {\codesize
 \begin{verbatim}
@@ -377,7 +406,7 @@ endu)
 \end{verbatim}
 }
 
-Por otro lado los módulos de sistema nos permiten usar, además de todas las anteriores, unas dos últimas funciones, que trabajan únicamente con reglas: \verb"assertReachable" y \verb"assertReachableBnd". La primera de ellas, \verb"assertReachable(_,_)", recibe dos expresiones, y nos indica si a partir de la primera se puede alcanzar la segunda con cualquier número de pasos. La segunda, \verb"assertReachableBnd(_,_,_)", nos indica lo mismo pero poniendo además un tope a los pasos, es decir, si desde primer estado se puede alcanzar el segundo en como mucho n pasos. Por ejemplo: \par
+Por otro lado los módulos de sistema nos permiten usar, además de todas las anteriores, unas dos últimas funciones, que trabajan únicamente con reglas: \verb"assertReachable" y \verb"assertReachableBnd". La primera de ellas, \verb"assertReachable", recibe dos expresiones, y nos indica si a partir de la primera se puede alcanzar la segunda con cualquier número de pasos. La segunda, \verb"assertReachableBnd", nos indica lo mismo pero poniendo además un tope a los pasos, es decir, si desde primer estado se puede alcanzar el segundo en como mucho n pasos. Por ejemplo: \par
 
 {\codesize
 \begin{verbatim}
@@ -419,10 +448,10 @@ Además de la implementación de los distintos módulos y sus test de unidad, se
 
 Estos módulos de aprendizaje se construirán una vez finalizados el módulo y el test de unidad correspondiente. Serán similares a los módulos completos, con la salvedad de que presentarán huecos, que deberán rellenarse. Sin embargo una vez las funciones avancen, nos encontraremos con algunas que llevarán detrás unos cálculos que, aún siendo relativamente elementales, no se podrán dejar con huecos debido a su complejidad, así pues, en estos casos los huecos aparecerán en los propios test de unidad donde se deberá indicar que se ha comprendido correctamente el funcionamiento de las distintas funciones. \par
 
-Sin embargo esta idea no es nueva, sino que se inspira claramente en el proyecto ScalaKoans, que nos ayuda a aprender Scala con un método muy similar, aunque no igual, y que podemos ver para otros muchos lenguajes como puede ser Python. ScalaKoans pertenece al proyecto Koans, cuya filosofia es la de facilitar el acceso a los lenguajes de programación mediante un entorno interactivo que permita a aquellos que quieran familiarizarse con los lenguajes con relativa facilidad. Las diferencias entre nuestro proyecto y ScalaKoans son las siguientes:\par
+Sin embargo esta idea no es nueva, sino que se inspira claramente en el proyecto ScalaKoans, que nos ayuda a aprender Scala con un método muy similar, aunque no igual, y que podemos ver para otros muchos lenguajes como puede ser Python. ScalaKoans pertenece al proyecto Koans, cuya filosofía es la de facilitar el acceso a los lenguajes de programación mediante un entorno interactivo que permita a aquellos que quieran familiarizarse con los lenguajes con relativa facilidad. Las diferencias entre nuestro proyecto y ScalaKoans son las siguientes:\par
 \begin{itemize}
 \item Los casos no serań completados desde un programa externo, sino que deberemos modificar los módulos \texttt{.maude} manualmente.
-\item De manera análoga, no utilizaremos un programa externo para comprobar la vericidad de nuestros programas, sino que se tendrán que ejecutar los test de unidad desde la propia consola de Maude hasta conseguir que todas las funciones los pasen.
+\item De manera análoga, no utilizaremos un programa externo para comprobar la veracidad de nuestros programas, sino que se tendrán que ejecutar los test de unidad desde la propia consola de Maude hasta conseguir que todas las funciones los pasen.
 \end{itemize}
  A continuación daremos un ejemplo de estos módulos incompletos, que no se corresponderá con \texttt{PEANO-NAT-EXTRA} o \texttt{VASIJAS}, sino que implementaremos un módulo nuevo, las listas. Al estar trabajando de nuevo con un módulo funcional este vuelve a empezar con \verb"fmod", sin embargo como queremos utilizar los naturales debemos importarlos. \par
 
@@ -433,7 +462,7 @@ fmod Lista is
 \end{verbatim}
 }
 
-Ahora ya sí definimos el módulo comenzando por los tipos, las variables, y finalmente dos constructores, \verb"mt" y \verb"__", correspondiendose el primero con la lista vacía y el segundo con la concatenación de dos naturales. \par
+Ahora ya sí definimos el módulo comenzando por los tipos, las variables, y finalmente dos constructores, \verb"mt" y \verb"__", correspondiéndose el primero con la lista vacía y el segundo con la concatenación de dos naturales. \par
 
 {\codesize
 \begin{verbatim}
