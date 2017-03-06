@@ -149,7 +149,7 @@ endfm
 
 Como se puede ver la definición es análoga a la de cualquier otra en Maude, con la salvedad de que los tipos deben darse entre \verb"@". \par 
 
-Tal y como estan dados los comandos veamos cómo se dan los comandos: los puntos se escribirían \verb"point p(0.0 0.0) as p1", las circunferencias \verb"circumference c1 in p1" \\ \verb" with radius 1.0", y finalmente las rectas como \verb"line r1 from p1 to p2". Como se puede ver todas las figuras menos los puntos depende de tener ya otras creadas. Esto es así para representar la necesidad de conocer otras figuras para construir unas nuevas.\par
+Tal y como estan dados los comandos veamos cómo se dan los comandos: los puntos se escribirían \verb"point p(0.0 0.0) as p1", las circunferencias \texttt{circumference c1 in p1 with radius 1.0}, y finalmente las rectas como \verb"line r1 from p1 to p2". Como se puede ver todas las figuras menos los puntos depende de tener ya otras creadas. Esto es así para representar la necesidad de conocer otras figuras para construir unas nuevas.\par
 
 Una vez concluido este módulo nos encargaremos de hacer que Maude entienda lo que queremos hacer, para ello crearemos un módulo de sistema llamado \verb"GEO-DATABASE-HANDLING" en el que ir recogiendo las distintas reglas que se encargarán de interpretar la información. Estas reglas serán analogas a la siguiente:\par
 
