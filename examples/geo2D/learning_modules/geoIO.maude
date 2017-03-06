@@ -1,0 +1,303 @@
+load GEO2D.maude
+load DICC-FIGURES.maude
+
+fmod GEO-SIGNATURE is
+  inc FULL-MAUDE-SIGN .
+
+  sorts @GeoCommand@ .
+  subsort @GeoCommand@ < @Input@ .
+
+  op point_as_ : @Bubble@ @Token@ -> @GeoCommand@ [ctor] .
+  op circumference_in_with`radius_ : @Token@ @Token@ @Bubble@ -> @GeoCommand@ [ctor] .
+  op circumference_in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op circumference`in_with`radius`distance`from_to_ : @Token@ @Token@ @Token@ ->  @GeoCommand@ [ctor] .
+  op line_from_to_ : @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op line`from_to_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op cut`point`of_and_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
+  op are`perpendicular_and_? : @Token@ @Token@ -> @GeoCommand@ [ctor] .
+
+endfm
+
+fmod META-GEO-SIGN is
+ inc META-FULL-MAUDE-SIGN .
+ inc UNIT .
+
+ op GEO-GRAMMAR : -> FModule [memo] .
+ eq GEO-GRAMMAR = addImports((including 'GEO-SIGNATURE .), GRAMMAR) .
+endfm
+
+
+fmod GEO-COMMAND-PROCESSING is
+ pr COMMAND-PROCESSING .
+ pr DICC-FIGURES .
+ pr GEO2D .
+
+ vars T T' T'' NP NC NR : Term .
+ vars Q Q' Q'' name1 name2 : Qid .
+ vars S S' : String .
+ vars F F' : Float .
+ vars P1 P2 p1 p2 p3 p4 : Point .
+ vars r1 r2 : Line .
+ vars f1 f2 : Figure .
+ vars 1entrada 2entrada : Entry .
+ vars D Dp Dr Dc : Dic .
+ var DF : DicFigures .
+ var z : Float .
+
+ op processPoint : Term Term -> Entry .
+ eq processPoint('bubble[T], 'token[NP]) = downQid(NP) -> processPointAux(T) .
+
+ op processPointAux : Term -> Point .
+ ceq processPointAux('__[T, T']) = qid2point(Q, Q')
+  if Q := downQid(T) /\
+     Q' := downQid(T') .
+
+ op qid2point : Qid Qid -> Point .
+ ceq qid2point(Q, Q') = p(F F')
+  if S := string(Q) /\
+     S' := string(Q') /\
+     F := float(S) /\
+     F' := float(S') .
+
+ op processCircumference-1 : Term Point Term -> Entry .
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> c(P1 , F)
+  if Q := downQid(T)
+  /\ S := string(Q)
+  /\ F := float(S)
+  /\ not F == 0.0 .
+ ceq processCircumference-1('token[NC] , P1 , 'bubble[T]) = downQid(NC) -> P1
+  if Q := downQid(T)
+  /\ S := string(Q)
+  /\ F := float(S)
+  /\ F == 0.0 .
+
+ op processCircumference-2 : Term Term Point Point Point -> Entry .
+ ceq processCircumference-2(***, ***, p1, p2, p3) = *** -> c(p1, F)
+  if F := distance(p2, p3)
+  /\ not F == 0.0 .
+ ceq processCircumference-2(***, ***, p1, p2, p3) = *** -> p1
+  if F := distance(p2, p3)
+  /\ F == 0.0 .
+
+ op processLine : Term Point Point -> Entry .
+ eq processLine('token[NR] , P1 , P2) = downQid(NR) -> r(P1 P2) .
+
+ op processCutPoint : Term Term Figure Figure -> Dic .
+ ceq processCutPoint('token[T] , 'token[T'] , f1 , f2) = processCutPointAux(p1, p2, f1, f2, 1entrada,2entrada)
+  if p1 := first-element(cut-point(f1 , f2))
+  /\ p2 := first-element(delete-first-element(cut-point(f1 , f2)))
+  /\ 1entrada := downQid(T) -> p1
+  /\ 2entrada := downQid(T') -> p2 .
+
+ op processCutPointAux : Point Point Figure Figure Entry Entry -> Dic .
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada . 2entrada
+  if not p1 == p2
+  /\ length-list(cut-point(f1 , f2)) == 2.0 .
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
+  if p1 == p2
+  /\ length-list(cut-point(f1 , f2)) == 2.0 .
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = 1entrada
+  if length-list(cut-point(f1 , f2)) == 1.0 .
+ ceq processCutPointAux(p1, p2, f1, f2, 1entrada, 2entrada) = mtD
+  if length-list(cut-point(f1 , f2)) == 0.0 .
+
+ op processPerpendicular :  Line Line -> Bool .
+ eq processPerpendicular(r1, r2) = *** .
+
+ op new-name : Qid Qid Qid DicFigures -> Qid .
+ ceq new-name(name1, name2, Q, DF) = new-name(Q', qid(string(1.0)), Q, DF)
+   if Q' := qid(string(name1) + string(name2)) /\
+      ***  . 
+ ceq new-name(name1, name2, Q, DF) = new-name(Q', qid(string(1.0)), Q, DF)
+   if Q' := qid(string(name1) + string(name2)) /\
+      contains?(DF, Q') .
+ ceq new-name(name1, name2, Q, DF) = Q'
+   if Q' := *** [owise] .
+
+ op mod-elements : DicFigures Dic -> QidList .
+ eq mod-elements([Dp, Dr, Dc], D . Q -> f1) = mod-elements([Dp, Dr, Dc], D) *** .
+ eq mod-elements([Dp, Dr, Dc], mtD) = nil [owise] .
+
+endfm
+
+mod GEO-DATABASE-HANDLING is
+ pr GEO-COMMAND-PROCESSING .
+ inc DATABASE-HANDLING .
+ pr DICC-FIGURES .
+
+ sort GEODatabaseClass .
+ subsort GEODatabaseClass < DatabaseClass .
+
+ var  MUDC : GEODatabaseClass .
+ var  AtS : AttributeSet .
+ var  DB : Database .
+ vars T1 T2 T3 T4 : Term .
+ var  F F' : Figure .
+ var  O : Oid .
+ var  D : DicFigures .
+ var  D' : Dic .
+ var  D? : [Dic] .
+ vars Q Q' Q'' Q''' name1 name2 : Qid .
+ var names QIL : QidList .
+ var b : Bool .
+
+ op dic :_ : DicFigures -> Attribute [ctor] .
+
+ crl [point] :
+     < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Punto 'almacenado names) , AtS >
+  if Q -> F := processPoint(T1 , T2) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+
+ crl [circumference1] :
+     < O : MUDC | input : ('circumference_in_with`radius_[T1 , 'token[T2] , T3]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Circunferencia 'almacenada names) , AtS >
+  if Q -> F := processCircumference-1(T1 , D[downQid(T2)] , T3) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+
+ crl [circumference2] :
+     < O : MUDC | input : ('circumference_in_with`radius`distance`from_to_[T1 , 'token[T2] , 'token[T3], 'token[T4]]), dic : D,
+                  output : nil, AtS >
+  => ***
+  if *** /\
+     *** .
+
+ crl [circumference3] :
+     < O : MUDC | input : ('circumference`in_with`radius`distance`from_to_['token[T1] , 'token[T2], 'token[T3]]), dic : D,
+                  output : nil, AtS >
+  => ***
+  if *** /\
+     *** /\
+     *** /\
+     ***) .
+
+ crl [line1] :
+     < O : MUDC | input : ('line_from_to_[T1 , 'token[T2] , 'token[T3]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
+                  output : ('Recta 'almacenada names) , AtS >
+  if Q -> F := processLine(T1 , D[downQid(T2)] , D[downQid(T3)]) /\
+     names := mod-elements(D [Q / F], Q -> F) .
+
+ crl [line2] :
+     < O : MUDC | input : ('line`from_to_['token[T1] , 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => ***
+  if name1 := new-name(downQid(T1), downQid(T2), 'None, D) /\
+     ***  /\
+     *** . 
+
+ crl [cut1] :
+     < O : MUDC | input : ('cut`point_and_of_and_[T1, T2, 'token[T3], 'token[T4]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
+                  output : ('Puntos 'almacenados names) , AtS >
+  if D' := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) /\
+     names := mod-elements(D U [D' , mtD , mtD], D') .
+
+
+ crl [cut2] :
+     < O : MUDC | input : ('cut`point`of_and_['token[T1], 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
+                  output : ('Puntos 'almacenados names) , AtS >
+  if Q := downQid(T1) /\
+     Q' := downQid(T2) /\
+     name1 := new-name(Q, Q', 'none, D) /\
+     name2 := new-name(Q', Q, name1, D) /\
+     *** /\
+     *** .
+
+ crl [perpendicular] :
+     < O : MUDC | input : ('are`perpendicular_and_?['token[T1], 'token[T2]]), dic : D,
+                  output : nil, AtS >
+  => < O : MUDC | input : nilTermList, dic : D, output : ***, AtS >
+  if Q := downQid(T1) /\
+     Q' := downQid(T2) /\
+     b := processPerpendicular(D[Q], D[Q']) /\
+     QIL := if b
+            then (Q Q' 'are 'perpendicular)
+            else (Q Q' 'are 'not 'perpendicular)
+            fi .
+
+endm
+
+mod IOGEO2D is
+ inc GEO-DATABASE-HANDLING .
+ inc META-GEO-SIGN .
+ inc LOOP-MODE .
+
+ var  QI : Qid .
+ vars QIL QIL' QIL'' : QidList .
+ var  Atts : AttributeSet .
+ var  N : Nat .
+ var  DB : Database .
+ vars RP RP' : ResultPair .
+ var  O : Oid .
+ var  X@Database : DatabaseClass .
+
+ op o : -> Oid [ctor] .
+
+ op GEODatabase : -> GEODatabaseClass [ctor] .
+
+ --- State for LOOP mode:
+ subsort Object < State .
+ op init-geo : -> System .
+
+ op init-state : -> AttributeSet .
+ eq init-state = dic : [mtD, mtD, mtD], db : initialDatabase, default : 'CONVERSION .
+ op geo-banner : -> QidList .
+ eq geo-banner = '\n '\t 'GEO: 'GEO2D 'a 'unit 'testing 'framework 'for 'Maude.
+           '\n '\t ' '\t '`( 'March '7th '`, '\s '2017 '`) '\n .
+
+ rl [init] :
+    init-geo
+ => [nil, < o : GEODatabase | input : nilTermList, output : nil,
+                              init-state >, geo-banner] .
+
+ crl [in] :
+     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
+  => [nil,
+      < O : X@Database | input : getTerm(metaParse(GEO-GRAMMAR, QIL, '@Input@)), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     metaParse(GEO-GRAMMAR, QIL, '@Input@) : ResultPair .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output : ('\r 'Warning: '\o
+                printSyntaxError(metaParse(GEO-GRAMMAR, QIL, '@Input@), QIL)
+                '\n
+                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     noParse(N) := metaParse(GEO-GRAMMAR, QIL, '@Input@)  .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
+      QIL']
+   if QIL =/= nil /\
+      ambiguity(RP, RP') := metaParse(GEO-GRAMMAR, QIL, '@Input@)  .
+
+ rl [out] :
+    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
+ => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
+endm
+
+set print conceal on .
+print conceal mod_is_sorts_._____endm .
+print conceal fmod_is_sorts_.____endfm .
+print conceal db .
+
+*** for debugging purposes
+set print attribute on .
+
+loop init-geo .

@@ -1,5 +1,5 @@
 load GEO2D.maude
-load GEO2D-Aux.maude
+load DICC-FIGURES.maude
 
 fmod GEO-SIGNATURE is
   inc FULL-MAUDE-SIGN .
@@ -16,7 +16,6 @@ fmod GEO-SIGNATURE is
   op cut`point_and_of_and_ : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op cut`point`of_and_ : @Token@ @Token@ -> @GeoCommand@ [ctor] .
   op are`perpendicular_and_? : @Token@ @Token@ -> @GeoCommand@ [ctor] .
-  ***op same`distance`from_to_and`from_to_? : @Token@ @Token@ @Token@ @Token@ -> @GeoCommand@ [ctor] .
 
 endfm
 
@@ -106,9 +105,6 @@ fmod GEO-COMMAND-PROCESSING is
  op processPerpendicular :  Line Line -> Bool .
  eq processPerpendicular(r1, r2) = are-perpendiculars(r1, r2) .
 
- ***op processSamedistance : Point Point Point Point -> Bool .
- ***eq processSamedistance(p1, p2, p3, p4) = (distance(p1, p2) == distance(p3, p4)) .
-
  op new-name : Qid Qid Qid DicFigures -> Qid .
  ceq new-name(name1, name2, Q, DF) = new-name(Q', qid(string(1.0)), Q, DF)
    if Q' := qid(string(name1) + string(name2)) /\
@@ -117,11 +113,11 @@ fmod GEO-COMMAND-PROCESSING is
    if Q' := qid(string(name1) + string(name2)) /\
       contains?(DF, Q') .
  ceq new-name(name1, name2, Q, DF) = Q'
-   if Q' := qid(string(name1) + string(name2)) .
+   if Q' := qid(string(name1) + string(name2)) [owise] .
 
  op mod-elements : DicFigures Dic -> QidList .
  eq mod-elements([Dp, Dr, Dc], D . Q -> f1) = mod-elements([Dp, Dr, Dc], D) name([Dp, Dr, Dc], f1) .
- eq mod-elements([Dp, Dr, Dc], mtD) = nil .
+ eq mod-elements([Dp, Dr, Dc], mtD) = nil [owise] .
 
 endfm
 
@@ -152,7 +148,7 @@ mod GEO-DATABASE-HANDLING is
      < O : MUDC | input : ('point_as_[T1 , T2]), dic : D,
                   output : nil, AtS >
   => < O : MUDC | input : nilTermList, dic : (D [Q / F]),
-                  output : ('Punto 'almacenado Q) , AtS >
+                  output : ('Punto 'almacenado names) , AtS >
   if Q -> F := processPoint(T1 , T2) /\
      names := mod-elements(D [Q / F], Q -> F) .
 
@@ -205,7 +201,7 @@ mod GEO-DATABASE-HANDLING is
   => < O : MUDC | input : nilTermList, dic : (D U [D' , mtD , mtD]),
                   output : ('Puntos 'almacenados names) , AtS >
   if D' := processCutPoint(T1 , T2 , D[downQid(T3)] , D[downQid(T4)]) /\
-     names := mod-elements(D U [D' , mtD , mtD], D').
+     names := mod-elements(D U [D' , mtD , mtD], D') .
 
 
  crl [cut2] :
@@ -231,21 +227,7 @@ mod GEO-DATABASE-HANDLING is
             then (Q Q' 'are 'perpendicular)
             else (Q Q' 'are 'not 'perpendicular)
             fi .
-***(
- crl [same-distance] :
-     < O : MUDC | input : ('same`distance`from_to_and`from_to_?['token[T1], 'token[T2], 'token[T3], 'token[T4]]), dic : D,
-                  output : nil, AtS >
-  => < O : MUDC | input : nilTermList, dic : D, output : QIL, AtS >
-  if Q := downQid(T1) /\
-     Q' := downQid(T2) /\
-     Q'' := downQid(T3) /\
-     Q''' := downQid(T4) /\
-     b := processSamedistance(D[Q], D[Q'], D[Q''], D[Q''']) /\
-     QIL := if b
-            then (Q Q' 'and Q'' Q''' 'have 'the 'same 'length)
-            else (Q Q' 'and Q'' Q''' 'have 'not 'the 'same 'length)
-            fi .
-)
+
 endm
 
 mod IOGEO2D is
@@ -274,7 +256,7 @@ mod IOGEO2D is
  eq init-state = dic : [mtD, mtD, mtD], db : initialDatabase, default : 'CONVERSION .
  op geo-banner : -> QidList .
  eq geo-banner = '\n '\t 'GEO: 'GEO2D 'a 'unit 'testing 'framework 'for 'Maude.
-           '\n '\t ' '\t '`( 'October '27th '`, '\s '2016 '`) '\n .
+           '\n '\t ' '\t '`( 'March '7th '`, '\s '2017 '`) '\n .
 
  rl [init] :
     init-geo
@@ -321,58 +303,4 @@ print conceal db .
 *** for debugging purposes
 set print attribute on .
 
-
 loop init-geo .
-
-***(
-(point 0.0 0.0 as p1)
-(point 1.0 1.0 as p2)
-(point 1.0 0.0 as p3)
-(point 0.0 1.0 as p4)
-(line r1 from p1 to p2)
-(line from p3 to p4)
-(circumference c1 in p1 with radius 1.0)
-(circumference c2 in p2 with radius 1.0)
-(circumference c3 in p2 with radius distance from p3 to p4)
-(circumference in p4 with radius distance from p1 to p2)
-(cut point of c1 and c2)
-(circumference zero in p1 with radius 0.0)
-(are perpendicular r1 and p3p4 ?)
-)
-
-***(
-(point 0.0 0.0 as p1)
-(point 1.0 0.0 as p2)
-(line r1 from p1 to p2)
-(circumference c1 in p1 with radius distance from p1 to p2)
-(circumference c2 in p2 with radius distance from p1 to p2)
-(cut point p3 and p4 of c1 and c2)
-(line r2 from p3 to p4)
-(are perpendicular r1 and r2 ?)
-)
-
-***(
-(point 0.0 0.0 as p1)
-(point 1.0 1.0 as p2)
-(point 1.0 0.0 as p3)
-(point 0.0 1.0 as p4)
-(line from p1 to p2)
-(line from p3 to p4)
-(cut point p1p3p2p4 and p2p4p1p3 of p1p2 and p3p4)
-(point 2.0 2.0 as p1p3)
-(point 3.0 2.0 as p2p4)
-(line from p1p3 to p2p4)
-(point 1.0 3.7 as p2p41.0)
-(line from p1p3 to p2p41.0)
-)
-
-***testeo del renombramiento
-***(
-(point 1.0 0.0 as p1)
-(point 0.0 1.0 as p2)
-(point 1.0 3.0 as p3)
-(point 3.0 1.0 as p4)
-(line r from p1 to p2)
-(circumference rr in p3 with radius distance from p3 to p4)
-(cut point of r and rr)
-)

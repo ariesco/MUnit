@@ -1,0 +1,42 @@
+load CIRCUMFERENCE.maude
+fmod GEO2D is
+
+	pr CIRCUMFERENCE .
+
+	sort Figure .
+	subsort Point < Figure .
+	subsort Line < Figure .
+	subsort Circumference < Figure .
+
+	vars p1 p2 : Point .
+	vars r1 r2 : Line .
+	vars c1 c2 : Circumference .
+
+	op cut-point : Figure Figure -> List [comm] .
+	*** Comprueba si dos figuras se cortan, y devuelve una lista con los puntos de corte
+	ceq cut-point(p1, p2) = p1
+	if *** .
+	ceq cut-point(p1 , r1) = p1
+	if *** .
+	ceq cut-point(r1 , r2) = ***
+	if cut?-r-r(r1 , r2) .
+	ceq cut-point(p1 , c1) = p1
+	if *** .
+	ceq cut-point(r1 , c1) = ***
+	if cut?-r-c(r1 , c1) .
+	ceq cut-point(c1 , c2) = ***
+	if cut?-c-c(c1 , c2) .
+	ceq cut-point(p1, p2) = mt
+	if *** .	
+	ceq cut-point(p1 , r1) = mt
+	if *** .
+	ceq cut-point(r1 , r2) = *** 
+	if not cut?-r-r(r1 , r2) .
+	ceq cut-point(p1 , c1) = mt
+	if *** .
+	ceq cut-point(r1 , c1) = ***
+	if not cut?-r-c(r1 , c1) .
+	ceq cut-point(c1 , c2) = ***
+	if not cut?-c-c(c1 , c2) .
+
+endfm

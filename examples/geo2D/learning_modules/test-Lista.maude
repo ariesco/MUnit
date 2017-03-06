@@ -1,0 +1,17 @@
+load Lista.maude
+load ../mUnit.maude
+
+(munit Lista is
+	*** Veamos los constructores
+   assertEqual(mt, mt mt)
+   assertEqual(***, mt 1.0)
+   assertEqual(1.0 2.0, 2.0 1.0)
+	*** Veamos la funcion empty-list
+   assertTrue(empty-list(mt))
+   assertFalse(empty-list(1.0))
+	*** Veamos la funcion length-list
+   assertEqual(length-list(mt), 0.0)
+   assertEqual(length-list(2.0), 1.0)
+   assertDifferent(length-list(2.0), 2.0)
+
+endu)

@@ -1,0 +1,122 @@
+load POINT.maude
+fmod LINE is 
+
+	pr POINT .
+	sorts Line Vector .
+
+	op r(__) : Point Point -> Line [ctor] .
+	*** Define una recta como un par de puntos, mas adelante la daremos ecuaciones.
+	op v(__) : Float Float -> Vector [ctor] .
+	*** Define un vector como un par de reales.
+	*** Extremo menos origen.
+
+	vars p1 p2 p3 p4 : Point .
+	vars z11 z12 z21 z22 z31 z32 z41 z42 m n a b c m1 m2 n1 n2 x y : Float .
+	vars r1 r2 : Line .
+	vars v1 v2 : Vector .
+	vars t : Bool .
+	vars l l1 : List .
+
+	op v-scalar-prod : Vector Vector -> Float .
+	***Calcula el producto escalar de dos vectores
+	eq v-scalar-prod(v(z11 z12) , v(z21 z22)) = z11 * z21 + z12 * z22 .
+
+	op v-norm : Vector -> Float .
+	***Calcula el modulo de un vector
+	eq v-norm(v1) = v-scalar-prod(v1 , v1) ^ (0.5) .
+
+	op perpendicular-vector : Vector -> Vector .
+	*** Devuelve el vector perpendicular a uno dado
+	eq perpendicular-vector(v(z11 z12)) = v(z12 (- z11)) .
+
+	op v-are-perpendicular? : Vector Vector -> Bool .
+	***Comprueba si dos vectores son perpendiculares
+	eq v-are-perpendicular?(v1 , v2) = (v-scalar-prod(v1 , v2) == 0.0) .
+
+	op direction-vector-line : Line -> Vector .
+	*** Devuelve el vector director de una recta
+	eq direction-vector-line(r(p(z11 z12) p(z21 z22))) = v((z21 - z11) (z22 - z12)) .
+
+	op equ-line-m : Line -> Float .
+	*** Dados los dos puntos que definen la recta, devuelve el valor de m, 
+	*** para poder "construirla" de forma y = mx + n.
+	eq equ-line-m(r(p(z11 z12) p(z21 z22))) = (z22 - z12)/(z21 - z11) .
+
+	op equ-line-n : Line -> Float .
+	*** Dados los dos puntos que definen la recta, devuelve el valor de n, 
+	*** para poder "construirla" de forma y = mx + n , teniendo cuidado 
+	*** en las que son de la forma  x = n
+	eq equ-line-n(r(p(z11 z12) p(z21 z22)))= z12 - (z11 * equ-line-m(r(p(z11 z12) p(z21 z22)))) .
+
+	op are-equal : Line Line -> Bool .
+	*** comprueba si dos rectas son iguales a partir de m y n, pendiente y desplazamiento, 
+	*** pues una recta puede construirse mediante infinitos pares de puntos.
+	eq are-equal(r(p(z11 z12) p(z11 z22)), r(p(z11 z32) p(z11 z42))) = true . 
+	eq are-equal(r1 , r2) = (equ-line-m(r1) == equ-line-m(r2)) and (equ-line-n(r1) == equ-line-n(r2)) [owise] .
+
+	op line-from-vector : Vector Point -> Line .
+	*** Construye una recta mediante un vector y un punto dados.
+	eq line-from-vector(v(z11 z12) , p(z21 z22)) = r(p(z21 z22) p((z11 + z21) (z12 + z22))) .
+
+	op perpendicular-line : Line Point -> Line .
+	*** Calcula la recta perpendicular a una dada que pasa por un punto tambien dado.	
+	eq perpendicular-line(r1 , p1) = line-from-vector(perpendicular-vector(direction-vector-line(r1)) , p1) .
+
+	op are-perpendiculars : Line Line -> Bool .
+	***Comprueba si dos rectas son perpendiculares
+	eq are-perpendiculars(r1 , r2) = v-are-perpendicular?(direction-vector-line(r1) , direction-vector-line(r2)) .
+
+	op vertical : Line -> Bool .
+	*** Comprueba si una recta es de la forma x = n .
+	eq vertical(r(p(z11 z12) p(z21 z22))) = (z21 - z11) == 0.0 .
+
+	op horizontal : Line -> Bool .
+	*** Comprueba si una recta es de la forma y = n .
+	eq horizontal(r(p(z11 z12) p(z21 z22))) = (z22 - z12) == 0.0 .
+	
+	op are-in-line : Point Line -> Bool .
+	*** Comprueba si un punto pertenece a una recta comprobando la distancia del punto dado con los
+	*** dos que definen la recta. Si la suma de las distancias del punto dado a los originales es igual 
+	*** que la distancia entre estos el punto estara contenido en la recta.
+	eq are-in-line(p1,r(p2 p3)) = (distance(p1 , p2) + distance(p1 , p3)) == distance(p2 , p3) . 
+	
+	op cut?-r-r : Line Line -> Bool .
+	*** comprueba si dos rectas se cortan a partir de la pendiente de estas
+	*** devolviendo el valor false si son paralelas y true en caso contrario.
+	*** El caso en que sean coincidentes debera verse de forma manual comparandolas.
+   	ceq cut?-r-r(r1, r2) = true 
+	if vertical(r1) and horizontal(r2) .
+   	ceq cut?-r-r(r1, r2) = true 
+	if vertical(r2) and horizontal(r1) .
+	eq cut?-r-r(r1, r2) = not (equ-line-m(r1) == equ-line-m(r2)) .
+
+	op cut-point-r-r : Line Line -> Point .
+	*** Devuelve el punto de corte de dos rectas dadas.
+	ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
+	if vertical(r1) .
+	ceq cut-point-r-r(r1, r2) = cut-point-r-r(r2, r1)
+	if horizontal(r2) .
+	ceq cut-point-r-r(r1, r2) = p(x y)
+	if x := cut-point-x(r1, r2) /\
+	   y := cut-point-y(r1, r2) .
+
+	op cut-point-x : Line Line -> Float .
+	*** Devuelve la coordenada X del punto de corte de las dos rectas.
+	ceq cut-point-x(r1, r2) = (n2 - n1) / (m1 - m2)
+	if not vertical(r2) /\
+	   m1 := equ-line-m(r1) /\
+	   m2 := equ-line-m(r2) /\
+	   n1 := equ-line-n(r1) /\
+	   n2 := equ-line-n(r2) .
+	eq cut-point-x(r1, r(p(z11 z12) p(z11 z22))) = z11 .
+	
+	op cut-point-y : Line Line -> Float .
+	*** Devuelve la coordenada Y del punto de corte de las dos rectas.
+	ceq cut-point-y(r1, r2) = m1 * x + n1
+	if not horizontal(r1) /\
+	   m1 := equ-line-m(r1) /\
+	   n1 := equ-line-n(r1) /\
+	   x := cut-point-x(r1, r2) .
+	eq cut-point-y(r(p(z11 z12) p(z21 z12)), r2) = z12 .
+
+endfm

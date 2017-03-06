@@ -1,0 +1,85 @@
+load full-maude.maude
+load GEO2D.maude
+
+fmod DICC-FIGURES is
+  pr GEO2D .
+  pr QID .
+  pr QID-LIST .
+
+  sorts Dic Entry DicFigures .
+  subsorts Entry < Dic .
+
+  op _->_ : Qid Figure -> Entry [ctor] .
+  op mtD : -> Dic [ctor] .
+  op _._ : Dic Dic -> Dic [ctor assoc comm id: mtD] .
+
+  vars  D Dp Dr Dc Dp' Dr' Dc' : Dic .
+  vars  Q Q' : Qid .
+  vars F F' : Figure .
+  var p1 : Point .
+  vars r1 r2 : Line .
+  var c1 : Circumference .
+
+  op _[_] : Dic Qid ~> Figure .
+  eq (D . Q -> F)[Q] = F .
+
+  op _[_/_] : Dic Qid Figure -> Dic .
+  eq (D . Q -> F)[Q' / F] = D . Q -> F  .
+  eq (D . Q -> F)[Q / F'] = D . Q -> F' .
+  ceq (D . Q -> r1)[Q' / r2] = D . Q -> r1
+    if are-equal(r1, r2) .   
+  eq D[Q / F] = D . Q -> F [owise] .
+
+  op _in_ : Figure Dic -> Bool .
+  eq F in D . (Q -> F) = true .
+  eq F in D = false [owise] .
+
+  op contains? : Dic Qid -> Bool .
+  eq contains?((Q -> F) . D, Q) = true .
+  eq contains?(D, Q) = false [owise] .
+
+  op name : Dic Figure -> QidList .
+  eq name(D . Q -> F, F) = Q .
+  eq name(D , F) = nil [owise] . 
+
+  op [_ , _ , _] : Dic Dic Dic -> DicFigures [ctor] .
+
+  op _._ : DicFigures Entry -> DicFigures .
+  eq [Dp , Dr , Dc] . Q -> p1 = [(Dp . Q -> p1) , Dr , Dc] .
+  eq [Dp , Dr , Dc] . Q -> r1 = [Dp , (Dr . Q -> r1) , Dc] .
+  eq [Dp , Dr , Dc] . Q -> c1 = [Dp , Dr , (Dc . Q -> c1)] .
+
+  op _[_] : DicFigures Qid ~> Figure .
+  eq [Dp . Q -> p1 , Dr , Dc][Q] = p1 .
+  eq [Dp , Dr . Q -> r1 , Dc][Q] = r1 .
+  eq [Dp , Dr , Dc . Q -> c1][Q] = c1 .
+
+  op _[_/_] : DicFigures Qid Figure -> DicFigures .
+  eq [Dp , Dr , Dc][Q / p1] = [Dp[Q / p1], Dr, Dc] .
+  eq [Dp , Dr , Dc][Q / r1] = [Dp, Dr[Q / r1], Dc] .
+  eq [Dp , Dr , Dc][Q / c1] = [Dp, Dr, Dc[Q / c1]] .
+
+  op _U_ : DicFigures DicFigures -> DicFigures .
+  eq [Dp , Dr , Dc] U [Dp' . Q -> p1 , Dr' , Dc'] = [Dp[Q / p1] , Dr , Dc] U [Dp' , Dr' , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , Dr' . Q -> r1 , Dc'] = [Dp , Dr[Q / r1] , Dc] U [mtD , Dr' , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , mtD , Dc' . Q -> c1] = [Dp , Dr , Dc[Q / c1]] U [mtD , mtD , Dc'] .
+  eq [Dp , Dr , Dc] U [mtD , mtD , mtD] = [Dp , Dr , Dc] .
+
+  op _in_ : Figure DicFigures -> Bool .
+  eq F in [Dp . Q -> F, Dr , Dc] = true .
+  eq F in [Dp , Dr . Q -> F, Dc] = true .
+  eq F in [Dp, Dr , Dc . Q -> F] = true .
+  eq F in [Dp, Dr, Dc] = false [owise] .
+
+  op contains? : DicFigures Qid -> Bool .
+  eq contains?([(Q -> F) . Dp, Dr, Dc], Q) = true .
+  eq contains?([Dp, (Q -> F) . Dr, Dc], Q) = true .
+  eq contains?([Dp, Dr, (Q -> F) . Dc], Q) = true .
+  eq contains?([Dp, Dr, Dc], Q) = false [owise] .
+
+  op name : DicFigures Figure -> QidList .
+  eq name([Dp, Dr, Dc],  p1) =  name(Dp, p1) .
+  eq name([Dp, Dr, Dc],  r1) =  name(Dr, r1) .
+  eq name([Dp, Dr, Dc],  c1) =  name(Dc, c1) .
+
+endfm

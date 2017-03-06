@@ -1,0 +1,22 @@
+fmod EQUATION is
+	pr FLOAT .
+	vars a b c : Float .
+
+	op first-degree-equation : Float Float -> Float .
+	*** Devuelve la solucion de una ecuacion de primer grado.
+	*** Recibe los valores correspondientes a ax + b.
+        eq first-degree-equation(a, b) = *** .
+
+	op second-degree-equation-1 : Float Float Float -> Float .
+	*** Devuelve el valor de una ecuacion de segundo grado en el caso +
+	*** Recibe los valores correspondientes a ax^2 + bx + c.
+	eq second-degree-equation-1(0.0 , b , c) = *** .
+	eq second-degree-equation-1(a , b , c) = (- b + sqrt(b ^ 2.0 - (4.0 * a * c))) / (2.0 * a) . 
+
+	op second-degree-equation-2 : Float Float Float -> Float .
+	*** Devuelve el valor de una ecuacion de segundo grado en el caso -
+	*** Recibe los valores correspondientes a ax^2 + bx + c.
+	eq second-degree-equation-2(0.0 , b , c) = *** .
+	eq second-degree-equation-2(a , b , c) = *** .
+
+endfm

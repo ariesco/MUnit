@@ -1,4 +1,4 @@
-load GEO2D.maude
+load POINT.maude
 load ../mUnit.maude
 
 (munit POINT is
@@ -29,22 +29,13 @@ load ../mUnit.maude
 	assertEqual(length-list(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 3.0)
 		*** Veamos ahora las funciones referidas a los puntos.
 		*** Funcion distance.
-	assertEqual(distance(p(1.0 0.0), p(0.0 1.0)), sqrt(2.0))
-	assertEqual(distance(p(0.0 0.0), p(4.0 3.0)), 5.0)
+	assertEqual(distance(p(1.0 0.0), p(0.0 1.0)), ***)
+	assertEqual(distance(p(0.0 0.0), ***), 5.0)
 	assertEqual(distance(p(1.0 0.0), p(2.0 0.0)), 1.0)
-	assertEqual(distance(p(1.0 1.0), p(1.0 3.0)), 2.0)
+	assertEqual(distance(p(1.0 1.0), ***, 2.0)
 		*** Funcion pto-trans.
 	assertDifferent(trans-point(p(1.0 0.0)), p(1.0 0.0))
 	assertEqual(trans-point(p(1.0 0.0)), p(0.0 1.0))
-		*** Veamos ahora las funciones referidas a las ecuaciones de primer grado.
-	assertEqual(first-degree-equation(2.0, 1.0), - 0.5)
-		*** Veamos ahora las funciones referidas a las ecuaciones de segundo grado.
-	assertEqual(second-degree-equation-1(-1.0, 2.0, 3.0), -1.0)
-	assertDifferent(second-degree-equation-1(-1.0, 2.0, 3.0), 3.0)
-	assertEqual(second-degree-equation-2(-3.0, 2.0, 1.0), 1.0)
-	assertDifferent(second-degree-equation-2(-3.0, 2.0, 1.0), -1.0 / 3.0)
-	assertEqual(second-degree-equation-1(0.0, 5.0, -2.0), second-degree-equation-2(0.0, 5.0, -2.0))
-	assertEqual(second-degree-equation-1(0.0, 5.0, -2.0), second-degree-equation-2(0.0, 1.0, -2.0 / 5.0))
 		*** Veamos ahora la funcion equal-epsilon.
 	assertTrue(equal-epsilon(5.0 ,5.00001 , 10.0 ^ (-4.0)))
 	assertFalse(equal-epsilon(7.0 ,7.1 , 10.0 ^ (-2.0)))

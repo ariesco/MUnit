@@ -1,0 +1,43 @@
+load POINT.maude
+load ../mUnit.maude
+
+(munit POINT is
+		*** comenzaremos viendo como se comportan las funciones referidas a las listas.
+	assertEqual(mt p(1.0 1.0), p(1.0 1.0))
+	assertEqual(mt p(1.0 1.0) mt p(2.0 2.0), p(1.0 1.0) p(2.0 2.0))
+		*** Funcion empty-list.
+	assertTrue(empty-list(mt))
+	assertTrue(empty-list(mt mt mt))
+	assertFalse(empty-list(p(1.0 0.0)))
+	assertFalse(empty-list(mt p(1.0 0.0)))
+		*** Funcion delete-first-element
+	assertEqual(delete-first-element(mt), mt)
+	assertEqual(delete-first-element(p(1.0 1.0)), mt)
+	assertEqual(delete-first-element(p(1.0 1.0) mt), mt)
+	assertDifferent(delete-first-element(mt p(1.0 1.0) mt), mt p(1.0 1.0))
+		*** Funcion first-element.
+	assertDifferent(first-element(mt), mt)
+	assertEqual(first-element(mt p(1.0 1.0)), p(1.0 1.0))
+	assertDifferent(first-element(p(1.0 1.0) mt), mt)
+	assertEqual(first-element(mt p(1.0 1.0) mt), p(1.0 1.0))
+		*** Funcion length-list.
+	assertEqual(length-list(mt), 0.0)
+	assertEqual(length-list(mt p(1.0 1.0)), 1.0)
+	assertDifferent(length-list(p(1.0 1.0) mt), 2.0)
+	assertEqual(length-list(p(1.0 1.0) mt), 1.0)
+	assertDifferent(length-list(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 4.0)
+	assertEqual(length-list(p(1.0 1.0) p(2.0 2.0) mt p(3.0 3.0)), 3.0)
+		*** Veamos ahora las funciones referidas a los puntos.
+		*** Funcion distance.
+	assertEqual(distance(p(1.0 0.0), p(0.0 1.0)), sqrt(2.0))
+	assertEqual(distance(p(0.0 0.0), p(4.0 3.0)), 5.0)
+	assertEqual(distance(p(1.0 0.0), p(2.0 0.0)), 1.0)
+	assertEqual(distance(p(1.0 1.0), p(1.0 3.0)), 2.0)
+		*** Funcion pto-trans.
+	assertDifferent(trans-point(p(1.0 0.0)), p(1.0 0.0))
+	assertEqual(trans-point(p(1.0 0.0)), p(0.0 1.0))
+		*** Veamos ahora la funcion equal-epsilon.
+	assertTrue(equal-epsilon(5.0 ,5.00001 , 10.0 ^ (-4.0)))
+	assertFalse(equal-epsilon(7.0 ,7.1 , 10.0 ^ (-2.0)))
+	assertEqual(equal-epsilon(1.01010, 1.01011, 10.0 ^ (-4.0)), equal-epsilon(1.01011, 1.01010, 10.0 ^ (-4.0)))
+endu)

@@ -1,0 +1,49 @@
+fmod PEANO-NAT-EXTRA is
+	
+	sorts Nat NoZeroNat ZeroNat .
+	subsort NoZeroNat < Nat .
+	subsort ZeroNat < Nat .
+	op 0 : -> ZeroNat [ctor] .
+	op s : Nat -> NoZeroNat [ctor iter] .
+
+	vars M N R : Nat .
+
+	op _+_ : Nat Nat -> Nat [comm assoc] . 
+	eq 0 + N = N .
+	eq s(M) + N = s(M + N) .
+
+	op _*_ : Nat Nat -> Nat [comm] .
+	eq 0 * M = 0 .
+	eq s(M) * N = (M * N) + N .
+
+	op _-_ : Nat Nat -> Nat .
+	eq M - 0 = M .
+	eq 0 - M = M .
+	eq s(M) - s(N) = M - N .
+ 
+	op _<=_ : Nat Nat -> Bool .
+	eq 0 <= s(M) = true .
+	eq 0 <= 0 = true .
+	eq s(M) <= 0 = false .
+	eq s(M) <= s(N) = M <= N .
+
+	op _<_ : Nat Nat -> Bool .
+	eq 0 < s(M) = true .
+	eq 0 < 0 = false .
+	eq s(M) < 0 = false .
+	eq s(M) < s(N) = M < N .
+
+	op _>=_ : Nat Nat -> Bool .
+	eq s(M) >= 0 = true .
+	eq 0 >= 0 = true .
+	eq 0 >= s(M) = false .
+	eq s(M) >= s(N) = M >= N .
+
+	op _>_ : Nat Nat -> Bool .
+	eq 0 > s(M) = false .
+	eq 0 > 0 = false .
+	eq s(M) > 0 = true .
+	eq s(M) > s(N) = M > N .
+
+
+endfm

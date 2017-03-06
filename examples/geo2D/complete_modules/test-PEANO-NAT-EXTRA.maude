@@ -1,0 +1,42 @@
+load PEANO-NAT-EXTRA.maude
+load ../mUnit.maude
+
+(munit PEANO-NAT-EXTRA is
+		*** Comenzaremos viendo como se comportan los constructores
+	assertDifferent(0, s(0))
+	assertEqual(s(s(s(0))), s^3(0))
+		*** Funcion _+_
+	assertEqual(s(0) + s(0), s(s(0)))
+	assertEqual(s(0) + 0, s(0))
+		*** Funcion _*_
+	assertEqual(s^2(0) * s^3(0), s^6(0))
+	assertEqual(s(0) * 0, 0)
+		*** Funcion _-_
+	assertEqual(s^3(0) - s^1(0), s^2(0))
+	assertEqual(s^3(0) - 0, s^3(0))
+	assertEqual(0 - s^3(0) , s^3(0))
+		*** Funcion _<=_
+	assertTrue(0 <= s^3(0))
+	assertTrue(0 <= 0)
+	assertFalse(s^2(0) <= 0)
+	assertFalse(s^3(0) <= s^2(0))
+	assertTrue(s^2(0) <= s^3(0))
+		*** Funcion _<_
+	assertTrue(0 < s^3(0))
+	assertFalse(0 < 0)
+	assertFalse(s^2(0) < 0)
+	assertFalse(s^3(0) < s^2(0))
+	assertTrue(s^2(0) < s^3(0))
+		*** Funcion _>=_
+	assertFalse(0 >= s^3(0))
+	assertTrue(0 >= 0)
+	assertTrue(s^2(0) >= 0)
+	assertTrue(s^3(0) >= s^2(0))
+	assertFalse(s^2(0) >= s^3(0))
+		*** Funcion _>_
+	assertFalse(0 > s^3(0))
+	assertFalse(0 > 0)
+	assertTrue(s^2(0) > 0)
+	assertTrue(s^3(0) > s^2(0))
+	assertFalse(s^2(0) > s^3(0))
+endu)

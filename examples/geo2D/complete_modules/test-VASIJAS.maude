@@ -1,0 +1,19 @@
+load VASIJAS.maude
+load ../mUnit.maude
+
+(munit VASIJAS is
+	***Comencemos viendo la funcion inicial
+   assertEqual(inicial, vasija(0, 3) , vasija(0, 5) , vasija(0, 8))
+	***Obliguemosle a usar la regla vacia
+   assertReachable(vasija(3, 3), vasija(0, 3))
+   assertReachableBnd(vasija(3, 3), vasija(0, 3), 1)
+	***Obliguemosle a usar la regla llena
+   assertReachable(vasija(0, 3), vasija(3, 3))
+   assertReachableBnd(vasija(0, 3), vasija(3, 3), 1)
+	***Obliguemosle a usar la regla transferir1
+   assertReachable((vasija(3, 3) , vasija(0, 5)), (vasija(0, 3) , vasija(3, 5)))
+   assertReachableBnd((vasija(3, 3) , vasija(0, 5)), (vasija(0, 3) , vasija(3, 5)), 1)
+	***Obliguemosle a usar la regla transferir2
+   assertReachable((vasija(5, 5) , vasija(0, 3)), (vasija(2, 5) , vasija(3, 3)))
+   assertReachableBnd((vasija(5, 5) , vasija(0, 3)), (vasija(2, 5) , vasija(3, 3)), 1)
+endu)

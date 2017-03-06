@@ -1,0 +1,82 @@
+load LINE.maude
+load ../mUnit.maude
+
+(munit LINE is
+		***Comenzaremos viendo como se comportan las funciones referidas a los vectores.
+		***Función v-scalar-prod.
+	assertEqual(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), ***)
+	assertDifferent(v-scalar-prod(v(1.0 0.0), v(0.0 1.0)), ***)
+	assertEqual(v-scalar-prod(v(1.0 2.0), v(2.0 1.0)), ***)
+	assertEqual(v-scalar-prod(v(1.0 2.0), v(-2.0 1.0)), ***)		
+		***Funcion v-norm.
+	assertDifferent(v-norm(v(2.0 0.0)), sqrt(8.0))
+	assertDifferent(v-norm(v(2.0 0.0)), 4.0)
+	assertEqual(v-norm(v(2.0 0.0)), 2.0)
+	assertEqual(v-norm(v(2.0 3.0)), sqrt(13.0))
+		***Funcion perpendicular-vector.
+	assertDifferent(perpendicular-vector(v(1.0 2.0)), v(-2.0 1.0))
+	assertEqual(perpendicular-vector(v(1.0 0.0)), v(0.0 -1.0))
+		***Funcion v-are-perpendicular?.
+	assertTrue(v-are-perpendicular?(v(1.0 0.0), v(0.0 1.0)))
+	assertFalse(v-are-perpendicular?(v(1.0 2.0), v(2.0 1.0)))
+	assertTrue(v-are-perpendicular?(v(2.0 3.0), perpendicular-vector(v(2.0 3.0))))
+	assertTrue(v-are-perpendicular?(v(-72.0 96.0), perpendicular-vector(v(-72.0 96.0))))
+		***Funciones referidas a las rectas.
+		***Funcion direction-vector-line
+	assertEqual(direction-vector-line(r(p(0.0 0.0) p(1.0 1.0))), ***)	
+	assertDifferent(direction-vector-line(r(p(2.0 3.0) p(1.0 1.0))), ***)
+	assertEqual(direction-vector-line(r(p(2.0 3.0) p(1.0 1.0))), ***)
+		***Funciones equ-line-m y equ-line-n.
+	assertEqual(equ-line-m(r(p(0.0 0.0) p(1.0 1.0))), ***)
+	assertDifferent(equ-line-m(r(p(0.0 0.0) p(0.0 45.0))), ***)
+	assertEqual(equ-line-n(r(p(0.0 0.0) p(1.0 1.0))), ***)
+	assertEqual(equ-line-n(r(p(45.0 0.0) p(0.0 45.0))), ***)
+		***Funcion are-equal.
+	assertTrue(are-equal(r(p(0.0 0.0) p(1.0 1.0)) , r(p(23.0 23.0) p(-1.0 -1.0))))
+	assertFalse(are-equal(r(p(0.0 0.0) p(1.0 0.0)) , r(p(0.0 0.0) p(0.0 1.0))))
+	assertTrue(are-equal(r(p(0.0 1.0) p(0.0 2.0)), r(p(0.0 3.0) p(0.0 4.0))))
+	assertFalse(are-equal(r(p(0.0 2.0) p(0.0 3.0)), r(p(1.0 2.0) p(1.0 3.0))))
+		***Funcion line-from-vector.
+	assertEqual(line-from-vector(v(1.0 2.0), p(0.0 0.0)),r(p(0.0 0.0) p(1.0 2.0)))
+	assertDifferent(line-from-vector(v(1.0 2.0), p(0.0 0.0)), ***)
+	assertTrue(are-equal(line-from-vector(v(1.0 2.0), ***), r(p(1.0 2.0) p(0.0 0.0))))
+	assertTrue(are-equal(line-from-vector(v(2.0 3.0), ***), r(p(-1.0 -2.0) p(1.0 1.0))))
+		***Funcion perpendicular-line.
+	assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 0.0))))
+	assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(0.0 1.0)), p(1.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
+	assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(0.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))))
+	assertTrue(are-equal(perpendicular-line(r(p(0.0 0.0) p(1.0 0.0)), p(1.0 1.0)), r(p(1.0 1.0) p(1.0 2.0))))
+	assertFalse(are-equal(perpendicular-line(r(p(3.0 -6.0) p(9.0 74.0)), p(0.0 0.0)), r(p(0.0 0.0) p(1.0 -4.0))))
+	assertTrue(are-equal(perpendicular-line(r(p(1.0 0.0) p(0.0 1.0)), p(0.5 0.5)), r(p(0.5 0.5) p(1.0 1.0))))
+		***Funcion are-perpendiculars.
+	assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))))
+	assertTrue(are-perpendiculars(r(p(0.0 0.0) p(0.0 1.0)), r(p(1.0 1.0) p(2.0 1.0))))
+	assertFalse(are-perpendiculars(r(p(3.0 -6.0) p(9.0 74.0)), r(p(0.0 0.0) p(1.0 -4.0))))
+	assertFalse(are-perpendiculars(r(p(1.0 0.0) p(0.0 1.0)), r(p(1.5 0.5) p(1.0 1.0))))
+		***Funciones vertical y horizontal.
+	assertTrue(vertical(r(p(13.0 -43.0) p(13.0 56.0))))
+	assertFalse(vertical(r(p(13.0 -43.0) p(-13.0 56.0))))
+	assertTrue(horizontal(r(p(57.0 12.0) p(24.0 12.0))))
+	assertFalse(horizontal(r(p(57.0 12.0) p(24.0 -12.0))))
+		***Funcion are-in-line.
+	assert***(are-in-line(p(0.0 0.0), r(p(0.0 0.0) p(1.0 1.0))))
+	assert***(are-in-line(p(1.0 1.0), r(p(0.0 0.0) p(1.0 1.0))))
+	assert***(are-in-line(p(2.0 3.0), r(p(2.0 1.0) p(4.0 3.0))))
+	assert***(are-in-line(p(1.0 2.0), r(p(2.0 1.0) p(4.0 3.0))))
+		***Funcion cut?-r-r.
+	assertTrue(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(3.0 4.0))))
+	assertTrue(cut?-r-r(r(p(0.0 1.0) p(1.0 0.0)), r(p(0.0 0.0) p(1.0 1.0))))
+	assertFalse(cut?-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(1.0 1.0) p(0.0 1.0))))
+	assertFalse(cut?-r-r(r(p(2.0 3.0) p(3.0 4.0)), r(p(5.0 3.0) p(6.0 4.0))))
+		***Funcion cut-point-x
+	assertEqual(cut-point-x(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
+	assertEqual(cut-point-x(r(p(2.0 3.0) p(0.0 2.0)), r(p(0.0 1.0) p(0.0 2.0))), 0.0)
+		***Funcion cut-point-y
+	assertEqual(cut-point-y(r(p(0.0 0.0) p(2.0 2.0)), r(p(2.0 0.0) p(0.0 2.0))), 1.0)
+	assertEqual(cut-point-y(r(p(2.0 3.0) p(0.0 3.0)), r(p(0.0 3.0) p(1.0 4.0))), 3.0)
+		***Funcion cut-point-r-r
+	assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 2.0)), r(p(0.0 0.0) p(2.0 1.0))), p(0.0 0.0))
+	assertEqual(cut-point-r-r(r(p(0.0 0.0) p(0.0 1.0)), r(p(0.0 0.0) p(1.0 0.0))), p(0.0 0.0))
+	assertEqual(cut-point-r-r(r(p(0.0 0.0) p(1.0 0.0)), r(p(0.0 0.0) p(0.0 1.0))), p(0.0 0.0))
+	assertTrue(equal-epsilon(0.0, distance(cut-point-r-r(r(p(2.0 3.0) p(7.0 5.0)), r(p(9.3 2.4) p(7.0 5.0))), p(7.0 5.0)), 10.0 ^ (-5.0)))
+endu)

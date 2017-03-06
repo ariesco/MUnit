@@ -1,0 +1,56 @@
+fmod POINT is
+	pr FLOAT .
+	sorts Point List .
+	subsort Point < List .
+
+	op p(__) : Float Float -> Point [ctor] .
+	*** Define un punto como un par de numeros reales
+
+	op mt : -> List [ctor] .
+	op __ : List List -> List [ctor assoc comm id: mt] . 
+
+	vars p1 p2 p3 p4 : Point .
+	vars z11 z12 z21 z22 a b c : Float .
+	var t : Bool .
+	vars l l1 : List .
+
+	op empty-list : List -> Bool .
+	*** Comprueba si una lista es la lista vacia.
+	eq empty-list(mt) = true . 
+	eq empty-list(mt l1 p1) = false .
+
+	op delete-first-element : List -> List .
+	*** Borra el primer elemento de una lista.
+	ceq delete-first-element(l1 p1) = l1
+	if not empty-list(mt l1 p1) .
+	ceq delete-first-element(mt) = mt
+	if empty-list(mt) .
+
+	op first-element : List -> Point .
+	*** Da el primer elemento de una lista.
+	eq first-element(mt l1 p1) = p1 .
+
+	op length-list : List -> Float .
+	*** Da la longitud de una lista.
+	eq length-list(mt) = 0.0 .
+	eq length-list(l p1) = 1.0 + length-list(l) .
+
+	op distance : Point Point -> Float .
+	*** Calcula la distancia entre dos puntos mediante la metrica usual.
+	eq distance(p(z11 z12) , p(z21 z22)) = sqrt(((z21 - z11) ^ 2.0) + ((z22 - z12) ^ 2.0)) .
+
+	op equal-epsilon : Float Float Float -> Bool .
+	*** Comprueba si dos numeros reales son iguales en funcion de un epsilon.
+	ceq equal-epsilon(z11, z12, a) = equal-epsilon(z12, z11, a)
+	if z11 < z12 .
+	ceq equal-epsilon(z11, z12, a) = true
+	if (z11 >= z12) /\ a > (z11 - z12) .
+	ceq equal-epsilon(z11, z12, a) = false
+	if (z11 >= z12) /\ a <= (z11 - z12) .
+
+	op trans-point : Point -> Point .
+	*** Intercambia las coordenadas de un punto
+	eq trans-point(p(z11 z12)) = p(z12 z11) .
+
+endfm
+

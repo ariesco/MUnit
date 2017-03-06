@@ -1,22 +1,10 @@
 load full-maude.maude
 load GEO2D.maude
 
-fmod FIGURES-LIST is
-  pr GEO2D .
-   
-  sort FiguresList .
-  subsort Figure < FiguresList .
-
-  op mtf : -> FiguresList [ctor] .
-  op _&_ : FiguresList FiguresList -> FiguresList [ctor assoc comm id: mtf] . 
-
-endfm
-
 fmod DICC-FIGURES is
   pr GEO2D .
   pr QID .
   pr QID-LIST .
-  pr FIGURES-LIST .
 
   sorts Dic Entry DicFigures .
   subsorts Entry < Dic .
@@ -31,17 +19,13 @@ fmod DICC-FIGURES is
   var p1 : Point .
   vars r1 r2 : Line .
   var c1 : Circumference .
-  vars Lf1 Lf2 : FiguresList .
 
   op _[_] : Dic Qid ~> Figure .
   eq (D . Q -> F)[Q] = F .
 
   op _[_/_] : Dic Qid Figure -> Dic .
-  eq (D . (Q' -> F) . (Q -> F'))[Q' / F'] = D . Q' -> F' . 
-  ceq (D . (Q' -> r1) . (Q -> r2))[Q' / r2] = D . Q' -> r2
-    if are-equal(r1, r2) .
-  eq (D . Q -> F)[Q / F'] = D . Q -> F' .
   eq (D . Q -> F)[Q' / F] = D . Q -> F  .
+  eq (D . Q -> F)[Q / F'] = D . Q -> F' .
   ceq (D . Q -> r1)[Q' / r2] = D . Q -> r1
     if are-equal(r1, r2) .   
   eq D[Q / F] = D . Q -> F [owise] .
@@ -93,10 +77,9 @@ fmod DICC-FIGURES is
   eq contains?([Dp, Dr, (Q -> F) . Dc], Q) = true .
   eq contains?([Dp, Dr, Dc], Q) = false [owise] .
 
-  op name : DicFigures FiguresList -> QidList .
-  eq name([Dp, Dr, Dc], (Lf1 & p1)) = name([Dp, Dr, Dc], Lf1) name(Dp, p1) .
-  eq name([Dp, Dr, Dc], (Lf1 & r1)) = name([Dp, Dr, Dc], Lf1) name(Dr, r1) .
-  eq name([Dp, Dr, Dc], (Lf1 & c1)) = name([Dp, Dr, Dc], Lf1) name(Dc, c1) .
-  eq name([Dp, Dr, Dc], mtf) = nil . 
+  op name : DicFigures Figure -> QidList .
+  eq name([Dp, Dr, Dc],  p1) =  name(Dp, p1) .
+  eq name([Dp, Dr, Dc],  r1) =  name(Dr, r1) .
+  eq name([Dp, Dr, Dc],  c1) =  name(Dc, c1) .
 
 endfm

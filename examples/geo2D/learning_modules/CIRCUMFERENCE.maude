@@ -1,0 +1,115 @@
+load LINE.maude
+load EQUATION.maude
+fmod CIRCUMFERENCE is
+
+	pr LINE .
+	pr EQUATION .
+	sorts Circumference .
+
+	op c : Point Float -> Circumference [ctor] .
+	*** Define una circunferencia como un par (punto, real), correspondiendo estos con el 
+	*** centro y el radio.
+	
+	vars p1 p2 p3 p4 : Point .
+	vars z11 z12 z21 z22 z31 z32 z41 z42 m n x y Aux-A Aux-B Aux-C Aux-D Aux-E Aux-F Aux-G : Float .
+	vars r1 r2 : Line .
+	vars v1 v2 : Vector .
+	vars c1 c2 c1' c2' : Circumference .
+	vars t : Bool .
+	vars l l1 : List .
+		
+	op circumference-center : Circumference -> Point .
+	*** Devuelve el centro de la circunferencia
+	eq circumference-center(c(p1 , z11)) = *** .
+
+	op circumference-radius : Circumference -> Float .
+	*** Devuelve el radio de la circunferencia
+	eq circumference-radius(c(p1 , z11)) = *** .
+
+	op are-in-circumference : Point Circumference -> Bool .
+	*** Comprueba si un punto esta en una circunferencia, comprobando su distancia 
+	*** al centro con el radio
+	eq are-in-circumference(p1 ,c(p2 , z11)) = distance(p1 , p2) == z11 .
+
+	op cut?-r-c : Line Circumference -> Bool .
+	*** Comprueba si una recta y una circunferencia se cortan mediante la comparacion de la
+	*** distancia de la recta al centro de la circunferencia.
+	eq cut?-r-c(r1 , c(p1 , z11)) = distance(cut-point-r-r(r1 , perpendicular-line(r1 , p1)) , p1) *** z11 .
+
+	op cut-point-r-c : Line Circumference -> List .
+	*** Dados una circunferencia y un punto devuelve una lista con los dos puntos de corte
+	*** pudiendo ser estos iguales.
+	ceq cut-point-r-c(r(p(z11 z12) p(z11 z22)), c(p(z31 z32), z41)) = p(z11 Aux-A) p(z11 Aux-B)
+	*** caso vertical 
+	if Aux-A := second-degree-equation-1(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) /\
+	   Aux-B := second-degree-equation-2(1.0, (-2.0 * z32), (z32 ^ 2.0) + ((z11 - z31) ^ 2.0) - (z41 ^ 2.0)) .
+	ceq cut-point-r-c(r(p(z11 z12) p(z21 z12)), c(p(z31 z32), z41)) = p(Aux-A z12) p(Aux-B z12)
+	*** caso horizontal
+	if Aux-A := second-degree-equation-1(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) /\
+	   Aux-B := second-degree-equation-2(1.0, (-2.0 * z31), (z31 ^ 2.0) + ((z21 - z32) ^ 2.0) - (z41 ^ 2.0)) .
+	eq cut-point-r-c(r1, c1) = cut-point-r-c-1(r1, c1) cut-point-r-c-2(r1, c1) [owise] .
+
+	op cut-point-r-c-1 : Line Circumference -> Point .
+	*** Halla el primer punto de corte de la recta y la circunferencia
+	ceq cut-point-r-c-1(r1, c(p(z31 z32), z41)) = p(x y)
+	if m := equ-line-m(r1) /\
+	   n := equ-line-n(r1) /\
+	   Aux-A := 1.0 + (m ^ 2.0) /\
+	   Aux-B := (2.0 * m * n) - (2.0 * z32 * m) - (2.0 * z31)  /\
+	   Aux-C := (z31 ^ 2.0) + (z32 ^ 2.0) - (z41 ^ 2.0) - (2.0 * n * z32) + (n ^ 2.0)  /\
+	   x := second-degree-equation-1(Aux-A, Aux-B, Aux-C) /\
+	   y := m * x + n .
+
+	op cut-point-r-c-2 : Line Circumference -> Point .
+	*** Halla el segundo punto de corte de la recta y la circunferencia
+	ceq cut-point-r-c-2(r1, c(p(z31 z32), z41)) = p(x y)
+            ***
+	    ***
+	    ***
+	    ***
+	    ***
+	    ***
+  	    ***
+	op cut?-c-c : Circumference Circumference -> Bool .
+	*** Comprueba si dos circunferencias se cortan en base a la distancia de los centros.
+	ceq cut?-c-c(c1, c2) = distance(circumference-center(c1) , circumference-center(c2)) <= (circumference-radius(c1) + circumference-radius(c2))
+	if not (circumference-center(c1) == circumference-center(c2)) . 
+	ceq cut?-c-c(c1, c2) = circumference-radius(c1) == circumference-radius(c2)
+	if (circumference-center(c1) == circumference-center(c2)) .
+
+	op cut-point-c-c : Circumference Circumference -> List .
+	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-x-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) 
+	if not (z11 == z21) .
+	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32))
+	if not (z12 == z22) .
+	ceq cut-point-c-c(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = mt 
+	if p(z11 z12) = p(z21 z22) /\ not(z31 == z32) .
+
+	op cut-point-circumferences-x-dis : Circumference Circumference -> List .
+	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
+	*** solo funciona si los centros no tienen la misma X, habria que hacer caso contrario
+	ceq cut-point-circumferences-x-dis(c1 , c2) = p1 p2
+	if p1 := cut-point-circumferences-1(c1 , c2) 
+	/\ p2 := cut-point-circumferences-2(c1 , c2) .
+
+	op cut-point-circumferences-y-dis : Circumference Circumference -> List .
+	*** da una lista con dos puntos, que serian los puntos de corte de las dos circunferencias.
+	ceq cut-point-circumferences-y-dis(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p1 p2
+	if p1 := trans-point(cut-point-circumferences-1(c(p(z12 z11) , z31) , c(p(z22 z21) , z32))) 
+	/\ p2 := *** .
+
+	op cut-point-circumferences-1 : Circumference Circumference -> Point .
+	*** halla el primer punto de corte de las dos circunferencias.
+	ceq cut-point-circumferences-1(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = p((Aux-A - (second-degree-equation-1(Aux-C , Aux-D , Aux-E) * Aux-B))  second-degree-equation-1(Aux-C , Aux-D , Aux-E))
+	if Aux-A := (z31 ^ 2.0 - z32 ^ 2.0 + (z21 ^ 2.0 + z22 ^ 2.0) - (z11 ^ 2.0 + z12 ^ 2.0)) / (2.0 * z21 - 2.0 * z11) 
+	/\ Aux-B := (z22 - z12) / (z21 - z11) 
+	/\ Aux-C := (Aux-B) ^ 2.0 + 1.0
+	/\ Aux-D := 2.0 * Aux-B * (z11 - Aux-A) - 2.0 * z12
+	/\ Aux-E := Aux-A * (Aux-A - 2.0 * z11) - z11 ^ 2.0 + z12 ^ 2.0 - z31 ^ 2.0 .
+
+	op cut-point-circumferences-2 : Circumference Circumference -> Point .
+	*** halla el segundo punto de corte de las dos circumferences.
+	ceq cut-point-circumferences-2(c(p(z11 z12) , z31) , c(p(z21 z22) , z32)) = ***
+
+
+endfm

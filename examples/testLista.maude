@@ -1,9 +1,0 @@
-load Lista.maude
-load ../mUnit.maude
-
-(munit Lista is
-   assertEqual(mt, mt mt)
-   assertEqual(1.0, mt 1.0)
-   assertEqual(1.0 2.0, 2.0 1.0)
-
-endu)
