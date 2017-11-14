@@ -1,26 +1,3 @@
-
-*.dvi
-
-memoria/tfg_fiesta.pdf
-
-*.toc
-
-*.out
-
-*.log
-
-*.aux
-
-*.gz
+memoria/*
 
 papers/*
-
-memoria/tfg_fiesta.blg
-
-memoria/tfg_fiesta.bbl
-
-memoria/tfg.blg
-
-memoria/tfg.bbl
-
-memoria/tfg.pdf
