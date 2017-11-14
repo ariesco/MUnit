@@ -13,6 +13,8 @@ memoria/tfg_fiesta.pdf
 
 *.gz
 
+papers/*
+
 memoria/tfg_fiesta.blg
 
 memoria/tfg_fiesta.bbl

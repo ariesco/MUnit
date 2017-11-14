@@ -928,9 +928,6 @@ mod MUNIT is
      < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
   => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
   if UR := procMUnit(T, T', DB) .
-
- *** Comparar atributos con upTerm
-
 endm
 
 mod MUNIT-INIT is
