@@ -23,20 +23,3 @@ load mUnit.maude
   assertTrue(par(7))
 endu)
 
-
-eof
-
-- assertSort -> comprobar que un termino tiene un tipo.
-- assertReachable
-
-a => b
-b => c
-b => d
-
-assertReachable(a, d)
-
-assertNotReachable(a, e)
-
-- assertEqualPattern(init, patata C)
-
-- eq init = ... .
