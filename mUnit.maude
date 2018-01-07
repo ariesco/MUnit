@@ -51,9 +51,25 @@ fmod MUNIT-SIGNATURE is
 
   *********************************************************************************
   *** Indicates that t' is reachable from t' within n steps.                    ***
-  *** Usage: assertReachable(t, t')                                             ***
+  *** Usage: assertReachableBnd(t, t', bnd)                                     ***
   *********************************************************************************
   op assertReachableBnd : @Bubble@ @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that a search starting in t, having pat as pattern, with the    ***
+  *** given type of search (*, +, or !), and condition cond reaches at least    ***
+  *** one solution with at most bound number of steps.                          ***
+  *** Usage: hasSolution(t, pat, (*, +, !), bound, cond)                        ***
+  *********************************************************************************
+  op hasSolution : @Bubble@ @Bubble@ @Token@ @Token@ @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that a search starting in t, having pat as pattern, with the    ***
+  *** given type of search (*, +, or !), and condition cond reaches no          ***
+  *** solution with at most bound number of steps.                              ***
+  *** Usage: noSolution(t, pat, (*, +, !), bound, cond)                         ***
+  *********************************************************************************
+  op noSolution : @Bubble@ @Bubble@ @Token@ @Token@ @Bubble@ -> @MUnitPredicate@ [ctor] .
 
   *********************************************************************************
   *** Indicates that the term introduced in the test must have the given sort.  ***
@@ -90,23 +106,28 @@ fmod MUNIT-COMMAND-PROCESSING is
  pr COMMAND-PROCESSING .
  pr PRINT .
 
- vars T T' T'' T1 T2 T3 TSB TSB' SYS SYS' SYS'' TI TI' TI1 TIS TIS' TIS1 TIS1' : Term .
+ vars T T' T'' T''' T1 T2 T3 T4 TSB TSB' TSB'' SYS SYS' SYS'' TI TI' TI1 TIS TIS' TIS1 TIS1' : Term .
  vars TL TL' TL'' ATTS : TermList .
  var  ME : ModuleExpression .
  vars SB SB' : Substitution .
  vars St St' St'' : String .
  vars VDS ODS : OpDeclSet .
+ var  COND? : [Condition] .
  vars QIL QIL' : QidList .
  vars DB DB' : Database .
  vars N N' N1 N1' : Nat .
+ var  COND : Condition .
+ var  UR : UnitResult .
  var  T&S : Term&Sub .
  var  AtS : AttrSet .
+ var  BND : Bound .
  var  V : Variable .
  var  SS : SortSet .
  var  C : Constant .
  var  T? : [Term] .
  var  M : Module .
  vars Q Q' : Qid .
+ var  Ty : Type .
  var  S : Sort .
  var  B : Bool .
 
@@ -506,6 +527,45 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (T? :: Term) /\
      QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
 
+ **********************************************************************************
+ ********************                hasSolution               ********************
+ **********************************************************************************
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = UR
+  if TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     'token[TI] := T'' /\
+     Q := downQid(TI) /\
+     (Q == '! or Q == '* or Q == '+) /\
+     'token[TI'] := T3 /\
+     Q' := downQid(TI') /\
+     BND := if Q' == 'unbounded
+            then unbounded
+            else rat(string(Q'), 10)
+            fi /\
+     UR := procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS) .
+
+ op procSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
+ ceq procSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
+  if metaSearch(M, T, T', COND, Q, BND, 0) =/= failure /\
+     QIL := '\! '\n 'hasSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            printCond(M, COND) '`) ' '\g 'passed. '\o '\n .
+ ceq procSolution(M, T, T', Q, BND, COND, SYS) = [0, 1, QIL, SYS]
+  if metaSearch(M, T, T', COND, Q, BND, 0) == failure /\
+     QIL := '\! '\n 'hasSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            printCond(M, COND) '`) ' '\r 'failed. '\o '\n .
+
+ op printCond : Module Condition ~> QidList .
+ eq printCond(M, nil) = nil .
+ eq printCond(M, T = T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=
+                                   metaPrettyPrint(M, T', printOpts) .
+ eq printCond(M, T := T' /\ COND) = metaPrettyPrint(M, T, printOpts) ':=
+                                    metaPrettyPrint(M, T', printOpts) .
+ eq printCond(M, T => T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=>
+                                    metaPrettyPrint(M, T', printOpts) .
+ eq printCond(M, T : Ty /\ COND) = metaPrettyPrint(M, T, printOpts) ': Ty .
+
  *********************************************************************************
  ***********************                loop               ***********************
  *********************************************************************************
@@ -825,8 +885,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  **********************************************************************************
  **********************************************************************************
 
- eq procProps(M, Q[T, T'], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
- eq procProps(M, Q[T], VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
+ eq procProps(M, T, VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise print T] .
 
  op reduce : Module Term -> Term .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
