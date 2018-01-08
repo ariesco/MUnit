@@ -379,7 +379,7 @@ fmod MUNIT-COMMAND-PROCESSING is
   if 'bubble[TI] := T /\
      ATTS := getAtts(SYS) /\
      < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T /\
+     'bubble[TI'] := T' /\
      < TI', none > := sub4Atts(M, TI', ATTS) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
      TSB' := solveBubbles(T', M, B, VDS, DB) /\
@@ -399,7 +399,7 @@ fmod MUNIT-COMMAND-PROCESSING is
   if 'bubble[TI] := T /\
      ATTS := getAtts(SYS) /\
      < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T /\
+     'bubble[TI'] := T' /\
      < TI', none > := sub4Atts(M, TI', ATTS) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
      TSB' := solveBubbles(T', M, B, VDS, DB) /\
@@ -549,7 +549,10 @@ fmod MUNIT-COMMAND-PROCESSING is
             then unbounded
             else rat(string(Q'), 10)
             fi /\
-     UR := procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS) .
+     UR := if T4 == 'bubble[''nil.Qid]
+           then procSolution(M, TSB, TSB', Q, BND, nil, SYS)
+           else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           fi .
 
  op procSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
  ceq procSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
@@ -563,15 +566,37 @@ fmod MUNIT-COMMAND-PROCESSING is
             metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
             printCond(M, COND) '`) ' '\r 'failed. '\o '\n .
 
- op printCond : Module Condition ~> QidList .
- eq printCond(M, nil) = nil .
- eq printCond(M, T = T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=
-                                   metaPrettyPrint(M, T', printOpts) .
- eq printCond(M, T := T' /\ COND) = metaPrettyPrint(M, T, printOpts) ':=
-                                    metaPrettyPrint(M, T', printOpts) .
- eq printCond(M, T => T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=>
-                                    metaPrettyPrint(M, T', printOpts) .
- eq printCond(M, T : Ty /\ COND) = metaPrettyPrint(M, T, printOpts) ': Ty .
+ **********************************************************************************
+ ********************                noSolution                ********************
+ **********************************************************************************
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = UR
+  if TSB := solveBubbles(T, M, B, VDS, DB) /\
+     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+     'token[TI] := T'' /\
+     Q := downQid(TI) /\
+     (Q == '! or Q == '* or Q == '+) /\
+     'token[TI'] := T3 /\
+     Q' := downQid(TI') /\
+     BND := if Q' == 'unbounded
+            then unbounded
+            else rat(string(Q'), 10)
+            fi /\
+     UR := if T4 == 'bubble[''nil.Qid]
+           then noSolution(M, TSB, TSB', Q, BND, nil, SYS)
+           else noSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           fi .
+
+ op noSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
+ ceq noSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
+  if metaSearch(M, T, T', COND, Q, BND, 0) == failure /\
+     QIL := '\! '\n 'noSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            printCond(M, COND) '`) ' '\g 'passed. '\o '\n .
+ ceq procSolution(M, T, T', Q, BND, COND, SYS) = [0, 1, QIL, SYS]
+  if metaSearch(M, T, T', COND, Q, BND, 0) =/= failure /\
+     QIL := '\! '\n 'noSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            printCond(M, COND) '`) ' '\r 'failed. '\o '\n .
 
  *********************************************************************************
  ***********************                loop               ***********************
@@ -932,13 +957,6 @@ fmod MUNIT-COMMAND-PROCESSING is
      QIL := '\! '\n 'assertReachableBnd '`( downQidList(T) '`, downQidList(T') '`,
                                             downQid(T'') '`) ' '\g 'passed. '\o '\n .
 
-
-
-
-
-
-
-
  ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      'bubble[TI] := T /\
@@ -991,7 +1009,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  **********************************************************************************
  **********************************************************************************
 
- eq procProps(M, T, VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise print T] .
+ eq procProps(M, T, VDS, B, DB, SYS) = [0, 1, nil, SYS] [owise] .
 
  op reduce : Module Term -> Term .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
@@ -1030,11 +1048,12 @@ fmod MUNIT-COMMAND-PROCESSING is
  eq exactOp(M, Q) = exactOp(getOps(M), Q) .
 
  op exactOp : OpDeclSet Qid ~> Sort .
- eq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q) = Q .
+*** eq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q) = Q .
  ceq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q') = Q
   if St := string(Q) /\
      St' := string(Q') /\
      *** We remove @
+     substr(St', 0, 1) == "@" /\
      St'' := substr(St', 1, length(St')) /\
      find(St, St'', 0) == 0 .
 
@@ -1051,6 +1070,20 @@ fmod MUNIT-COMMAND-PROCESSING is
 
  op getAtt : TermList Qid ~> Term .
  eq getAtt((TL, Q[T], TL'), Q) = T .
+
+ op printCond : Module Condition ~> QidList .
+ eq printCond(M, nil) = 'nil .
+ eq printCond(M, COND) = $printCond(M, COND) [owise] .
+
+ op $printCond : Module Condition ~> QidList .
+ eq $printCond(M, nil) = nil .
+ eq $printCond(M, T = T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=
+                                    metaPrettyPrint(M, T', printOpts) .
+ eq $printCond(M, T := T' /\ COND) = metaPrettyPrint(M, T, printOpts) ':=
+                                     metaPrettyPrint(M, T', printOpts) .
+ eq $printCond(M, T => T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=>
+                                     metaPrettyPrint(M, T', printOpts) .
+ eq $printCond(M, T : Ty /\ COND) = metaPrettyPrint(M, T, printOpts) ': Ty .
 
  *******************************************************************************
  *** END auxiliary function                                                  ***
