@@ -1,0 +1,69 @@
+fmod BSTREE is
+ pr STRING .
+
+ sort BSTree BSTree? Pair .
+ subsort BSTree < BSTree? .
+
+
+ op mt : -> BSTree .
+ op _[_,_]_ : BSTree? String Pair BSTree? -> BSTree? [ctor] .
+
+ cmb L [S, P] R : BSTree
+  if correctOrder(L, S) /\
+     correctOrder(S, R) .
+
+ op <_,_> : Nat Nat -> Pair [ctor] .
+
+ vars S S' : String .
+ vars L R : BSTree .
+ vars P P' : Pair .
+ vars N N' N1 N2 : Nat .
+
+ op correctOrder : BSTree String -> Bool .
+ eq correctOrder(mt, S) = true .
+ eq correctOrder(L [S, P] R, S') = S < S' .
+
+ op correctOrder : String BSTree -> Bool .
+ eq correctOrder(S, mt) = true .
+ eq correctOrder(S', L [S, P] R) = S' < S .
+
+ op insert : BSTree String Pair -> BSTree .
+ eq insert(mt, S, P) = mt [S, P] mt .
+ ceq insert(L [S, P] R, S', P') = insert(L, S', P') [S, P] R
+  if S' < S .
+ ceq insert(L [S, P] R, S', P') = L [S, P] insert(R, S', P')
+  if S < S' .
+ eq insert(L [S, P] R, S, P') = L [S, combine(P, P')] R .
+
+ op combine : Pair Pair -> Pair .
+ eq combine(< N, N' >, < N1, N2 >) = < N + N1, N2 > .
+
+ sort NodeInfo .
+ op _&_ : String Pair -> NodeInfo .
+
+ op min : BSTree ~> NodeInfo .
+ eq min(mt [S, P] R) = S & P .
+ eq min(L [S, P] R) = min(L) [owise] .
+
+ op delete : BSTree String -> BSTree .
+ eq delete(mt, S) = mt .
+ ceq delete(L [S, P] R, S') = delete(L, S') [S, P] R
+  if S' < S .
+ ceq delete(L [S, P] R, S') = L [S, P] delete(R, S')
+  if S' > S .
+ eq delete(L [S, P] mt, S) = L .
+ ceq delete(L [S, P] R, S) = L [S', P'] delete(R, S')
+  if S' & P' := min(R) [owise] .
+endfm
+
+fmod TEST is
+ pr BSTREE .
+
+ ops treeOK1 treeOK2 treeOK3 treeError : -> BSTree .
+ eq treeOK1 = (mt [ "a", < 1, 1 > ] mt) ["c", < 1, 1 > ] (mt [ "e", < 1, 1 > ] mt) .
+ eq treeOK2 = (mt [ "a", < 1, 1 > ] (mt ["b", < 1, 1 >] mt)) ["c", < 1, 1 > ] (mt [ "e", < 1, 1 > ] mt) .
+ eq treeOK3 = (mt ["a", < 1,1 >] mt)["e", < 1,1 >] mt .
+ eq treeError = (mt [ "a", < 1, 1 > ] mt) ["d", < 1, 1 > ] (mt [ "c", < 1, 1 > ] mt) .
+endfm
+
+*** Inventarios

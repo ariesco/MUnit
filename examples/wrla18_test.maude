@@ -1,0 +1,14 @@
+load wrla18.maude
+load ../mUnit.maude
+
+(munit TEST is
+  assertSort(treeOK1, BSTree)
+  assertLeqSort(treeOK1, BSTree?)
+  assertSort(treeError, BSTree?)
+  assertSort(insert(treeOK1, "b", < 1, 1 >), BSTree)
+
+  assertEqual(insert(treeOK1, "b", < 1, 1 >), treeOK2)
+  assertEqual(min(treeOK1), "a" & < 1, 1 >)
+  assertEqual(min(insert(treeOK1, "b", < 1, 1 >)), "a" & < 1, 1 >)
+  assertEqual(delete(treeOK1, "c"), treeOK3)
+endu)
