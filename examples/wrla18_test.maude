@@ -7,6 +7,9 @@ load ../mUnit.maude
   assertSort(treeError, BSTree?)
   assertSort(insert(treeOK1, "b", < 1, 1 >), BSTree)
 
+  assertTrue(inStock(treeOK1, "a"))
+  assertFalse(inStock(treeOK1, "f"))
+
   assertEqual(insert(treeOK1, "b", < 1, 1 >), treeOK2)
   assertEqual(min(treeOK1), "a" & < 1, 3 >)
   assertEqual(min(insert(treeOK1, "b", < 1, 1 >)), "a" & < 1, 3 >)

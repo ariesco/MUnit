@@ -5,7 +5,7 @@ fmod BSTREE is
  subsort BSTree < BSTree? .
 
 
- op mt : -> BSTree .
+ op mt : -> BSTree [ctor] .
  op _[_,_]_ : BSTree? String Pair BSTree? -> BSTree? [ctor] .
 
  cmb L [S, P] R : BSTree
@@ -69,17 +69,17 @@ fmod BSTREE is
 
  op getPrice : BSTree String ~> Nat .
  eq getPrice(L [S, < N, N' >] R, S) = N' .
- ceq getPrice(L [S, < N, N' >] R, S') = getPrice(L, S)
+ ceq getPrice(L [S, < N, N' >] R, S') = getPrice(L, S')
   if S' < S .
- ceq getPrice(L [S, < N, N' >] R, S') = getPrice(R, S)
+ ceq getPrice(L [S, < N, N' >] R, S') = getPrice(R, S')
   if S' > S .
 
  op inStock : BSTree String -> Bool .
  eq inStock(mt, S) = false .
  eq inStock(L [S, < N, N' >] R, S) = N > 0 .
- ceq inStock(L [S, < N, N' >] R, S') = inStock(L, S)
+ ceq inStock(L [S, < N, N' >] R, S') = inStock(L, S')
   if S' < S .
- ceq inStock(L [S, < N, N' >] R, S') = inStock(R, S)
+ ceq inStock(L [S, < N, N' >] R, S') = inStock(R, S')
   if S' > S .
 endfm
 
