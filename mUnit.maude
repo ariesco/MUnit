@@ -43,7 +43,7 @@ fmod MUNIT-SIGNATURE is
   op assertDifferent : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
 
   *********************************************************************************
-  *** Indicates that t' is reachable from t' within an unbounded number         ***
+  *** Indicates that t' is reachable from t within an unbounded number          ***
   *** of steps.                                                                 ***
   *** Usage: assertReachable(t, t')                                             ***
   *********************************************************************************
