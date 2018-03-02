@@ -15,5 +15,6 @@ several examples.
 
 Available commands:
 -------------------
-* assertEqual(T, T'): it indicates that both T and T' must be equal once equations
-are applied.
+* **assertEqual(T, T')** indicates that both **T** and **T'** must be reduced to the same normal
+form by means of equations.
+* assertFalse(T) indicates that

@@ -51,7 +51,7 @@ fmod BSTREE is
  eq oneSold(P) = P [owise] .
 
  sort NodeInfo .
- op _&_ : String Pair -> NodeInfo .
+ op _&_ : String Pair -> NodeInfo [ctor] .
 
  op min : BSTree ~> NodeInfo .
  eq min(mt [S, P] R) = S & P .
@@ -86,10 +86,11 @@ endfm
 fmod FTEST is
  pr BSTREE .
 
- ops treeOK1 treeOK2 treeOK3 treeError : -> BSTree .
+ ops treeOK1 treeOK2 treeOK3 treeOK4 treeError : -> BSTree .
  eq treeOK1 = (mt [ "a", < 1, 3 > ] mt) ["c", < 2, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
  eq treeOK2 = (mt [ "a", < 1, 3 > ] (mt ["b", < 1, 1 >] mt)) ["c", < 2, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
  eq treeOK3 = (mt ["a", < 1, 3 >] mt)["e", < 3, 5 >] mt .
+ eq treeOK4 = (mt [ "a", < 1, 3 > ] mt) ["c", < 1, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
  eq treeError = (mt [ "a", < 1, 3 > ] mt) ["d", < 1, 1 > ] (mt [ "c", < 2, 7 > ] mt) .
 endfm
 
