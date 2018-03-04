@@ -1,0 +1,39 @@
+load wrla18.maude
+load ../mUnit.maude
+
+(munit FTEST is
+  assertSort(treeOK1, BSTree)
+  assertLeqSort(treeOK1, BSTree?)
+  assertSort(treeError, BSTree?)
+  assertSort(insert(treeOK1, "b", < 1, 1 >), BSTree)
+
+  assertTrue(inStock(treeOK1, "a"))
+  assertFalse(inStock(treeOK1, "f"))
+
+  assertEqual(insert(treeOK1, "b", < 1, 1 >), treeOK2)
+  assertEqual(min(treeOK1), "a" & < 1, 3 >)
+  assertEqual(min(insert(treeOK1, "b", < 1, 1 >)), "a" & < 1, 3 >)
+  assertEqual(delete(treeOK1, "c"), treeOK3)
+  assertEqual(oneSold(treeOK1, "c"), treeOK4)
+endu)
+
+(munit STEST is
+  hasSolution(init-shop, ([nobody | T:BSTree, 5]), !, unbounded, inStock(T:BSTree, "b"))
+  noSolution(init-shop, ([P:People | T:BSTree, 20]), +, unbounded, nil)
+endu)
+
+(munit SHOP-INIT is
+  loop(init-shop)
+  assertFalse(inStock(@tree, "cake"))
+  assertEqual(@money, 10)
+
+  command(add cake, 1, 5)
+
+  assertEqual(@money, 5)
+  assertTrue(inStock(@tree, "cake"))
+
+  command(sold cake)
+
+  assertEqual(@money, 15)
+  assertFalse(inStock(@tree, "cake"))
+endu)

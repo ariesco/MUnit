@@ -15,5 +15,12 @@ several examples.
 
 Available commands:
 -------------------
-* assertEqual(T, T'): it indicates that both T and T' must be equal once equations
-are applied.
+* **assertEqual(t, t')** indicates that both **t** and **t'** must be reduced to the same
+normal form by means of equations.
+* **assertDifferent(t, t')** indicates that the normal forms of **t** and **t'** must
+be different.
+* **assertTrue(t)** indicates that the normal form of **t** must be **true**.
+* **assertFalse(t)** indicates that the normal form of **t** must be **false**.
+* **assertReachable(t, t')** Indicates that **t'** is reachable from **t** within an
+unbounded number of steps.
+* **assertReachableBnd(t, t', bnd)**

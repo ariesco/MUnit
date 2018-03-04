@@ -1,0 +1,310 @@
+fmod BSTREE is
+ pr STRING .
+
+ sort BSTree BSTree? Pair .
+ subsort BSTree < BSTree? .
+
+
+ op mt : -> BSTree [ctor] .
+ op _[_,_]_ : BSTree? String Pair BSTree? -> BSTree? [ctor] .
+
+ cmb L [S, P] R : BSTree
+  if correctOrder(L, S) /\
+     correctOrder(S, R) .
+
+ op <_,_> : Nat Nat -> Pair [ctor] .
+
+ vars S S' : String .
+ vars L R : BSTree .
+ vars P P' : Pair .
+ vars N N' N1 N2 : Nat .
+
+ op correctOrder : BSTree String -> Bool .
+ eq correctOrder(mt, S) = true .
+ eq correctOrder(L [S, P] R, S') = S < S' .
+
+ op correctOrder : String BSTree -> Bool .
+ eq correctOrder(S, mt) = true .
+ eq correctOrder(S', L [S, P] R) = S' < S .
+
+ op insert : BSTree String Pair -> BSTree .
+ eq insert(mt, S, P) = mt [S, P] mt .
+ ceq insert(L [S, P] R, S', P') = insert(L, S', P') [S, P] R
+  if S' < S .
+ ceq insert(L [S, P] R, S', P') = L [S, P] insert(R, S', P')
+  if S < S' .
+ eq insert(L [S, P] R, S, P') = L [S, combine(P, P')] R .
+
+ op combine : Pair Pair -> Pair .
+ eq combine(< N, N' >, < N1, N2 >) = < N + N1, N2 > .
+
+ op oneSold : BSTree String -> BSTree .
+ eq oneSold(mt, S) = mt .
+ ceq oneSold(L [S, P] R, S') = oneSold(L, S') [S, P] R
+  if S' < S .
+ ceq oneSold(L [S, P] R, S') = L [S, P] oneSold(R, S')
+  if S < S' .
+ eq oneSold(L [S, P] R, S) = L [S, oneSold(P)] R .
+
+ op oneSold : Pair -> Pair .
+ eq oneSold(< s(N), N' >) = < N, N' > .
+ eq oneSold(P) = P [owise] .
+
+ sort NodeInfo .
+ op _&_ : String Pair -> NodeInfo [ctor] .
+
+ op min : BSTree ~> NodeInfo .
+ eq min(mt [S, P] R) = S & P .
+ eq min(L [S, P] R) = min(L) [owise] .
+
+ op delete : BSTree String -> BSTree .
+ eq delete(mt, S) = mt .
+ ceq delete(L [S, P] R, S') = delete(L, S') [S, P] R
+  if S' < S .
+ ceq delete(L [S, P] R, S') = L [S, P] delete(R, S')
+  if S' > S .
+ eq delete(L [S, P] mt, S) = L .
+ ceq delete(L [S, P] R, S) = L [S', P'] delete(R, S')
+  if S' & P' := min(R) [owise] .
+
+ op getPrice : BSTree String ~> Nat .
+ eq getPrice(L [S, < N, N' >] R, S) = N' .
+ ceq getPrice(L [S, < N, N' >] R, S') = getPrice(L, S')
+  if S' < S .
+ ceq getPrice(L [S, < N, N' >] R, S') = getPrice(R, S')
+  if S' > S .
+
+ op inStock : BSTree String -> Bool .
+ eq inStock(mt, S) = false .
+ eq inStock(L [S, < N, N' >] R, S) = N > 0 .
+ ceq inStock(L [S, < N, N' >] R, S') = inStock(L, S')
+  if S' < S .
+ ceq inStock(L [S, < N, N' >] R, S') = inStock(R, S')
+  if S' > S .
+endfm
+
+fmod FTEST is
+ pr BSTREE .
+
+ ops treeOK1 treeOK2 treeOK3 treeOK4 treeError : -> BSTree .
+ eq treeOK1 = (mt [ "a", < 1, 3 > ] mt) ["c", < 2, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
+ eq treeOK2 = (mt [ "a", < 1, 3 > ] (mt ["b", < 1, 1 >] mt)) ["c", < 2, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
+ eq treeOK3 = (mt ["a", < 1, 3 >] mt)["e", < 3, 5 >] mt .
+ eq treeOK4 = (mt [ "a", < 1, 3 > ] mt) ["c", < 1, 7 > ] (mt [ "e", < 3, 5 > ] mt) .
+ eq treeError = (mt [ "a", < 1, 3 > ] mt) ["d", < 1, 1 > ] (mt [ "c", < 2, 7 > ] mt) .
+endfm
+
+mod SHOP is
+ pr BSTREE .
+
+ sorts Person People Shop .
+ subsort Person < People .
+
+ *** Product Quantity Price
+ op seller : String Nat Nat -> Person [ctor] .
+ op buyer : String -> Person [ctor] .
+
+ op nobody : -> People [ctor] .
+ op __ : People People -> People [ctor assoc comm id: nobody] .
+
+ op [_|_,_] : People BSTree Nat -> Shop [ctor] .
+
+ vars N M PR Q : Nat .
+ var  T : BSTree .
+ var  P : People .
+ var  S : String .
+
+ crl [buyer_buys] :
+     [buyer(S) P | T, M]
+  => [P | oneSold(T, S), M + PR]
+  if inStock(T, S) /\
+     PR := getPrice(T, S) .
+
+ crl [seller_provides] :
+     [seller(S, Q, PR) P | T, M]
+  => [P | insert(T, S, < Q, 2 * PR >), sd(M, PR * Q) ]
+  if M >= PR * Q .
+endm
+
+mod STEST is
+ pr FTEST .
+ pr SHOP .
+
+ op init-shop : -> Shop .
+ eq init-shop = [seller("a", 1, 5) seller("b", 1, 5) buyer("a") | mt, 5] .
+endm
+
+load full-maude.maude
+
+fmod SHOP-SIGNATURE is
+  inc FULL-MAUDE-SIGN .
+
+  sorts @ShopCommand@ .
+  subsort @ShopCommand@ < @Input@ .
+
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to true       ***
+  *** Usage: assertTrue(f(t_1, ..., t_n))                                       ***
+  *********************************************************************************
+  op sold_ : @Token@ -> @ShopCommand@ [ctor] .
+  op add_,_,_ : @Token@ @Token@ @Token@ -> @ShopCommand@ [ctor] .
+
+endfm
+
+fmod META-SHOP-SIGN is
+ inc META-FULL-MAUDE-SIGN .
+ inc UNIT .
+
+ op SHOP-GRAMMAR : -> FModule [memo] .
+ eq SHOP-GRAMMAR = addImports((including 'SHOP-SIGNATURE .), GRAMMAR) .
+endfm
+
+mod IOSHOP is
+ inc DATABASE-HANDLING .
+ inc META-SHOP-SIGN .
+ pr BSTREE .
+
+ var  SDC : ShopDatabaseClass .
+ vars N M M' QTY PR : Nat .
+ var  AtS : AttributeSet .
+ vars BST BST' : BSTree .
+ vars T T' T'' : Term .
+ var  QIL : QidList .
+ var  DB : Database .
+ vars S S' : String .
+ var  B : Bool .
+ var  O : Oid .
+ var  Q : Qid .
+
+ sort ShopDatabaseClass .
+ subsort ShopDatabaseClass < DatabaseClass .
+
+ op SDatabase : -> ShopDatabaseClass [ctor] .
+
+ op tree :_ : BSTree -> Attribute [ctor] .
+ op money :_ : Nat -> Attribute [ctor] .
+
+ crl [sold] :
+     < O : SDC | input : ('sold_['token[T]]), output : nil, tree : BST,
+                 money : M, AtS >
+  => < O : SDC | input : nilTermList, output : QIL, tree : BST',
+                 money : M', AtS >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     B := inStock(BST, S) /\
+     BST' := if B
+             then oneSold(BST, S)
+             else BST
+             fi /\
+     M' := if B
+           then M + getPrice(BST, S)
+           else M
+           fi /\
+     QIL := if B
+            then '\n '\! 'Database 'updated. '\n
+                 '1 'unit 'of qid(S) 'sold 'at qid(getPrice(BST, S)) 'euros. '\o '\n
+            else '\n '\! '\r 'Error: '\o 'Product 'not 'in 'database. '\n
+            fi .
+
+ crl [add] :
+     < O : SDC | input : ('add_`,_`,_['token[T], 'token[T'], 'token[T'']]), output : nil,
+                 tree : BST, money : M, AtS >
+  => < O : SDC | input : nilTermList, output : QIL, tree : BST',
+                 money : M', AtS >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     QTY := rat(string(downQid(T')), 10) /\
+     PR := rat(string(downQid(T'')), 10) /\
+     B := M >= QTY * PR /\
+     BST' := if B
+             then insert(BST, S, < QTY, 2 * PR >)
+             else BST
+             fi /\
+     M' := if B
+           then sd(M, QTY * PR)
+           else M
+           fi /\
+     QIL := if B
+            then '\n '\! 'Database 'updated. qid(QTY) 'units 'of qid(S) 'added. '\n
+                 'It 'was 'bought 'at qid(PR) 'euros. '\n
+                 'It 'will 'be 'sold 'at qid(2 * PR) 'euros. '\o '\n
+            else '\n '\! '\r 'Error: '\o 'Not 'enough 'money. '\n
+            fi .
+endm
+
+mod SHOP-INIT is
+ inc LOOP-MODE .
+ pr IOSHOP .
+
+ var  QI : Qid .
+ vars QIL QIL' QIL'' : QidList .
+ var  Atts : AttributeSet .
+ var  N : Nat .
+ var  DB : Database .
+ vars RP RP' : ResultPair .
+ var  O : Oid .
+ var  X@Database : DatabaseClass .
+
+ op o : -> Oid [ctor] .
+
+ --- State for LOOP mode:
+ subsort Object < State .
+ op init-shop : -> System .
+
+ op init-state : -> AttributeSet .
+ eq init-state = db : initialDatabase, default : 'CONVERSION, tree : mt, money : 10 .
+
+ op banner : -> QidList .
+ eq banner = '\n 'Welcome 'to 'our 'shop 'manager! '\n .
+
+ rl [init] :
+    init-shop
+ => [nil, < o : SDatabase | input : nilTermList, output : nil, init-state >, banner ] .
+
+ crl [in] :
+     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
+  => [nil,
+      < O : X@Database | input : getTerm(metaParse(SHOP-GRAMMAR, QIL, '@Input@)), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     metaParse(SHOP-GRAMMAR, QIL, '@Input@) : ResultPair .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output : ('\r 'Warning: '\o
+                printSyntaxError(metaParse(SHOP-GRAMMAR, QIL, '@Input@), QIL)
+                '\n
+                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     noParse(N) := metaParse(SHOP-GRAMMAR, QIL, '@Input@)  .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
+      QIL']
+   if QIL =/= nil /\
+      ambiguity(RP, RP') := metaParse(SHOP-GRAMMAR, QIL, '@Input@)  .
+
+ rl [out] :
+    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
+ => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
+endm
+
+eof
+
+set print conceal on .
+print conceal mod_is_sorts_._____endm .
+print conceal fmod_is_sorts_.____endfm .
+print conceal db .
+
+set print attribute on .
+
+loop init-shop .
+
+(add cake, 1, 5)
+
+(sold cake)
