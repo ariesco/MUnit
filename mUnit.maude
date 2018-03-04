@@ -192,7 +192,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, T') /\
      T1 =/= 'true.Bool /\
      QIL := '\! '\n 'assertTrue '`( metaPrettyPrint(M, T', printOpts) '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertTrue['bubble[T]], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < T', SB > := sub4Atts(M, T, ATTS) /\
@@ -209,7 +210,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      TSB := applySb(T'', SB) /\
      T1 := reduce(M, TSB) /\
      T1 =/= 'true.Bool /\
-     QIL := '\! '\n 'assertTrue '`( downQidList(T) '`) ' '\r 'failed. '\o '\n .
+     QIL := '\! '\n 'assertTrue '`( downQidList(T) '`) ' '\r 'failed. '\o '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertTrue[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
@@ -255,7 +257,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, T') /\
      T1 =/= 'false.Bool /\
      QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if 'bubble[T2] := T /\
      ATTS := getAtts(SYS) /\
@@ -264,7 +267,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, T') /\
      T1 =/= 'false.Bool /\
      QIL := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertFalse['bubble[T]], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < T', SB > := sub4Atts(M, T, ATTS) /\
@@ -281,7 +285,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      TSB := applySb(T'', SB) /\
      T1 := reduce(M, TSB) /\
      T1 =/= 'false.Bool /\
-     QIL := '\! '\n 'assertFalse '`( downQidList(T) '`) ' '\r 'failed. '\o '\n .
+     QIL := '\! '\n 'assertFalse '`( downQidList(T) '`) ' '\r 'failed. '\o '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertFalse[T], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      T? := reduce(M, solveBubbles(T, M, B, VDS, DB)) /\
@@ -332,7 +337,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 =/= 'true.Bool /\
      QIL := '\! '\n 'assertTrue '`( metaPrettyPrint(M, TSB, printOpts) '`) '
             '\r 'failed. '\o '\n
-            ' '---> ' downQid(T') '\n .
+            ' '---> ' downQid(T') '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertTrueMsg[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -340,7 +346,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 =/= 'true.Bool /\
      QIL := '\! '\n 'assertTrue '`( metaPrettyPrint(M, TSB, printOpts) '`) '
             '\r 'failed. '\o '\n
-            ' '---> ' downQid(T') '\n .
+            ' '---> ' downQid(T') '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertTrueMsg['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < T1, SB > := sub4Atts(M, T, ATTS) /\
@@ -350,8 +357,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      T3 := reduce(M, TSB) /\
      T3 =/= 'true.Bool /\
      QIL := '\! '\n 'assertTrue '`( downQidList(T) '`) ' '\r 'failed. '\o '\n
-            ' '---> ' downQid(T') '\n .
- ceq procProps(M, 'assertTrueMsg['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
+            ' '---> ' downQid(T') '\n
+            '\! 'Term 'reduced 'to metaPrettyPrint(M, T3, printOpts) '\o '\n .
+ ceq procProps(M, 'assertTrueMsg['bubble[T], 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < T1, SB > := sub4Atts(M, T, ATTS) /\
      SB =/= none /\
@@ -400,7 +408,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      T2 := reduce(M, TSB') /\
      T1 =/= T2 /\
      QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
+            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
+            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -409,7 +419,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      T2 := reduce(M, TSB') /\
      T1 =/= T2 /\
      QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
+            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
+            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
  ceq procProps(M, 'assertEqual['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -436,7 +448,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      T2 := reduce(M, TIS1') /\
      T1 =/= T2 /\
      QIL := '\! '\n 'assertEqual '`( downQidList(T) '`, downQidList(T') '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
+            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
@@ -503,7 +517,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      T1 := reduce(M, TIS') /\
      T1 := reduce(M, TIS1') /\
      QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\! 'Terms 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
  ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -645,7 +660,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      sameKind(M, Q, S) /\
      not sortLeq(M, S, Q) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -655,7 +672,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      sameKind(M, Q, S) /\
      not sortLeq(M, S, Q) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -667,7 +686,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      Q ; SS := getSorts(M) /\
      sameKind(M, Q, S) /\
      not sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n .
+     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if 'bubble[TI] := T /\
      ATTS := getAtts(SYS) /\
@@ -678,7 +699,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -687,7 +710,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n .
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -698,7 +723,9 @@ fmod MUNIT-COMMAND-PROCESSING is
      Q := downQid(T') /\
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n .
+     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\
@@ -825,14 +852,6 @@ fmod MUNIT-COMMAND-PROCESSING is
      metaSearch(M, T1, T2, nil, '*, N, 0) =/= failure /\
      QIL := '\! '\n 'assertReachableBnd '`( downQidList(T) '`, downQidList(T') '`,
                                             downQid(T'') '`) ' '\g 'passed. '\o '\n .
-
-
-
-
-
-
-
-
  ceq procProps(M, 'assertReachableBnd[T, T', 'token[T'']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      'bubble[TI] := T /\
