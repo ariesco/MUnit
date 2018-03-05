@@ -684,8 +684,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      not sortLeq(M, S, Q) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
             '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -696,8 +696,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      S =/= Q /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
             '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -710,8 +710,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      sameKind(M, Q, S) /\
      S =/= Q /\
      QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if 'bubble[TI] := T /\
      ATTS := getAtts(SYS) /\
@@ -723,8 +723,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
             '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
@@ -734,8 +734,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
             '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if ATTS := getAtts(SYS) /\
      < TI, SB > := sub4Atts(M, T, ATTS) /\
@@ -747,8 +747,8 @@ fmod MUNIT-COMMAND-PROCESSING is
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
+            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
+            '\n '\! 'Its 'sort 'is '\o S '\n .
  ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
   if T? := solveBubbles(T, M, B, VDS, DB) /\
      not (T? :: Term) /\

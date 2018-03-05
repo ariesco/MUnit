@@ -221,9 +221,15 @@ mod IOSHOP is
              then insert(BST, S, < QTY, 2 * PR >)
              else BST
              fi /\
+             ***(
      M' := if B
            then sd(M, QTY * PR)
            else M
+           fi /\
+           )
+     M' := if B
+           then M
+           else sd(M, QTY * PR)
            fi /\
      QIL := if B
             then '\n '\! 'Database 'updated. qid(QTY) 'units 'of qid(S) 'added. '\n
