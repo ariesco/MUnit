@@ -565,9 +565,10 @@ fmod MUNIT-COMMAND-PROCESSING is
             then unbounded
             else rat(string(Q'), 10)
             fi /\
+     'bubble[T5] := T4 /\
      UR := if T4 == 'bubble[''nil.Qid]
            then procSolution(M, TSB, TSB', Q, BND, nil, SYS)
-           else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T5, M, addInfoConds(M), B, VDS, DB), SYS)
            fi .
 
  op procSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
@@ -597,9 +598,10 @@ fmod MUNIT-COMMAND-PROCESSING is
             then unbounded
             else rat(string(Q'), 10)
             fi /\
+     'bubble[T5] := T4 /\
      UR := if T4 == 'bubble[''nil.Qid]
            then noSolution(M, TSB, TSB', Q, BND, nil, SYS)
-           else noSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           else noSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T5, M, addInfoConds(M), B, VDS, DB), SYS)
            fi .
 
  op noSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
