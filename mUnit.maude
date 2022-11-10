@@ -103,22 +103,23 @@ endfm
 
 fmod META-MUNIT-SIGN is
  inc META-FULL-MAUDE-SIGN .
- inc UNIT .
+ inc FM-UNIT .
 
  op MUNIT-GRAMMAR : -> FModule [memo] .
  eq MUNIT-GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), GRAMMAR) .
 endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
- pr COMMAND-PROCESSING .
+ pr FM-COMMAND-PROCESSING .
  pr PRINT .
 
- vars T T' T'' T''' T1 T2 T3 T4 TSB TSB' TSB'' SYS SYS' SYS'' TI TI' TI1 TIS TIS' TIS1 TIS1' : Term .
+ vars T T' T'' T''' T1 T2 T3 T4 T5 TSB TSB' TSB'' SYS SYS' SYS'' TI TI' TI1 TIS TIS' TIS1 TIS1' : Term .
  vars TL TL' TL'' ATTS : TermList .
  var  ME : ModuleExpression .
  vars SB SB' : Substitution .
  vars St St' St'' : String .
- vars VDS ODS : OpDeclSet .
+ var ODS : OpDeclSet .
+ var VDS : VariableSet .
  var  COND? : [Condition] .
  vars QIL QIL' : QidList .
  vars DB DB' : Database .
@@ -162,7 +163,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  eq procMUnitAux(ME, T, DB) = < 0, 0, '\n '\r '\! 'Error: '\o 'The
                                   'module 'cannot 'be 'compiled. '\n > [owise] .
 
- op procProps : Module Term OpDeclSet Bool Database Term -> UnitResult .
+ op procProps : Module Term VariableSet Bool Database Term -> UnitResult .
  ceq procProps(M, '__[T, T'], VDS, B, DB, SYS) = [N + N', N1 + N1', QIL QIL', SYS'']
   if [N, N1, QIL, SYS'] := procProps(M, T, VDS, B, DB, SYS) /\
      [N', N1', QIL', SYS''] := procProps(M, T', VDS, B, DB, SYS') .
@@ -1142,7 +1143,7 @@ endfm
 
 mod MUNIT is
  pr MUNIT-COMMAND-PROCESSING .
- inc DATABASE-HANDLING .
+ inc FM-DATABASE-HANDLING .
  inc META-MUNIT-SIGN .
  pr PRINT .
 
@@ -1215,7 +1216,7 @@ mod MUNIT-INIT is
       < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
       QIL']
    if QIL =/= nil /\
-      ambiguity(RP, RP') := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
+      ambiguity(RP, RP') := metaParse(MUNIT-GRAMMAR, QIL, '@Input@) .
 
  rl [out] :
     [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
@@ -1225,6 +1226,7 @@ endm
 set print conceal on .
 print conceal mod_is_sorts_._____endm .
 print conceal fmod_is_sorts_.____endfm .
+print conceal smod_is_sorts_._______endsm .
 print conceal db .
 
 *** for debugging purposes
