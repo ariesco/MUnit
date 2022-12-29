@@ -571,6 +571,13 @@ fmod MUNIT-COMMAND-PROCESSING is
            else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T5, M, addInfoConds(M), B, VDS, DB), SYS)
            fi .
 
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (solveBubbles(T, M, B, VDS, DB) :: Term) /\
+     QIL := '\! '\n 'hasSolution '-> 'No 'parse 'for 'initial 'term. '\o '\n .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
+  if not (solveBubbles(T', M, B, VDS, DB) :: Term) /\
+     QIL := '\! '\n 'hasSolution '-> 'No 'parse 'for 'pattern. '\o '\n .
+
  op procSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
  ceq procSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
   if metaSearch(M, T, T', COND, Q, BND, 0) =/= failure /\
