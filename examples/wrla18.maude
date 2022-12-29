@@ -154,14 +154,14 @@ endfm
 
 fmod META-SHOP-SIGN is
  inc META-FULL-MAUDE-SIGN .
- inc UNIT .
+ inc FM-UNIT .
 
  op SHOP-GRAMMAR : -> FModule [memo] .
  eq SHOP-GRAMMAR = addImports((including 'SHOP-SIGNATURE .), GRAMMAR) .
 endfm
 
 mod IOSHOP is
- inc DATABASE-HANDLING .
+ inc FM-DATABASE-HANDLING .
  inc META-SHOP-SIGN .
  pr BSTREE .
 
