@@ -1,0 +1,350 @@
+load file.maude
+
+fmod MAYBE{X :: TRIV} is
+ sort Maybe{X} .
+ subsort X$Elt < Maybe{X} .
+ op maybe : -> Maybe{X} [ctor] .
+endfm
+
+view Term from TRIV to META-TERM is
+ sort Elt to Term .
+endv
+
+fmod COMMANDS is
+ pr QID .
+
+ sort @Command@ .
+
+ op open_. : Qid -> @Command@ [ctor] .
+endfm
+
+fmod MUNIT-SIGNATURE is
+
+  sorts @Token@ @NeTokenList@ @Bubble@ .
+
+  sorts @MUnitModule@ @MUnitPredicate@ @MUnitPredList@ .
+  subsort @MUnitPredicate@ < @MUnitPredList@ .
+
+  op __ : @MUnitPredList@ @MUnitPredList@ -> @MUnitPredList@ [ctor assoc] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to true       ***
+  *** Usage: assertTrue(f(t_1, ..., t_n))                                       ***
+  *********************************************************************************
+  op assertTrue : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  **********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to false       ***
+  *** Usage: assertFalse(f(t_1, ..., t_n))                                       ***
+  **********************************************************************************
+  op assertFalse : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test is evaluated to true       ***
+  *** and print the given message                                               ***
+  *** Usage: assertTrueMsg(f(t_1, ..., t_n), "Error in f")                      ***
+  *********************************************************************************
+  op assertTrueMsg : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that both terms are reduced to the same normal form.            ***
+  *** Usage: assertEqual(t, t')                                                 ***
+  *********************************************************************************
+  op assertEqual : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+
+  ************************************************************************************
+  *** Indicates that both terms are reduced to a different normal form.            ***
+  *** Usage: assertDifferent(t, t')                                                ***
+  ************************************************************************************
+  op assertDifferent : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor comm] .
+
+  *********************************************************************************
+  *** Indicates that t' is reachable from t within an unbounded number          ***
+  *** of steps.                                                                 ***
+  *** Usage: assertReachable(t, t')                                             ***
+  *********************************************************************************
+  op assertReachable : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that t' is reachable from t' within n steps.                    ***
+  *** Usage: assertReachableBnd(t, t', bnd)                                     ***
+  *********************************************************************************
+  op assertReachableBnd : @Bubble@ @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that a search starting in t, having pat as pattern, with the    ***
+  *** given type of search (*, +, or !), and condition cond reaches at least    ***
+  *** one solution with at most bound number of steps.                          ***
+  *** Usage: hasSolution(t, pat, (*, +, !), bound, cond)                        ***
+  *********************************************************************************
+  op hasSolution : @Bubble@ @Bubble@ @Token@ @Token@ @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that a search starting in t, having pat as pattern, with the    ***
+  *** given type of search (*, +, or !), and condition cond reaches no          ***
+  *** solution with at most bound number of steps.                              ***
+  *** Usage: noSolution(t, pat, (*, +, !), bound, cond)                         ***
+  *********************************************************************************
+  op noSolution : @Bubble@ @Bubble@ @Token@ @Token@ @Bubble@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test must have the given sort.  ***
+  *** It passes if the sort of the term is equal to the given sort.             ***
+  *** Usage: assertSort(f(t_1, ..., t_n), Sort)                                 ***
+  *********************************************************************************
+  op assertSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  *********************************************************************************
+  *** Indicates that the term introduced in the test must have the given sort.  ***
+  *** It passes if the sort of the term is lesser or equal than the given sort. ***
+  *** Usage: assertLeqSort(f(t_1, ..., t_n), Sort)                              ***
+  *********************************************************************************
+  op assertLeqSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+
+  op munit_is_endu : @Token@ @MUnitPredList@ -> @MUnitModule@ [ctor] .
+endfm
+
+
+
+fmod META-MUNIT-SIGN is
+  inc META-LEVEL .
+
+  var  SSDS : SubsortDeclSet .
+  vars IL IL' : ImportList .
+  var  EqS : EquationSet .
+  var  ODS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  RS : RuleSet .
+  var  SS : SortSet .
+  var  H : Header .
+
+  op BUBBLES : -> FModule .
+  eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ':)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'strat 'endm
+                                  'endfm 'endsm 'sorts 'subsort 'subsorts
+                                  'subclass 'subclasses 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '==)))] .
+        none
+        none
+     endfm) .
+
+  op GRAMMAR : -> FModule [memo] .
+  eq GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), BUBBLES) .
+
+  op addImports : ImportList Module -> Module .
+  eq addImports(IL', fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                     fmod H is IL IL' sorts SS . SSDS ODS MAS EqS endfm .
+  eq addImports(IL', mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                     mod H is IL IL' sorts SS . SSDS ODS MAS EqS RS endm .
+endfm
+
+mod MONGO-IO is
+ pr META-MUNIT-SIGN .
+ inc STD-STREAM .
+ pr MAYBE{Term} .
+ pr LEXICAL .
+ inc FILE .
+
+
+ ***             ***
+ ***  Variables  ***
+ ***             ***
+
+ var  AtS : AttributeSet .
+ vars S D TXT : String .
+ var  FHIn : Oid .
+ var  T  : Term .
+
+ ***            ***
+ *** Attributes ***
+ ***            ***
+
+ *** Parsed input
+ op input:_ : Maybe{Term} -> Attribute [ctor] .
+ *** Current state
+ op state:_ : State -> Attribute [ctor] .
+ *** File being read
+ op data:_ : String -> Attribute [ctor gather (&)] .
+
+ ***            ***
+ ***   States   ***
+ ***            ***
+
+ sort State .
+ ops waiting reading processing : -> State [ctor] .
+
+ ***           ***
+ *** CID & OID ***
+ ***           ***
+
+ *** Object and class definition
+ op munit : -> Oid [ctor] .
+ op MUnit : -> Cid [ctor] .
+
+ ************************************
+ ***                              ***
+ *** Initial value for attributes ***
+ ***                              ***
+ ************************************
+
+  crl [open-cmnd-start] :
+      < munit : MUnit | input: ('open_.['token[T]]), state: waiting, AtS >
+   => < munit : MUnit | input: maybe, state: reading, AtS >
+      openFile(fileManager, munit, S, "r")
+   if S := downTerm(T, "") .
+
+  rl [open-cmnd-opened] :
+     openedFile(munit, fileManager, FHIn)
+     < munit : MUnit | state: reading, AtS >
+  => < munit : MUnit | state: reading, AtS >
+     getLine(FHIn, munit) .
+
+  rl [open-cmnd-got-line] :
+     gotLine(munit, FHIn, TXT)
+     < munit : MUnit | state: reading, data: D, AtS >
+  => < munit : MUnit | state: reading, data: D + TXT, AtS >
+     if Text == ""
+     then closeFile(FHIn, myObj)
+     else getLine(FHIn, munit)
+     fi .
+
+  rl [open-cmnd-closed] :
+     closedFile(myObj, FHIn)
+     < munit : MUnit | state: reading, AtS >
+  => < munit : MUnit | state: processing, AtS > .
+
+
+endm
+
+eof
+
+ rl < myObj : myClass | in: null, outFile: Copy, Attrs >
+   openedFile(myObj, fileManager, FHIn)
+ => < myObj : myClass | in: FHIn, outFile: Copy, Attrs >
+   openFile(fileManager, myObj, Copy, "w") .
+ rl < myObj : myClass | in: FHIn, out: null, Attrs >
+   openedFile(myObj, fileManager, FHOut)
+ => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   getLine(FHIn, myObj) .
+ rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   gotLine(myObj, FHIn, Text)
+ => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   if Text == ""
+   then closeFile(FHIn, myObj)
+       closeFile(FHOut, myObj)
+   else write(FHOut, myObj, Text)
+   fi .
+ rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   wrote(myObj, FHOut)
+ => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   getLine(FHIn, myObj) .
+ rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
+   closedFile(myObj, FHIn)
+   closedFile(myObj, FHOut)
+ => none .
+
+ ************************************
+ ***                              ***
+ *** Initial value for attributes ***
+ ***                              ***
+ ************************************
+ op initAtS : -> AttributeSet .
+ eq initAtS = input: maybe, state: waiting, data: "" .
+
+ op run : -> Configuration .
+ eq run
+  = <> < munit : MUnit | initAtS >
+    getLine(stdin, mongo, "MUnit> ") .
+endm
+
+eof
+
+mod MUNIT-INIT is
+ inc LOOP-MODE .
+ pr MUNIT .
+
+ var  QI : Qid .
+ vars QIL QIL' QIL'' : QidList .
+ var  Atts : AttributeSet .
+ var  N : Nat .
+ var  DB : Database .
+ vars RP RP' : ResultPair .
+ var  O : Oid .
+ var  X@Database : DatabaseClass .
+
+ op o : -> Oid [ctor] .
+
+ --- State for LOOP mode:
+ subsort Object < State .
+ op init-munit : -> System .
+
+ op init-state : -> AttributeSet .
+ eq init-state = db : initialDatabase, default : 'CONVERSION .
+
+ rl [init] :
+    init-munit
+ => [nil, < o : MUDatabase | input : nilTermList, output : nil, init-state >, mu-banner] .
+
+ crl [in] :
+     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
+  => [nil,
+      < O : X@Database | input : getTerm(metaParse(MUNIT-GRAMMAR, QIL, '@Input@)), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     metaParse(MUNIT-GRAMMAR, QIL, '@Input@) : ResultPair .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output : ('\r 'Warning: '\o
+                printSyntaxError(metaParse(MUNIT-GRAMMAR, QIL, '@Input@), QIL)
+                '\n
+                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
+      QIL']
+  if QIL =/= nil /\
+     noParse(N) := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
+
+ crl [in] :
+     [QIL, < O : X@Database | output : nil, Atts >, QIL']
+  => [nil,
+      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
+      QIL']
+   if QIL =/= nil /\
+      ambiguity(RP, RP') := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
+
+ rl [out] :
+    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
+ => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
+endm
+
+set print conceal on .
+print conceal mod_is_sorts_._____endm .
+print conceal fmod_is_sorts_.____endfm .
+print conceal db .
+
+*** for debugging purposes
+set print attribute on .
+
+loop init-munit .
+
