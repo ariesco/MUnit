@@ -427,36 +427,6 @@ eof
             metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
             printCond(M, COND) '`) ' '\r 'failed. '\o '\n .
 
- *********************************************************************************
- ***********************                loop               ***********************
- *********************************************************************************
- ceq procProps(M, 'loop['token[T]], VDS, B, DB, SYS) = [0, 0, QIL, T'']
-  if Q := downQid(T) /\
-     T' := qid(string(Q) + ".System") /\
-     T'' := rewrite(M, T') /\
-     QIL := '\n '\! 'loop '\b Q '\o '\! 'started. '\o '\n .
- ceq procProps(M, 'loop['token[T]], VDS, B, DB, SYS) = [0, 0, QIL, SYS]
-  if Q := downQid(T) /\
-     T' := qid(string(Q) + ".System") /\
-     not (metaRewrite(M, T', unbounded) :: ResultPair) /\
-     QIL := '\n '\! '\r 'loop '\b Q '\o '\! '\r 'failed. '\o '\n .
-
- ************************************************************************************
- ***********************                command               ***********************
- ************************************************************************************
- ceq procProps(M, 'command['bubble[T]], VDS, B, DB, SYS) = [0, 0, QIL', SYS'']
-  if QIL := downQidList(T) /\
-     T' := upTerm(QIL) /\
-     SYS' := sysInput(SYS, T') /\
-     SYS'' := rewrite(M, SYS') /\
-     QIL' := '\n '\! 'command '\b ' '`( QIL '`) ' '\o '\! 'executed. '\o '\n .
- ceq procProps(M, 'command['bubble[T]], VDS, B, DB, SYS) = [0, 0, QIL', SYS]
-  if QIL := downQidList(T) /\
-     T' := upTerm(QIL) /\
-     SYS' := sysInput(SYS, T') /\
-     not (metaRewrite(M, SYS', unbounded) :: ResultPair) /\
-     QIL' := '\n '\! '\r 'command '\b ' '`( QIL '`) ' '\o '\! '\r 'failed. '\o '\n .
-
  **********************************************************************************
  ********************                assertSort               *********************
  **********************************************************************************
