@@ -1,0 +1,11 @@
+munit FOO is
+  assertEqual(3, 4)
+  assertEqual(3, add(1, 2))
+  assertEqual(add(2,1), 2 + 1)
+  assertEqual(3, 3)
+
+  assertTrue(even(7))
+  assertTrue(even(8))
+endu
+
+
