@@ -5,6 +5,7 @@ munit FOO is
   assertEqual(3, 3)
 
   assertTrue(even(7))
+  assertTrue(even(8))
 endu
 
 
