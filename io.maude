@@ -251,7 +251,7 @@ mod MUNIT-IO is
 
  op printUR : UnitResult -> String .
  eq printUR(< CORR, FAIL, INFO >) = "\n" + string(CORR + FAIL, 10) + " test cases were executed.\n" +
-                                    "\n" + string(FAIL, 10) + " failures.\n" +  printTokens(INFO) .
+                                    "\n" + string(FAIL, 10) + " failures.\n" +  printTokens(INFO) + "\n" .
 
  op printRed : String -> String .
  eq printRed(S) = printTokens('\! '\r) + S + printTokens('\o) .

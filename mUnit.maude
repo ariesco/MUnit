@@ -58,24 +58,24 @@ fmod MUNIT-COMMAND-PROCESSING is
  pr AUX .
 
  vars T T' T'' T''' T1 T2 T3 T4 TSB TSB' TSB'' TI TI' TI1 TIS TIS' TIS1 TIS1' MSG : Term .
+ vars QIL QIL' QILI QILI' : QidList .
  vars TL TL' TL'' : TermList .
  vars SB SB' : Substitution .
  vars St St' St'' : String .
  vars VDS ODS : OpDeclSet .
  var  COND? : [Condition] .
- vars QIL QIL' : QidList .
  vars N N' N1 N1' : Nat .
  var  COND : Condition .
  var  UR : UnitResult .
+ vars Ty Ty' : Type .
  var  AtS : AttrSet .
- var  BND : Bound .
  var  V : Variable .
  var  SS : SortSet .
  var  C : Constant .
+ var  BND : Bound .
  var  T? : [Term] .
  var  M : Module .
  vars Q Q' : Qid .
- var  Ty : Type .
  var  S : Sort .
  var  B : Bool .
 
@@ -175,27 +175,40 @@ fmod MUNIT-COMMAND-PROCESSING is
              '\n 'assertTrue '`( QIL '`) '\n
              ' '---> ' downQid(MSG) '\n .
 
+ **********************************************************************************
+ ********************                assertEqual               ********************
+ **********************************************************************************
+ ceq procProps(M, 'assertEqual[T, T']) = < 1, 0, QIL >
+  if 'bubble[TI] := T /\
+     QILI := downQidList(TI) /\
+     'bubble[TI'] := T' /\
+     QILI' := downQidList(TI') /\
+     {TSB, Ty} := metaParse(M, QILI, anyType) /\
+     {TSB', Ty'} := metaParse(M, QILI', anyType) /\
+     reduce(M, TSB) == reduce(M, TSB') /\
+     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertEqual[T, T']) = < 0, 1, QIL >
+  if 'bubble[TI] := T /\
+     QILI := downQidList(TI) /\
+     'bubble[TI'] := T' /\
+     QILI' := downQidList(TI') /\
+     {TSB, Ty} := metaParse(M, QILI, anyType) /\
+     {TSB', Ty'} := metaParse(M, QILI', anyType) /\
+     T1 := reduce(M, TSB) /\
+     T2 := reduce(M, TSB') /\
+     T1 =/= T2 /\
+     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
+            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
+            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
+
+
  eq procProps(M, T) = < 0, 1, nil > [owise print T] .
 
 endfm
 
 eof
-
- **********************************************************************************
- ********************                assertEqual               ********************
- **********************************************************************************
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T' /\
-     < TI', none > := sub4Atts(M, TI', ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T1 := reduce(M, TSB') /\
-     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
   if not (getAtts(SYS) :: Term) /\
      TSB := solveBubbles(T, M, B, VDS, DB) /\
