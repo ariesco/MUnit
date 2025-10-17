@@ -10,12 +10,52 @@ view Term from TRIV to META-TERM is
  sort Elt to Term .
 endv
 
+fmod META-OPS is
+  inc META-LEVEL .
+
+  var  SSDS : SubsortDeclSet .
+  vars IL IL' : ImportList .
+  var  EqS : EquationSet .
+  var  ODS : OpDeclSet .
+  var  MAS : MembAxSet .
+  var  RS : RuleSet .
+  var  SS : SortSet .
+  var  H : Header .
+
+  op addImports : ImportList Module -> Module .
+  eq addImports(IL', fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
+                     fmod H is IL IL' sorts SS . SSDS ODS MAS EqS endfm .
+  eq addImports(IL', mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
+                     mod H is IL IL' sorts SS . SSDS ODS MAS EqS RS endm .
+
+endfm
+
 fmod COMMANDS is
  pr QID .
 
  sort @Command@ .
 
  op open_. : Qid -> @Command@ [ctor] .
+ op quit : -> @Command@ [ctor] .
+ op q : -> @Command@ [ctor] .
+endfm
+
+fmod META-COMMANDS-SIGN is
+  inc META-OPS .
+
+  op COMMANDS-BUBBLES : -> FModule .
+  eq COMMANDS-BUBBLES
+    = (fmod 'COMMANDS-GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        none
+        none
+        none
+     endfm) .
+
+  op COMMANDS-GRAMMAR : -> FModule [memo] .
+  eq COMMANDS-GRAMMAR = addImports((including 'COMMANDS .), COMMANDS-BUBBLES) .
 endfm
 
 fmod MUNIT-SIGNATURE is
@@ -107,20 +147,11 @@ endfm
 
 
 fmod META-MUNIT-SIGN is
-  inc META-LEVEL .
-
-  var  SSDS : SubsortDeclSet .
-  vars IL IL' : ImportList .
-  var  EqS : EquationSet .
-  var  ODS : OpDeclSet .
-  var  MAS : MembAxSet .
-  var  RS : RuleSet .
-  var  SS : SortSet .
-  var  H : Header .
+  inc META-OPS .
 
   op BUBBLES : -> FModule .
   eq BUBBLES
-    = (fmod 'GRAMMAR is
+    = (fmod 'MUNIT-GRAMMAR is
         including 'QID-LIST .
         sorts none .
         none
@@ -149,17 +180,12 @@ fmod META-MUNIT-SIGN is
         none
      endfm) .
 
-  op GRAMMAR : -> FModule [memo] .
-  eq GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), BUBBLES) .
-
-  op addImports : ImportList Module -> Module .
-  eq addImports(IL', fmod H is IL sorts SS . SSDS ODS MAS EqS endfm) =
-                     fmod H is IL IL' sorts SS . SSDS ODS MAS EqS endfm .
-  eq addImports(IL', mod H is IL sorts SS . SSDS ODS MAS EqS RS endm) =
-                     mod H is IL IL' sorts SS . SSDS ODS MAS EqS RS endm .
+  op MUNIT-GRAMMAR : -> FModule [memo] .
+  eq MUNIT-GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), BUBBLES) .
 endfm
 
 mod MONGO-IO is
+ pr META-COMMANDS-SIGN .
  pr META-MUNIT-SIGN .
  inc STD-STREAM .
  pr MAYBE{Term} .
@@ -174,7 +200,8 @@ mod MONGO-IO is
  var  AtS : AttributeSet .
  vars S D TXT : String .
  var  FHIn : Oid .
- var  T  : Term .
+ var  Ty : Type .
+ var  T : Term .
 
  ***            ***
  *** Attributes ***
@@ -192,7 +219,23 @@ mod MONGO-IO is
  ***            ***
 
  sort State .
- ops waiting reading processing : -> State [ctor] .
+ ops waiting reading processing idle write&wait write&end finished : -> State [ctor] .
+
+ ***              ***
+ ***   Messages   ***
+ ***              ***
+
+ op errorMsg : -> String .
+ eq errorMsg = "\n" + printRed("Error: ") .
+
+ op noParseMsg : -> String .
+ eq noParseMsg = errorMsg + "Command not parsed.\n\n" .
+
+ op byeMsg : -> String .
+ eq byeMsg = "\nThanks for using MUnit!\n\n" .
+
+ op printRed : String -> String .
+ eq printRed(S) = printTokens('\! '\r) + S + printTokens('\o) .
 
  ***           ***
  *** CID & OID ***
@@ -224,45 +267,72 @@ mod MONGO-IO is
      gotLine(munit, FHIn, TXT)
      < munit : MUnit | state: reading, data: D, AtS >
   => < munit : MUnit | state: reading, data: D + TXT, AtS >
-     if Text == ""
-     then closeFile(FHIn, myObj)
+     if TXT == ""
+     then closeFile(FHIn, munit)
      else getLine(FHIn, munit)
      fi .
 
   rl [open-cmnd-closed] :
-     closedFile(myObj, FHIn)
+     closedFile(munit, FHIn)
      < munit : MUnit | state: reading, AtS >
   => < munit : MUnit | state: processing, AtS > .
 
+  crl [parse-module] :
+      < munit : MUnit | state: processing, data: D, AtS >
+   => < munit : MUnit | state: processing, data: "", AtS >
+   if {T, Ty} := metaParse(MUNIT-GRAMMAR, tokenize(D), '@MUnitModule@) .
 
-endm
+ ********************
+ ***              ***
+ ***     Wrote    ***
+ ***              ***
+ ********************
 
-eof
+ rl [remove-wrote-wait] :
+    wrote(munit, stdout)
+    < munit : MUnit | state: write&wait, AtS >
+ => < munit : MUnit | state: idle, AtS >
+    getLine(stdin, munit, "MUnit> ") .
 
- rl < myObj : myClass | in: null, outFile: Copy, Attrs >
-   openedFile(myObj, fileManager, FHIn)
- => < myObj : myClass | in: FHIn, outFile: Copy, Attrs >
-   openFile(fileManager, myObj, Copy, "w") .
- rl < myObj : myClass | in: FHIn, out: null, Attrs >
-   openedFile(myObj, fileManager, FHOut)
- => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   getLine(FHIn, myObj) .
- rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   gotLine(myObj, FHIn, Text)
- => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   if Text == ""
-   then closeFile(FHIn, myObj)
-       closeFile(FHOut, myObj)
-   else write(FHOut, myObj, Text)
-   fi .
- rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   wrote(myObj, FHOut)
- => < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   getLine(FHIn, myObj) .
- rl < myObj : myClass | in: FHIn, out: FHOut, Attrs >
-   closedFile(myObj, FHIn)
-   closedFile(myObj, FHOut)
- => none .
+ rl [remove-wrote-end] :
+    wrote(munit, stdout)
+    < munit : MUnit | state: write&end, AtS >
+ => < munit : MUnit | state: finished, AtS > .
+
+ ********************
+ ***              ***
+ ***      Quit    ***
+ ***              ***
+ ********************
+
+ rl [quite-large] :
+    < munit : MUnit | input: 'quit.@Command@, state: waiting, AtS >
+ => < munit : MUnit | input: maybe, state: write&end, AtS >
+    write(stdout, munit, byeMsg) .
+
+ rl [quit-short] :
+    < munit : MUnit | input: 'q.@Command@, state: waiting, AtS >
+ => < munit : MUnit | input: maybe, state: write&end, AtS >
+    write(stdout, munit, byeMsg) .
+
+ ********************
+ ***              ***
+ ***     Parse    ***
+ ***              ***
+ ********************
+
+ crl [parse-command] :
+     gotLine(munit, stdin, S)
+     < munit : MUnit | input: maybe, state: idle, AtS >
+  => < munit : MUnit | input: T, state: waiting, AtS >
+  if {T, Ty} := metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) .
+
+ crl [parse-command-error] :
+     gotLine(munit, stdin, S)
+     < munit : MUnit | state: idle, AtS >
+  => < munit : MUnit | state: write&wait, AtS >
+     write(stdout, munit, noParseMsg)
+  if not (metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) :: ResultPair) .
 
  ************************************
  ***                              ***
@@ -270,13 +340,15 @@ eof
  ***                              ***
  ************************************
  op initAtS : -> AttributeSet .
- eq initAtS = input: maybe, state: waiting, data: "" .
+ eq initAtS = input: maybe, state: idle, data: "" .
 
  op run : -> Configuration .
  eq run
   = <> < munit : MUnit | initAtS >
-    getLine(stdin, mongo, "MUnit> ") .
+    getLine(stdin, munit, "MUnit> ") .
 endm
+
+erew run .
 
 eof
 
