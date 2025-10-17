@@ -1,4 +1,5 @@
 load file.maude
+load mUnit.maude
 
 fmod MAYBE{X :: TRIV} is
  sort Maybe{X} .
@@ -33,9 +34,9 @@ endfm
 fmod COMMANDS is
  pr QID .
 
- sort @Command@ .
+ sort @Command@ @Token@ .
 
- op open_. : Qid -> @Command@ [ctor] .
+ op open_ : @Token@ -> @Command@ [ctor] .
  op quit : -> @Command@ [ctor] .
  op q : -> @Command@ [ctor] .
 endfm
@@ -49,7 +50,10 @@ fmod META-COMMANDS-SIGN is
         including 'QID-LIST .
         sorts none .
         none
-        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
         none
         none
      endfm) .
@@ -199,6 +203,9 @@ mod MONGO-IO is
 
  var  AtS : AttributeSet .
  vars S D TXT : String .
+ var  MT : Maybe{Term} .
+ vars CORR FAIL : Nat .
+ var  INFO : QidList .
  var  FHIn : Oid .
  var  Ty : Type .
  var  T : Term .
@@ -213,13 +220,15 @@ mod MONGO-IO is
  op state:_ : State -> Attribute [ctor] .
  *** File being read
  op data:_ : String -> Attribute [ctor gather (&)] .
+ *** Current term
+ op parsed:_ : Maybe{Term} -> Attribute [ctor] .
 
  ***            ***
  ***   States   ***
  ***            ***
 
  sort State .
- ops waiting reading processing idle write&wait write&end finished : -> State [ctor] .
+ ops idle waiting reading processing executing write&wait write&end finished : -> State [ctor] .
 
  ***              ***
  ***   Messages   ***
@@ -252,10 +261,10 @@ mod MONGO-IO is
  ************************************
 
   crl [open-cmnd-start] :
-      < munit : MUnit | input: ('open_.['token[T]]), state: waiting, AtS >
+      < munit : MUnit | input: ('open_['token[T]]), state: waiting, AtS >
    => < munit : MUnit | input: maybe, state: reading, AtS >
       openFile(fileManager, munit, S, "r")
-   if S := downTerm(T, "") .
+   if S := string(downTerm(T, 'a')) .
 
   rl [open-cmnd-opened] :
      openedFile(munit, fileManager, FHIn)
@@ -279,8 +288,19 @@ mod MONGO-IO is
 
   crl [parse-module] :
       < munit : MUnit | state: processing, data: D, AtS >
-   => < munit : MUnit | state: processing, data: "", AtS >
-   if {T, Ty} := metaParse(MUNIT-GRAMMAR, tokenize(D), '@MUnitModule@) .
+   => < munit : MUnit | state: executing, data: "", AtS >
+   if {T, Ty} := metaParse(MUNIT-GRAMMAR, tokenize(D), '@MUnitModule@) [print T] .
+
+ ************************
+ ***                  ***
+ ***     Executing    ***
+ ***                  ***
+ ************************
+
+  crl [parse-module] :
+      < munit : MUnit | state: executing, data: D, AtS >
+   => < munit : MUnit | state: , data: "", AtS >
+   if {T, Ty} := metaParse(MUNIT-GRAMMAR, tokenize(D), '@MUnitModule@) [print T] .
 
  ********************
  ***              ***
@@ -340,7 +360,7 @@ mod MONGO-IO is
  ***                              ***
  ************************************
  op initAtS : -> AttributeSet .
- eq initAtS = input: maybe, state: idle, data: "" .
+ eq initAtS = input: maybe, state: idle, data: "", parsed: maybe .
 
  op run : -> Configuration .
  eq run
@@ -348,75 +368,17 @@ mod MONGO-IO is
     getLine(stdin, munit, "MUnit> ") .
 endm
 
+*** for debugging purposes
+set print attribute on .
+
 erew run .
 
 eof
-
-mod MUNIT-INIT is
- inc LOOP-MODE .
- pr MUNIT .
-
- var  QI : Qid .
- vars QIL QIL' QIL'' : QidList .
- var  Atts : AttributeSet .
- var  N : Nat .
- var  DB : Database .
- vars RP RP' : ResultPair .
- var  O : Oid .
- var  X@Database : DatabaseClass .
-
- op o : -> Oid [ctor] .
-
- --- State for LOOP mode:
- subsort Object < State .
- op init-munit : -> System .
-
- op init-state : -> AttributeSet .
- eq init-state = db : initialDatabase, default : 'CONVERSION .
-
- rl [init] :
-    init-munit
- => [nil, < o : MUDatabase | input : nilTermList, output : nil, init-state >, mu-banner] .
-
- crl [in] :
-     [QIL, < O : X@Database | input : nilTermList, Atts >, QIL']
-  => [nil,
-      < O : X@Database | input : getTerm(metaParse(MUNIT-GRAMMAR, QIL, '@Input@)), Atts >,
-      QIL']
-  if QIL =/= nil /\
-     metaParse(MUNIT-GRAMMAR, QIL, '@Input@) : ResultPair .
-
- crl [in] :
-     [QIL, < O : X@Database | output : nil, Atts >, QIL']
-  => [nil,
-      < O : X@Database | output : ('\r 'Warning: '\o
-                printSyntaxError(metaParse(MUNIT-GRAMMAR, QIL, '@Input@), QIL)
-                '\n
-                '\r 'Error: '\o 'No 'parse 'for 'input. '\n), Atts >,
-      QIL']
-  if QIL =/= nil /\
-     noParse(N) := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
-
- crl [in] :
-     [QIL, < O : X@Database | output : nil, Atts >, QIL']
-  => [nil,
-      < O : X@Database | output :  ('\r 'Error: '\o 'Ambiguous 'input. '\n), Atts >,
-      QIL']
-   if QIL =/= nil /\
-      ambiguity(RP, RP') := metaParse(MUNIT-GRAMMAR, QIL, '@Input@)  .
-
- rl [out] :
-    [QIL, < O : X@Database | output : (QI QIL'), Atts >, QIL'']
- => [QIL, < O : X@Database | output : nil, Atts >, (QIL'' QI QIL')] .
-endm
 
 set print conceal on .
 print conceal mod_is_sorts_._____endm .
 print conceal fmod_is_sorts_.____endfm .
 print conceal db .
-
-*** for debugging purposes
-set print attribute on .
 
 loop init-munit .
 

@@ -4,15 +4,12 @@ fmod UNIT-RESULT is
 
  sort UnitResult .
 
- *** Correct test, failed tests, Tests info, new System
+ *** Correct test, failed tests, Tests info
  op <_,_,_> : Nat Nat QidList -> UnitResult [ctor] .
 
- *** Correct test, failed tests, Tests info, new System
- op [_,_,_,_] : Nat Nat QidList Term -> UnitResult [ctor] .
-
-  var  QIL : QidList .
-  vars N N' : Nat .
-  var  T : Term .
+ var  QIL : QidList .
+ vars N N' : Nat .
+ var  T : Term .
 
  op normalize : UnitResult -> UnitResult .
  eq normalize([N, N', QIL, T]) = < N, N', QIL > .

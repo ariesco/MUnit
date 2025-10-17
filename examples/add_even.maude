@@ -1,10 +1,13 @@
-(munit FOO is
-  assertEqual(3, 4)
-  assertEqual(3, add(1, 2))
-  assertEqual(add(2,1), 2 + 1)
-  assertEqual(3, 3)
+fmod FOO is
+ pr NAT .
 
-  assertTrue(even(7))
-endu)
+ vars N N' : Nat .
 
+ op add : Nat Nat -> Nat .
+ eq add(N, N') = N + N' .
 
+ op even : Nat -> Bool .
+ eq even(0) = true .
+ eq even(1) = false .
+ eq even(s(s(N))) = even(N) .
+endfm

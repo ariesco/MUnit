@@ -1,17 +1,7 @@
 load aux_modules.maude
-load full-maude.maude
 
-
-fmod META-MUNIT-SIGN is
- inc META-FULL-MAUDE-SIGN .
- inc UNIT .
-
- op MUNIT-GRAMMAR : -> FModule [memo] .
- eq MUNIT-GRAMMAR = addImports((including 'MUNIT-SIGNATURE .), GRAMMAR) .
-endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
- pr COMMAND-PROCESSING .
  pr PRINT .
 
  vars T T' T'' T''' T1 T2 T3 T4 TSB TSB' TSB'' SYS SYS' SYS'' TI TI' TI1 TIS TIS' TIS1 TIS1' : Term .
@@ -26,7 +16,6 @@ fmod MUNIT-COMMAND-PROCESSING is
  vars N N' N1 N1' : Nat .
  var  COND : Condition .
  var  UR : UnitResult .
- var  T&S : Term&Sub .
  var  AtS : AttrSet .
  var  BND : Bound .
  var  V : Variable .
@@ -42,7 +31,15 @@ fmod MUNIT-COMMAND-PROCESSING is
  op printOpts : -> PrintOptionSet .
  eq printOpts = mixfix number rat format .
 
- op procMUnit : Term Term Database -> UnitResult .
+ op procMUnit : Term -> UnitResult .
+ ceq procMUnit('munit_is_endu['token[T], T']) = procMUnit(Q, T')
+  if Q := downQid(T) .
+
+endfm
+
+eof
+
+ op procMUnit : Qid Term -> UnitResult .
  ceq procMUnit(T, T', DB) = procMUnitAux(ME, T', DB')
   if < DB' ; ME > := evalModExp(parseModExp(T), DB) .
  eq procMUnit(T, T', DB) = < 0, 0, '\n '\r '\! 'Error: '\o
@@ -954,52 +951,6 @@ fmod MUNIT-COMMAND-PROCESSING is
  op rewrite : Module Term -> Term .
  eq rewrite(M, T) = getTerm(metaRewrite(M, T, unbounded)) .
 
- *******************************************************************************
- *** Auxiliary function for replacing terms of the form @att by variables of ***
- *** the appropriate sort in a metarepresented list of qids.                 ***
- *******************************************************************************
- sort Term&Sub .
- op <_,_> : TermList Substitution -> Term&Sub [ctor] .
-
- *** Module where the reductions take place.
- *** Term we are looking for
- *** Current System, where we need to look for the value of the attribute
- op sub4Atts : Module Term TermList -> Term&Sub .
- ceq sub4Atts(M, '__[TL], ATTS) = < '__[TL'], SB >
-  if < TL', SB > := sub4Atts*(M, TL, ATTS, 0, < empty, none >) .
- eq sub4Atts(M, T, ATTS) = sub4Atts*(M, T, ATTS, 0, < empty, none >) [owise] .
-
- op sub4Atts* : Module TermList TermList Nat Term&Sub -> Term&Sub .
- eq sub4Atts*(M, empty, ATTS, N, T&S) = T&S .
- ceq sub4Atts*(M, (T, TL), ATTS, N, < TL', SB >) =
-                             sub4Atts*(M, TL, ATTS, s(N), < (TL', T'), SB ; V <- T'' >)
-  if Q := downQid(T) /\
-     Q' := exactOp(M, Q) /\
-     S := findInOps(M, Q') /\
-     V := qid("V" + string(N, 10) + ":" + string(S)) /\
-     T' := upTerm(V) /\
-     T'' := getAtt(ATTS, Q') .
- eq sub4Atts*(M, (T, TL), ATTS, N, < TL', SB >) = sub4Atts*(M, TL, ATTS, N, < (TL', T), SB >) [owise] .
-
- op exactOp : Module Qid ~> Qid .
- eq exactOp(M, Q) = exactOp(getOps(M), Q) .
-
- op exactOp : OpDeclSet Qid ~> Sort .
-*** eq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q) = Q .
- ceq exactOp(op Q : S -> 'Attribute [AtS] . ODS, Q') = Q
-  if St := string(Q) /\
-     St' := string(Q') /\
-     *** We remove @
-     substr(St', 0, 1) == "@" /\
-     St'' := substr(St', 1, length(St')) /\
-     find(St, St'', 0) == 0 .
-
- op findInOps : Module Qid ~> Sort .
- eq findInOps(M, Q) = findInOps(getOps(M), Q) .
-
- op findInOps : OpDeclSet Qid ~> Sort .
- eq findInOps(op Q : S -> 'Attribute [AtS] . ODS, Q) = S .
-
  op getAtts : Term ~> TermList .
  eq getAtts('`[_`,_`,_`][T, T', T'']) = getAtts(T') .
  eq getAtts('<_:_|_>[T, T', T'']) = getAtts(T'') .
@@ -1040,28 +991,4 @@ fmod MUNIT-COMMAND-PROCESSING is
  eq applySb*(empty, SB) = empty .
  eq applySb*((T, TL), SB) = applySb(T, SB), applySb*(TL, SB) .
 endfm
-
-mod MUNIT is
- pr MUNIT-COMMAND-PROCESSING .
- inc DATABASE-HANDLING .
- inc META-MUNIT-SIGN .
- pr PRINT .
-
- var  MUDC : MUDatabaseClass .
- var  AtS : AttributeSet .
- var  UR : UnitResult .
- var  DB : Database .
- vars T T' : Term .
- var  O : Oid .
-
- sort MUDatabaseClass .
- subsort MUDatabaseClass < DatabaseClass .
-
- op MUDatabase : -> MUDatabaseClass [ctor] .
-
- crl [munit] :
-     < O : MUDC | db : DB, input : ('munit_is_endu[T, T']), output : nil, AtS >
-  => < O : MUDC | db : DB, input : nilTermList, output : printUR(UR), AtS >
-  if UR := procMUnit(T, T', DB) .
-endm
 
