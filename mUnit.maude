@@ -477,129 +477,58 @@ fmod MUNIT-COMMAND-PROCESSING is
      QIL' := '\! '\n '\r 'No 'parse 'for '\o
              '\n QIL '\n .
 
+ **********************************************************************************
+ ********************                assertLeqSort            *********************
+ **********************************************************************************
+ ceq procProps(M, 'assertLeqSort[T, 'token[T']]) = < 1, 0, QIL >
+  if TSB := solveBubbles(M, T) /\
+     { T1, S } := metaReduce(M, TSB) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     sameKind(M, Q, S) /\
+     sortLeq(M, S, Q) /\
+     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, ' Q '`) '
+            '\g 'passed. '\o '\n .
+ ceq procProps(M, 'assertLeqSort[T, 'token[T']]) = < 0, 1, QIL >
+  if TSB := solveBubbles(M, T) /\
+     { T1, S } := metaReduce(M, TSB) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     sameKind(M, Q, S) /\
+     not sortLeq(M, S, Q) /\
+     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S '\n .
+ ceq procProps(M, 'assertLeqSort[T, 'token[T']]) = < 0, 1, QIL >
+  if TSB := solveBubbles(M, T) /\
+     { T1, S } := metaReduce(M, TSB) /\
+     Q := downQid(T') /\
+     Q ; SS := getSorts(M) /\
+     not sameKind(M, Q, S) /\
+     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
+            '\r 'failed. '\o '\n
+            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
+            '\n 'Its 'sort 'is S
+            '\n 'The 'sorts 'do 'not 'have 'the 'same 'kind. '\n .
+ ceq procProps(M, 'assertLeqSort[T, 'token[T']]) = < 0, 1, QIL >
+  if TSB := solveBubbles(M, T) /\
+     { T1, S } := metaReduce(M, TSB) /\
+     Q := downQid(T') /\
+     Q notIn getSorts(M) /\
+     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
+            '\r 'failed. '\o '\n
+            '\n '\! 'The Q 'does 'not 'exist. '\n .
+
+ op _notIn_ : Qid SortSet -> Bool .
+ eq Q notIn Q ; SS = false .
+ eq Q notIn SS = true [owise] .
+
  eq procProps(M, T) = < 0, 1, nil > [owise print T] .
 
 endfm
 
 eof
-
- **********************************************************************************
- ********************                assertLeqSort            *********************
- **********************************************************************************
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertLeqSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( downQidList(T) '`, Q '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     not sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     not sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
- ceq procProps(M, 'assertLeqSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     not sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertLeqSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
- ceq procProps(M, 'assertLeqSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertLeqSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\n '\! 'The 'normal 'form 'is metaPrettyPrint(M, T1, printOpts)
-            '\n 'Its 'sort 'is S .
- ceq procProps(M, 'assertLeqSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T, M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
 
  **********************************************************************************
  ********************             assertReachable            **********************
