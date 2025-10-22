@@ -521,7 +521,7 @@ fmod MUNIT-COMMAND-PROCESSING is
             '\n '\! 'The Q 'does 'not 'exist. '\n .
 
  op _notIn_ : Qid SortSet -> Bool .
- eq Q notIn Q ; SS = false .
+ eq Q notIn (Q ; SS) = false .
  eq Q notIn SS = true [owise] .
 
  eq procProps(M, T) = < 0, 1, nil > [owise print T] .
