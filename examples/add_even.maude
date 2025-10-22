@@ -11,3 +11,9 @@ fmod FOO is
  eq even(1) = false .
  eq even(s(s(N))) = even(N) .
 endfm
+
+mod FOO+ is
+ pr FOO .
+
+ rl [cancel] : 1 => 0 .
+endm

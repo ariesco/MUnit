@@ -312,7 +312,7 @@ mod MUNIT-IO is
    => < munit : MUnit | state: write&wait, parsed: maybe, AtS >
       write(stdout, munit, S)
    if UR := procMUnit(T) /\
-      S := printUR(UR) [print "Done"] .
+      S := printUR(UR) .
 
  ********************
  ***              ***

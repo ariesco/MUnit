@@ -1,4 +1,4 @@
-munit FOO is
+munit FOO+ is
   assertEqual(3, 4)
   assertEqual(3, add(1, 2))
   assertEqual(add(2,1), 2 + 1)
@@ -6,6 +6,9 @@ munit FOO is
 
   assertTrue(even(7))
   assertTrue(even(8))
+
+  hasSolution(1, 0, *, unbounded, true /\ (8 > 4))
+  hasSolution(2, 0, *, 7, true /\ (9 > 4))
 endu
 
 

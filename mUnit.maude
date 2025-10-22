@@ -9,14 +9,27 @@ endfm
 
 fmod AUX is
  pr META-LEVEL .
+ pr CONVERSION .
 
+ vars SSDS SSDS' : SubsortDeclSet .
+ vars ODS ODS' : OpDeclSet .
+ vars AtS AtS' : AttrSet .
  vars TL TL' : TermList .
+ vars SS SS' : SortSet .
  var  COND : Condition .
+ var  ES : EquationSet .
+ vars T T' T'' : Term .
+ var  MAS : MembAxSet .
+ var  IL : ImportList .
+ var  TyL : TypeList .
  var  Ct : Constant .
- vars T T' : Term .
+ var  QIL : QidList .
+ var  RS : RuleSet .
+ vars QI F : Qid .
  var  M : Module .
  var  Ty : Type .
- var  QI : Qid .
+ var  S : Sort .
+ var  N : Nat .
 
  op printOpts : -> PrintOptionSet .
  eq printOpts = mixfix number rat format .
@@ -32,7 +45,7 @@ fmod AUX is
   if TL =/= empty /\ TL' =/= empty .
  eq downQidList(QI) = downQid(QI) [owise] .
 
- op reduce : Module Term -> Term .
+ op reduce : Module Term -> Term [memo] .
  eq reduce(M, T) = getTerm(metaReduce(M, T)) .
 
  op rewrite : Module Term -> Term .
@@ -45,12 +58,108 @@ fmod AUX is
  op $printCond : Module Condition ~> QidList .
  eq $printCond(M, nil) = nil .
  eq $printCond(M, T = T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=
-                                    metaPrettyPrint(M, T', printOpts) .
+                                    metaPrettyPrint(M, T', printOpts)
+                                    if COND == nil
+                                    then nil
+                                    else '/\ $printCond(M, COND)
+                                    fi .
  eq $printCond(M, T := T' /\ COND) = metaPrettyPrint(M, T, printOpts) ':=
-                                     metaPrettyPrint(M, T', printOpts) .
+                                     metaPrettyPrint(M, T', printOpts)
+                                    if COND == nil
+                                    then nil
+                                    else '/\ $printCond(M, COND)
+                                    fi .
  eq $printCond(M, T => T' /\ COND) = metaPrettyPrint(M, T, printOpts) '=>
-                                     metaPrettyPrint(M, T', printOpts) .
- eq $printCond(M, T : Ty /\ COND) = metaPrettyPrint(M, T, printOpts) ': Ty .
+                                     metaPrettyPrint(M, T', printOpts)
+                                    if COND == nil
+                                    then nil
+                                    else '/\ $printCond(M, COND)
+                                    fi .
+ eq $printCond(M, T : Ty /\ COND) = metaPrettyPrint(M, T, printOpts) ': Ty
+                                    if COND == nil
+                                    then nil
+                                    else '/\ $printCond(M, COND)
+                                    fi .
+
+ op printBound : Bound -> Qid .
+ eq printBound(unbounded) = 'unbounded .
+ eq printBound(N) = qid(string(N, 10)) .
+
+ op solveBubbles : Module Term ~> Term [memo] .
+ ceq solveBubbles(M, 'bubble[T]) = T'
+  if QIL := downQidList(T) /\
+     {T', Ty} := metaParse(M, QIL, anyType) .
+
+ op solveBubblesCond : Module Term ~> Condition [memo] .
+ ceq solveBubblesCond(M, 'bubble[T]) = COND
+  if QIL := downQidList(T) /\
+     {T', Ty} := metaParse(M, QIL, '@Condition@) /\
+     COND := parseCond(T') [print COND] .
+
+ op parseCond : Term -> Condition .
+ eq parseCond('_/\_[T, T']) = parseCond(T) /\ parseCond(T') .
+ eq parseCond('_=_[T, T']) = T = T' .
+ eq parseCond('_:_[T, T']) = T : getName(T') .
+ eq parseCond('_:=_[T, T']) = T := T' .
+ eq parseCond('_=>_[T, T']) = T => T' .
+ eq parseCond(T) = T = 'true.Bool [owise] .
+
+ op addInfoConds : Module -> [Module] .
+ op addInfoConds : Module SortSet -> Module .
+
+ eq addInfoConds(M) = addInfoConds(M, getSorts(M)) .
+
+ eq addInfoConds(M, '@Token@ ; SS) = addInfoConds(M, SS) .
+ eq addInfoConds(M, '@Bubble@ ; SS) = addInfoConds(M, SS) .
+ eq addInfoConds(M, S ; SS)
+   = addInfoConds(
+       addOps(op qid(string(S)) : nil -> '@Sort@ [ctor] .
+              op '_:_ : S '@Sort@ -> '@Condition@ [ctor prec(71)] ., M),
+       SS)
+   [owise] .
+ eq addInfoConds(M, none)
+   = addOps(op '_/\_ : '@Condition@ '@Condition@ -> '@Condition@
+                              [ctor assoc prec(73)] .
+            op '_=_  : 'Universal 'Universal -> '@Condition@
+                              [ctor poly(1 2) prec(71)] .
+            op '_:=_ : 'Universal 'Universal -> '@Condition@
+                              [ctor poly(1 2) prec(71)] .
+            op '_=>_ : 'Universal 'Universal -> '@Condition@
+                              [ctor poly(1 2) prec(71)] .,
+       addSorts('@Condition@ ; '@Sort@,
+         if 'Bool in getSorts(M)
+         then addSubsorts(subsort 'Bool < '@Condition@ ., M)
+         else M
+         fi)) .
+
+ op addOps : OpDeclSet Module -> Module [memo] .
+ eq addOps(ODS', fmod QI is IL sorts SS . SSDS ODS MAS ES endfm)
+   = fmod QI is IL sorts SS . SSDS
+     override(ODS, ODS')
+     MAS ES endfm .
+ eq addOps(ODS', mod QI is IL sorts SS . SSDS ODS MAS ES RS endm)
+   = mod QI is IL sorts SS . SSDS
+     override(ODS, ODS')
+     MAS ES RS endm .
+
+ op addSorts : SortSet Module -> Module [memo] .
+ eq addSorts(SS', fmod QI is IL sorts SS . SSDS ODS MAS ES endfm)
+   = fmod QI is IL sorts (SS' ; SS) . SSDS ODS MAS ES endfm .
+ eq addSorts(SS', mod QI is IL sorts SS . SSDS ODS MAS ES RS endm)
+   = mod QI is IL sorts (SS' ; SS) . SSDS ODS MAS ES RS endm .
+
+ op addSubsorts : SubsortDeclSet Module -> Module [memo] .
+ eq addSubsorts(SSDS', fmod QI is IL sorts SS . SSDS ODS MAS ES endfm)
+   = fmod QI is IL sorts SS . (SSDS SSDS') ODS MAS ES endfm .
+ eq addSubsorts(SSDS', mod QI is IL sorts SS . SSDS ODS MAS ES RS endm)
+   = mod QI is IL sorts SS . (SSDS SSDS') ODS MAS ES RS endm .
+
+ op override : OpDeclSet OpDeclSet -> OpDeclSet .
+ eq override(
+      (op F : TyL -> Ty [AtS] .)  ODS,
+      (op F : TyL -> Ty [AtS'] .) ODS')
+   = override(ODS,(op F : TyL -> Ty [AtS'] .) ODS') .
+  eq override(ODS, ODS') = ODS ODS' [owise] .
 endfm
 
 fmod MUNIT-COMMAND-PROCESSING is
@@ -81,11 +190,11 @@ fmod MUNIT-COMMAND-PROCESSING is
 
  op procMUnit : Term -> UnitResult .
  ceq procMUnit('munit_is_endu['token[T], T']) = procMUnit(Q, T')
-  if Q := downTerm(T, 'error) [print Q] .
+  if Q := downTerm(T, 'error) .
 
  op procMUnit : Qid Term -> UnitResult .
  ceq procMUnit(Q, T) = procProps(M, T)
-  if M := upModule(Q, false) .
+  if M := upModule(Q, true) .
  eq procMUnit(Q, T) = < 0, 0, '\n '\r '\! 'Error: '\o 'The
                               'module 'is 'not 'loaded. '\n > [owise] .
 
@@ -98,16 +207,12 @@ fmod MUNIT-COMMAND-PROCESSING is
  ********************                assertTrue               ********************
  *********************************************************************************
  ceq procProps(M, 'assertTrue[T]) = < 1, 0, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
+  if T' := solveBubbles(M, T) /\
      reduce(M, T') == 'true.Bool /\
      QIL' := '\! '\n 'assertTrue '`( metaPrettyPrint(M, T', printOpts) '`) '
              '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertTrue[T]) = < 0, 1, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
+  if T' := solveBubbles(M, T) /\
      T2 := reduce(M, T') /\
      T2 =/= 'true.Bool /\
      QIL' := '\! '\n 'assertTrue '`( metaPrettyPrint(M, T', printOpts) '`) '
@@ -116,51 +221,43 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertTrue[T]) = < 0, 1, QIL' >
   if 'bubble[T1] := T /\
      QIL := downQidList(T1) /\
-     not (metaParse(M, QIL, anyType) :: ResultPair) /\
+     not (solveBubbles(M, T) :: Term) /\
      QIL' := '\! '\n '\r 'No 'parse 'for '\o
-             '\n 'assertTrue '`( QIL '`) '\n .
+             '\n QIL '\n .
 
  **********************************************************************************
  ********************                assertFalse               ********************
  **********************************************************************************
  ceq procProps(M, 'assertFalse[T]) = < 1, 0, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
-     reduce(M, T') == 'true.Bool /\
+  if T' := solveBubbles(M, T) /\
+     reduce(M, T') == 'false.Bool /\
      QIL' := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
              '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertFalse[T]) = < 0, 1, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
+  if T' := solveBubbles(M, T) /\
      T2 := reduce(M, T') /\
-     T2 =/= 'true.Bool /\
+     T2 =/= 'false.Bool /\
      QIL' := '\! '\n 'assertFalse '`( metaPrettyPrint(M, T', printOpts) '`) '
              '\r 'failed. '\o '\n
              '\! 'Term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
  ceq procProps(M, 'assertFalse[T]) = < 0, 1, QIL' >
   if 'bubble[T1] := T /\
      QIL := downQidList(T1) /\
-     not (metaParse(M, QIL, anyType) :: ResultPair) /\
+     not (solveBubbles(M, T) :: Term) /\
      QIL' := '\! '\n '\r 'No 'parse 'for '\o
-             '\n 'assertFalse '`( QIL '`)  '\n .
+             '\n QIL '\n .
 
  *********************************************************************************
  *******************                assertTrueMsg             ********************
  *********************************************************************************
  ceq procProps(M, 'assertTrueMsg[T, 'token[MSG]]) = < 1, 0, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
+  if T' := solveBubbles(M, T) /\
      reduce(M, T') == 'true.Bool /\
      QIL' := '\! '\n 'assertTrue '`( metaPrettyPrint(M, T', printOpts) '`) '
              '\g 'passed. '\o '\n
             ' '---> ' downQid(MSG) '\n .
  ceq procProps(M, 'assertTrueMsg[T, 'token[MSG]]) = < 0, 1, QIL' >
-  if 'bubble[T1] := T /\
-     QIL := downQidList(T1) /\
-     {T', Ty} := metaParse(M, QIL, anyType) /\
+  if T' := solveBubbles(M, T) /\
      T2 := reduce(M, T') /\
      T2 =/= 'true.Bool /\
      QIL' := '\! '\n 'assertTrue '`( metaPrettyPrint(M, T', printOpts) '`) '
@@ -170,31 +267,23 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertTrueMsg[T, 'token[MSG]]) = < 0, 1, QIL' >
   if 'bubble[T1] := T /\
      QIL := downQidList(T1) /\
-     not (metaParse(M, QIL, anyType) :: ResultPair) /\
+     not (solveBubbles(M, T) :: Term) /\
      QIL' := '\! '\n '\r 'No 'parse 'for '\o
-             '\n 'assertTrue '`( QIL '`) '\n
+             '\n QIL '\n
              ' '---> ' downQid(MSG) '\n .
 
  **********************************************************************************
  ********************                assertEqual               ********************
  **********************************************************************************
  ceq procProps(M, 'assertEqual[T, T']) = < 1, 0, QIL >
-  if 'bubble[TI] := T /\
-     QILI := downQidList(TI) /\
-     'bubble[TI'] := T' /\
-     QILI' := downQidList(TI') /\
-     {TSB, Ty} := metaParse(M, QILI, anyType) /\
-     {TSB', Ty'} := metaParse(M, QILI', anyType) /\
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
      reduce(M, TSB) == reduce(M, TSB') /\
      QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
             metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertEqual[T, T']) = < 0, 1, QIL >
-  if 'bubble[TI] := T /\
-     QILI := downQidList(TI) /\
-     'bubble[TI'] := T' /\
-     QILI' := downQidList(TI') /\
-     {TSB, Ty} := metaParse(M, QILI, anyType) /\
-     {TSB', Ty'} := metaParse(M, QILI', anyType) /\
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
      T1 := reduce(M, TSB) /\
      T2 := reduce(M, TSB') /\
      T1 =/= T2 /\
@@ -202,173 +291,55 @@ fmod MUNIT-COMMAND-PROCESSING is
             metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
             '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
             '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
-
-
- eq procProps(M, T) = < 0, 1, nil > [owise print T] .
-
-endfm
-
-eof
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T1 := reduce(M, TSB') /\
-     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T' /\
-     < TI', none > := sub4Atts(M, TI', ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T2 := reduce(M, TSB') /\
-     T1 =/= T2 /\
-     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
-            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
-            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T2 := reduce(M, TSB') /\
-     T1 =/= T2 /\
-     QIL := '\! '\n 'assertEqual '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
-            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
-            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
- ceq procProps(M, 'assertEqual['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
-     ((SB =/= none) or (SB' =/= none)) /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
-     TIS1' := applySb(TIS1, SB') /\
-     T1 := reduce(M, TIS') /\
-     T1 := reduce(M, TIS1') /\
-     QIL := '\! '\n 'assertEqual '`( downQidList(T) '`, downQidList(T') '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertEqual['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
-     ((SB =/= none) or (SB' =/= none)) /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
-     TIS1' := applySb(TIS1, SB') /\
-     T1 := reduce(M, TIS') /\
-     T2 := reduce(M, TIS1') /\
-     T1 =/= T2 /\
-     QIL := '\! '\n 'assertEqual '`( downQidList(T) '`, downQidList(T') '`) '
-            '\r 'failed. '\o '\n
-            '\! 'First 'term 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n
-            '\! 'Second 'term 'reduced 'to metaPrettyPrint(M, T2, printOpts) '\o '\n .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T, M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertEqual[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T', M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
+ ceq procProps(M, 'assertEqual[T, T']) = < 0, 1, QIL' >
+  if 'bubble[T1] := T /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'assertEqual[T, T']) = < 0, 1, QIL' >
+  if 'bubble[T1] := T' /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
 
  **************************************************************************************
  ********************                assertDifferent               ********************
  **************************************************************************************
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T /\
-     < TI', none > := sub4Atts(M, TI', ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+ ceq procProps(M, 'assertDifferent[T, T']) = < 0, 1, QIL >
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
      T1 := reduce(M, TSB) /\
-     T1 := reduce(M, TSB') /\
+     T1 == reduce(M, TSB') /\
      QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T1 := reduce(M, TSB') /\
-     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n .
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     'bubble[TI'] := T /\
-     < TI', none > := sub4Atts(M, TI', ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T2 := reduce(M, TSB') /\
-     T1 =/= T2 /\
+            metaPrettyPrint(M, TSB', printOpts) '`) ' '\r 'failed. '\o '\n
+            'Terms 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\n .
+ ceq procProps(M, 'assertDifferent[T, T']) = < 1, 0, QIL >
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
+     reduce(M, TSB) =/= reduce(M, TSB') /\
      QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
             metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
-     T1 := reduce(M, TSB) /\
-     T2 := reduce(M, TSB') /\
-     T1 =/= T2 /\
-     QIL := '\! '\n 'assertDifferent '`( metaPrettyPrint(M, TSB, printOpts) '`,
-            metaPrettyPrint(M, TSB', printOpts) '`) ' '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
-     ((SB =/= none) or (SB' =/= none)) /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
-     TIS1' := applySb(TIS1, SB') /\
-     T1 := reduce(M, TIS') /\
-     T1 := reduce(M, TIS1') /\
-     QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
-            '\r 'failed. '\o '\n
-            '\! 'Terms 'reduced 'to metaPrettyPrint(M, T1, printOpts) '\o '\n .
- ceq procProps(M, 'assertDifferent['bubble[T], 'bubble[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     < TI1, SB' > := sub4Atts(M, T', ATTS) /\
-     ((SB =/= none) or (SB' =/= none)) /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     TIS1 := solveBubbles('bubble[TI1], M, B, VDS, DB) /\
-     TIS1' := applySb(TIS1, SB') /\
-     T1 := reduce(M, TIS') /\
-     T2 := reduce(M, TIS1') /\
-     T1 =/= T2 /\
-     QIL := '\! '\n 'assertDifferent '`( downQidList(T) '`, downQidList(T') '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T, M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) .
- ceq procProps(M, 'assertDifferent[T, T'], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T', M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
+ ceq procProps(M, 'assertDifferent[T, T']) = < 0, 1, QIL >
+  if 'bubble[T1] := T /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'assertDifferent[T, T']) = < 0, 1, QIL >
+  if 'bubble[T1] := T' /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
 
  **********************************************************************************
  ********************                hasSolution               ********************
  **********************************************************************************
- ceq procProps(M, 'hasSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = UR
-  if TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = UR
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
      'token[TI] := T'' /\
      Q := downQid(TI) /\
      (Q == '! or Q == '* or Q == '+) /\
@@ -378,29 +349,56 @@ eof
             then unbounded
             else rat(string(Q'), 10)
             fi /\
+     ((T4 == 'bubble[''nil.Qid]) or (solveBubblesCond(addInfoConds(M), T4) :: Condition)) /\
      UR := if T4 == 'bubble[''nil.Qid]
-           then procSolution(M, TSB, TSB', Q, BND, nil, SYS)
-           else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           then procSolution(M, TSB, TSB', Q, BND, nil)
+           else procSolution(M, TSB, TSB', Q, BND, solveBubblesCond(addInfoConds(M), T4))
            fi .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = < 0, 1, QIL' >
+  if 'bubble[T1] := T /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = < 0, 1, QIL' >
+  if 'bubble[T1] := T' /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if 'token[TI] := T'' /\
+     Q := downQid(TI) /\
+     not (Q == '! or Q == '* or Q == '+) /\
+     QIL := '\! '\n '\r 'Invalid 'search 'arrow. '\o '\n .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if 'token[TI'] := T3 /\
+     Q' := downQid(TI') /\
+     not ((Q' == 'unbounded) or (rat(string(Q'), 10) :: Nat)) /\
+     QIL := '\! '\n '\r 'Invalid 'bound. '\o '\n .
+ ceq procProps(M, 'hasSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if not ((T4 == 'bubble[''nil.Qid]) or (solveBubblesCond(addInfoConds(M), T4) :: Condition)) /\
+     QIL := '\! '\n '\r 'Invalid 'condition. '\o '\n .
 
- op procSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
- ceq procSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
+ op procSolution : Module Term Term Qid Bound Condition -> UnitResult .
+ ceq procSolution(M, T, T', Q, BND, COND) = < 1, 0, QIL >
   if metaSearch(M, T, T', COND, Q, BND, 0) =/= failure /\
      QIL := '\! '\n 'hasSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
-            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, ' printBound(BND) '`, '
             printCond(M, COND) '`) ' '\g 'passed. '\o '\n .
- ceq procSolution(M, T, T', Q, BND, COND, SYS) = [0, 1, QIL, SYS]
+ ceq procSolution(M, T, T', Q, BND, COND) = < 0, 1, QIL >
   if metaSearch(M, T, T', COND, Q, BND, 0) == failure /\
      QIL := '\! '\n 'hasSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
-            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
+            metaPrettyPrint(M, T', printOpts) '`, ' Q '`, ' printBound(BND) '`, '
             printCond(M, COND) '`) ' '\r 'failed. '\o '\n .
 
  **********************************************************************************
  ********************                noSolution                ********************
  **********************************************************************************
- ceq procProps(M, 'noSolution[T, T', T'', T3, T4], VDS, B, DB, SYS) = UR
-  if TSB := solveBubbles(T, M, B, VDS, DB) /\
-     TSB' := solveBubbles(T', M, B, VDS, DB) /\
+
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = UR
+  if TSB := solveBubbles(M, T) /\
+     TSB' := solveBubbles(M, T') /\
      'token[TI] := T'' /\
      Q := downQid(TI) /\
      (Q == '! or Q == '* or Q == '+) /\
@@ -410,18 +408,44 @@ eof
             then unbounded
             else rat(string(Q'), 10)
             fi /\
+     ((T4 == 'bubble[''nil.Qid]) or (solveBubblesCond(addInfoConds(M), T4) :: Condition)) /\
      UR := if T4 == 'bubble[''nil.Qid]
-           then noSolution(M, TSB, TSB', Q, BND, nil, SYS)
-           else noSolution(M, TSB, TSB', Q, BND, solveBubblesCond(T4, M, addInfoConds(M), B, VDS, DB), SYS)
+           then noSolution(M, TSB, TSB', Q, BND, nil)
+           else noSolution(M, TSB, TSB', Q, BND, solveBubblesCond(addInfoConds(M), T4))
            fi .
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = < 0, 1, QIL' >
+  if 'bubble[T1] := T /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = < 0, 1, QIL' >
+  if 'bubble[T1] := T' /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if 'token[TI] := T'' /\
+     Q := downQid(TI) /\
+     not (Q == '! or Q == '* or Q == '+) /\
+     QIL := '\! '\n '\r 'Invalid 'search 'arrow. '\o '\n .
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if 'token[TI'] := T3 /\
+     Q' := downQid(TI') /\
+     not ((Q' == 'unbounded) or (rat(string(Q'), 10) :: Nat)) /\
+     QIL := '\! '\n '\r 'Invalid 'bound. '\o '\n .
+ ceq procProps(M, 'noSolution[T, T', T'', T3, T4]) = < 0, 1, QIL >
+  if not ((T4 == 'bubble[''nil.Qid]) or (solveBubblesCond(addInfoConds(M), T4) :: Condition)) /\
+     QIL := '\! '\n '\r 'Invalid 'condition. '\o '\n .
 
- op noSolution : Module Term Term Qid Bound [Condition] Term -> UnitResult .
- ceq noSolution(M, T, T', Q, BND, COND, SYS) = [1, 0, QIL, SYS]
+ op noSolution : Module Term Term Qid Bound Condition -> UnitResult .
+ ceq noSolution(M, T, T', Q, BND, COND) = < 1, 0, QIL >
   if metaSearch(M, T, T', COND, Q, BND, 0) == failure /\
      QIL := '\! '\n 'noSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
             metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
             printCond(M, COND) '`) ' '\g 'passed. '\o '\n .
- ceq procSolution(M, T, T', Q, BND, COND, SYS) = [0, 1, QIL, SYS]
+ ceq noSolution(M, T, T', Q, BND, COND) = < 0, 1, QIL >
   if metaSearch(M, T, T', COND, Q, BND, 0) =/= failure /\
      QIL := '\! '\n 'noSolution '`( metaPrettyPrint(M, T, printOpts) '`, '
             metaPrettyPrint(M, T', printOpts) '`, ' Q '`, '
@@ -430,113 +454,34 @@ eof
  **********************************************************************************
  ********************                assertSort               *********************
  **********************************************************************************
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
+
+ ceq procProps(M, 'assertSort[T, 'token[T']]) = < 1, 0, QIL >
+  if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     S := downQid(T') /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, S '`) '
+     S == downQid(T') /\
+     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, ' S '`) '
             '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     S := downQid(T') /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, S '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [1, 0, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     S := downQid(T') /\
-     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, S '`) '
-            '\g 'passed. '\o '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
+ ceq procProps(M, 'assertSort[T, 'token[T']]) = < 0, 1, QIL >
+  if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
      Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
      S =/= Q /\
-     not sortLeq(M, S, Q) /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
+     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, ' Q '`) '
             '\r 'failed. '\o '\n
             '\! 'The 'normal 'form 'is '\o metaPrettyPrint(M, T1, printOpts)
             '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     S =/= Q /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\! 'The 'normal 'form 'is '\o metaPrettyPrint(M, T1, printOpts)
-            '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     sameKind(M, Q, S) /\
-     S =/= Q /\
-     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
-            '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if 'bubble[TI] := T /\
-     ATTS := getAtts(SYS) /\
-     < TI, none > := sub4Atts(M, TI, ATTS) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
-            '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if not (getAtts(SYS) :: Term) /\
-     TSB := solveBubbles(T, M, B, VDS, DB) /\
-     { T1, S } := metaReduce(M, TSB) /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
-            '\r 'failed. '\o '\n
-            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
-            '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort['bubble[T], 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if ATTS := getAtts(SYS) /\
-     < TI, SB > := sub4Atts(M, T, ATTS) /\
-     SB =/= none /\
-     TIS := solveBubbles('bubble[TI], M, B, VDS, DB) /\
-     TIS' := applySb(TIS, SB) /\
-     { T1, S } := metaReduce(M, TIS') /\
-     Q := downQid(T') /\
-     Q ; SS := getSorts(M) /\
-     not sameKind(M, Q, S) /\
-     QIL := '\! '\n 'assertSort '`( downQidList(T) '`, Q '`) ' '\r 'failed. '\o '\n
-            '\! 'The 'normal 'form 'is ' '\o metaPrettyPrint(M, T1, printOpts)
-            '\n '\! 'Its 'sort 'is '\o S '\n .
- ceq procProps(M, 'assertSort[T, 'token[T']], VDS, B, DB, SYS) = [0, 1, QIL, SYS]
-  if T? := solveBubbles(T, M, B, VDS, DB) /\
-     not (T? :: Term) /\
-     QIL := ('\n '\r 'Error: '\o getMsg(T?)) [owise] .
+ ceq procProps(M, 'assertSort[T, 'token[T']]) = < 0, 1, QIL' >
+  if 'bubble[T1] := T /\
+     QIL := downQidList(T1) /\
+     not (solveBubbles(M, T) :: Term) /\
+     QIL' := '\! '\n '\r 'No 'parse 'for '\o
+             '\n QIL '\n .
+
+ eq procProps(M, T) = < 0, 1, nil > [owise print T] .
+
+endfm
+
+eof
 
  **********************************************************************************
  ********************                assertLeqSort            *********************
