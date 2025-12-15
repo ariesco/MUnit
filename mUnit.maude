@@ -595,7 +595,7 @@ fmod MUNIT-COMMAND-PROCESSING is
      not (solveBubbles(M, T) :: Term) /\
      QIL' := '\! '\n '\r 'No 'parse 'for '\o
              '\n QIL '\n .
- ceq procProps(M, 'assertReachableBnd[T, T', 'token[TI']]) = < 0, 1, QIL' >
+ ceq procProps(M, 'assertReachableBnd[T, T', 'token[TI']]) = < 0, 1, QIL >
   if Q' := downQid(TI') /\
      not (rat(string(Q'), 10) :: Nat) /\
      QIL := '\! '\n '\r 'Invalid 'bound Q' '. '\o '\n .
