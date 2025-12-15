@@ -32,7 +32,7 @@ We show how to test the **add_even.maude** module, available in the **examples**
 folder. The tool is first started as:
 
 ```
-$> maude examples/add_even.maude -allow-files munit.maude
+$> maude examples/add_even.maude -allow-files io.maude
 ```
 
 The unit tests are defined in the file **add_even_test.maude**, which is loaded with

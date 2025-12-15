@@ -381,7 +381,7 @@ mod MUNIT-IO is
 endm
 
 *** for debugging purposes
-set print attribute on .
+set print attribute off .
 
 erew run .
 
