@@ -85,7 +85,7 @@ normal form by means of equations.
 different.
 * **assertTrue(t)** passes if the normal form of **t** is **true**.
 * **assertFalse(t)** passes if the normal form of **t** is **false**.
-* **asertSort(t, s)** passes if the normal form of **t** has exactly sort **s**.
+* **assertSort(t, s)** passes if the normal form of **t** has exactly sort **s**.
 * **assertLeqSort(t, s)** passes if the normal form of **t** has sort **s'**, with **s' <= s**.
 * **assertReachable(t, t')** passes if **t'** is reachable from **t** within an
 unbounded number of steps.
