@@ -145,6 +145,14 @@ fmod MUNIT-SIGNATURE is
   *********************************************************************************
   op assertLeqSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
 
+  *********************************************************************************
+  *** Indicates that the term introduced in the test has no sort. That is, it   ***
+  *** is a term only defined at kind level.                                     ***
+  *** It passes if the term has not sort but only kind.                         ***
+  *** Usage: assertNoSort(f(t_1, ..., t_n))                                     ***
+  *********************************************************************************
+  op assertNoSort : @Bubble@ -> @MUnitPredicate@ [ctor] .
+
   op munit_is_endu : @Token@ @MUnitPredList@ -> @MUnitModule@ [ctor] .
 endfm
 
