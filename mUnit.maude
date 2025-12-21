@@ -34,16 +34,16 @@ fmod AUX is
  op printOpts : -> PrintOptionSet .
  eq printOpts = mixfix number rat format .
 
- op getStringSort : TermList -> String .
- eq getStringSort(empty) = "" .
- eq getStringSort((Ct, TL)) = string(downQid(Ct)) + getStringSort(TL) .
+ op getStringType : TermList -> String .
+ eq getStringType(empty) = "" .
+ eq getStringType((Ct, TL)) = string(downQid(Ct)) + getStringType(TL) .
 
- op downSort* : TermList -> Sort .
- eq downSort*(TL) = qid(getStringSort(TL)) .
+ op downType* : TermList -> Type .
+ eq downType*(TL) = qid(getStringType(TL)) .
 
- op downSort : Term -> Sort .
- eq downSort('__[TL]) = downSort*(TL) .
- eq downSort(T) = downQid(T) [owise] .
+ op downType : Term -> Type .
+ eq downType('__[TL]) = downType*(TL) .
+ eq downType(T) = downQid(T) [owise] .
 
  op downQid : Term -> [Qid] .
  eq downQid(Ct)
@@ -470,13 +470,13 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertSort[T, 'bubble[T']]) = < 1, 0, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     S == downSort(T') /\
+     S == downType(T') /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, ' S '`) '
             '\g 'passed. '\o '\n .
  ceq procProps(M, 'assertSort[T, 'bubble[T']]) = < 0, 1, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     Q := downSort(T') /\
+     Q := downType(T') /\
      S =/= Q /\
      QIL := '\! '\n 'assertSort '`( metaPrettyPrint(M, TSB, printOpts) '`, ' Q '`) '
             '\r 'failed. '\o '\n
@@ -518,7 +518,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertLeqSort[T, 'bubble[T']]) = < 1, 0, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     Q := downSort(T') /\
+     Q := downType(T') /\
      Q ; SS := getSorts(M) /\
      sameKind(M, Q, S) /\
      sortLeq(M, S, Q) /\
@@ -527,7 +527,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertLeqSort[T, 'bubble[T']]) = < 0, 1, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     Q := downSort(T') /\
+     Q := downType(T') /\
      Q ; SS := getSorts(M) /\
      sameKind(M, Q, S) /\
      not sortLeq(M, S, Q) /\
@@ -538,7 +538,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertLeqSort[T, 'bubble[T']]) = < 0, 1, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     Q := downSort(T') /\
+     Q := downType(T') /\
      Q ; SS := getSorts(M) /\
      not sameKind(M, Q, S) /\
      QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
@@ -549,7 +549,7 @@ fmod MUNIT-COMMAND-PROCESSING is
  ceq procProps(M, 'assertLeqSort[T, 'bubble[T']]) = < 0, 1, QIL >
   if TSB := solveBubbles(M, T) /\
      { T1, S } := metaReduce(M, TSB) /\
-     Q := downSort(T') /\
+     Q := downType(T') /\
      Q notIn getSorts(M) /\
      QIL := '\! '\n 'assertLeqSort '`( metaPrettyPrint(M, TSB, printOpts) '`, Q '`) '
             '\r 'failed. '\o '\n
