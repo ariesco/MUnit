@@ -365,7 +365,7 @@ mod MUNIT-IO is
      gotLine(munit, stdin, S)
      < munit : MUnit | input: maybe, state: idle, AtS >
   => < munit : MUnit | input: T, state: waiting, AtS >
-  if {T, Ty} := metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) [print T] .
+  if {T, Ty} := metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) .
 
  crl [parse-command-error] :
      gotLine(munit, stdin, S)
@@ -389,7 +389,7 @@ mod MUNIT-IO is
 endm
 
 *** for debugging purposes
-set print attribute on .
+set print attribute off .
 
 erew run .
 

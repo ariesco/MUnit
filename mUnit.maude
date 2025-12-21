@@ -105,7 +105,7 @@ fmod AUX is
  ceq solveBubblesCond(M, 'bubble[T]) = COND
   if QIL := downQidList(T) /\
      {T', Ty} := metaParse(M, QIL, '@Condition@) /\
-     COND := parseCond(T') [print COND] .
+     COND := parseCond(T') .
 
  op parseCond : Term -> Condition .
  eq parseCond('_/\_[T, T']) = parseCond(T) /\ parseCond(T') .
@@ -636,6 +636,6 @@ fmod MUNIT-COMMAND-PROCESSING is
      QIL := '\! '\n '\r 'Invalid 'bound Q' '. '\o '\n .
 
  *** Otherwise
- eq procProps(M, T) = < 0, 1, nil > [owise print T] .
+ eq procProps(M, T) = < 0, 1, nil > [owise] .
 endfm
 
