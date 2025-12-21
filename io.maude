@@ -136,14 +136,14 @@ fmod MUNIT-SIGNATURE is
   *** It passes if the sort of the term is equal to the given sort.             ***
   *** Usage: assertSort(f(t_1, ..., t_n), Sort)                                 ***
   *********************************************************************************
-  op assertSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+  op assertSort : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor] .
 
   *********************************************************************************
   *** Indicates that the term introduced in the test must have the given sort.  ***
   *** It passes if the sort of the term is lesser or equal than the given sort. ***
   *** Usage: assertLeqSort(f(t_1, ..., t_n), Sort)                              ***
   *********************************************************************************
-  op assertLeqSort : @Bubble@ @Token@ -> @MUnitPredicate@ [ctor] .
+  op assertLeqSort : @Bubble@ @Bubble@ -> @MUnitPredicate@ [ctor] .
 
   *********************************************************************************
   *** Indicates that the term introduced in the test has no sort. That is, it   ***
@@ -365,7 +365,7 @@ mod MUNIT-IO is
      gotLine(munit, stdin, S)
      < munit : MUnit | input: maybe, state: idle, AtS >
   => < munit : MUnit | input: T, state: waiting, AtS >
-  if {T, Ty} := metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) .
+  if {T, Ty} := metaParse(COMMANDS-GRAMMAR, tokenize(S), '@Command@) [print T] .
 
  crl [parse-command-error] :
      gotLine(munit, stdin, S)
@@ -389,7 +389,7 @@ mod MUNIT-IO is
 endm
 
 *** for debugging purposes
-set print attribute off .
+set print attribute on .
 
 erew run .
 
